@@ -1,5 +1,6 @@
 <?php
-$link = mysqli_connect("localhost", "root", "alina", "Auction");
+// $link = mysqli_connect("localhost", "root", "alina", "Auction");
+$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 if ($link == false) {
     die("Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error());
@@ -200,4 +201,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <p style="font-style: italic; color: #555;">Погрузитесь в мир искусства с нашим онлайн-аукционом. Здесь вы можете приобретать уникальные произведения со всего мира. Участвуйте в торгах и найдите идеальное дополнение для своей коллекции.</p>
         <p style="font-weight: bold; text-align: center;">HueHaven — откройте мир искусства!</p>
     </div>
+</div>
+
+ <!-- SQL-запрос для -->
+ <div id="infoModal1" class="modal">
+    <div class="modal-content">
+
 </div>
