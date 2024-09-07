@@ -1,0 +1,100 @@
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background-color: #00CED1; /* Цвет фона */
+    display: flex;
+    align-items: center; /* Центрирование элементов по вертикали */
+    padding: 1px 10px; /* Уменьшено верхнее и нижнее значение */
+}
+
+header img {
+    width: 50px; /* Ширина логотипа */
+    height: auto; /* Автоматическая высота */
+    margin-right: 10px; /* Отступ справа от логотипа */
+}
+
+#paintingsGrid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 10px; /* Отступ внутри контейнера */
+}
+
+.painting {
+    width: calc(33.33% - 10px); /* Три в ряд с пробелами */
+    margin-bottom: 20px; /* Отступ снизу */
+    text-align: center; /* Центрирование текста */
+}
+
+.painting img {
+    width: 100%; /* Ширина изображения 100% от родителя */
+    height: 300px; /* Фиксированная высота */
+    object-fit: cover; /* Обрезка изображения для соответствия размеру */
+}
+
+.paintInfo {
+    margin-top: 5px; /* Отступ сверху для текста */
+}
+
+/* Кнопка "Сделать ставку" */
+.bid-button {
+    display: inline-block;
+    margin-top: 10px; /* Отступ сверху */
+    padding: 10px 15px; /* Отступы внутри кнопки */
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    text-decoration: none; /* Без подчеркивания */
+    border-radius: 5px; /* Закругленные углы */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.bid-button:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+/* Стили для модального окна */
+.modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed; /* Окно фиксировано на экране */
+    z-index: 1000; /* Поверх других элементов */
+    left: 0;
+    top: 0;
+    width: 100%; /* Полная ширина */
+    height: 100%; /* Полная высота */
+    background-color: rgba(0, 0, 0, 0.7); /* Полупрозрачный фон */
+}
+
+.modal-content {
+    background-color: #fff; /* Белый фон для содержимого */
+    margin: 15% auto; /* Центрирование */
+    padding: 20px;
+    border: 1px solid #888; /* Рамка */
+    width: 60%; /* Установите желаемую ширину */
+}
+
+.modal-header {
+    display: flex;
+    align-items: center; /* Центрирование элементов по вертикали */
+}
+
+.modal-content p {
+    margin: 5px 0; /* Отступы для параграфов */
+}
+
+.close-button {
+    color: #aaa; /* Цвет кнопки закрытия */
+    float: right; /* Справа */
+    font-size: 28px; /* Размер шрифта */
+    font-weight: bold; /* Жирный шрифт */
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black; /* Цвет при наведении */
+    text-decoration: none; /* Без подчеркивания */
+    cursor: pointer; /* Указатель курсора */
+}

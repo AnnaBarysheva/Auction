@@ -1,3 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HueHaven - Art Auction</title>
+
+    <!-- Add this line to connect your style.css file -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Other head content like icon links or meta tags -->
+</head>
+<body>
+    <header>
+        <img src="https://cdn-icons-png.flaticon.com/512/10613/10613919.png" alt="Art Gallery Logo">
+        <h1 style="color: white;font-style: italic;">HueHaven</h1>
+    </header>
+
+
 <?php
 // $link = mysqli_connect("localhost", "root", "alina", "Auction");
 $link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
@@ -17,11 +36,6 @@ $sql = "
 
 $result = mysqli_query($link, $sql);
 ?>
-
-<header>
-    <img src="https://cdn-icons-png.flaticon.com/512/10613/10613919.png" alt="Art Gallery Logo">
-    <h1 style="color: white;font-style: italic;">HueHaven</h1>
-</header>
 
 <?php
 if ($result) {
@@ -50,7 +64,7 @@ if ($result) {
 mysqli_close($link);
 ?>
 
-<style>
+<!-- <style>
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -150,7 +164,7 @@ header img {
     text-decoration: none; /* Без подчеркивания */
     cursor: pointer; /* Указатель курсора */
 }
-</style>
+</style> -->
 
 <script>
 // Добавляем обработчик события для каждой картины
@@ -208,3 +222,6 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="modal-content">
 
 </div>
+
+</body>
+</html>
