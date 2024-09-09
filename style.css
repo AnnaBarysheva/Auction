@@ -1,7 +1,7 @@
-
 body {
     margin: 0;
     font-family: Arial, sans-serif;
+    user-select: none; /* Отключение выделения текста */
 }
 
 header {
@@ -9,6 +9,7 @@ header {
     display: flex;
     align-items: center; /* Центрирование элементов по вертикали */
     padding: 1px 10px; /* Уменьшено верхнее и нижнее значение */
+    user-select: none; /* Отключение выделения текста */
 }
 
 header img {
@@ -17,43 +18,118 @@ header img {
     margin-right: 10px; /* Отступ справа от логотипа */
 }
 
-#paintingsGrid {
+/* Стили для таблицы с картинами */
+#paintingsTable {
+    width: 1300px; /* Фиксированная ширина таблицы */
+    margin: 20px auto; /* Центрирование таблицы */
+    border-collapse: collapse; /* Убираем двойные границы */
+    user-select: none; /* Отключение выделения текста */
+}
+
+#paintingsTable th, #paintingsTable td {
+    padding: 15px; /* Отступы внутри ячеек */
+    text-align: left; /* Выравнивание текста по левому краю */
+    border: 1px solid #ddd; /* Светло-серая граница */
+    user-select: none; /* Отключение выделения текста */
+}
+
+#paintingsTable th {
+    background-color: #00CED1; /* Цвет фона для заголовков */
+    color: white; /* Цвет текста для заголовков */
+    font-weight: bold; /* Жирный шрифт для заголовков */
+}
+
+#paintingsTable tr:nth-child(even) {
+    background-color: rgba(0, 206, 209, 0.2); /* Полупрозрачный фон для четных строк */
+}
+
+#paintingsTable tr:hover {
+    background-color: rgba(221, 221, 221, 0.6); /* Полупрозрачный цвет при наведении на строку */
+    cursor: pointer; /* Указатель курсора при наведении */
+}
+
+#paintingsTable td {
+    color: #333; /* Цвет текста для ячеек */
+    font-size: 16px; /* Размер шрифта для ячеек */
+}
+
+/* Стили для полей ввода */
+.input-container {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding: 10px; /* Отступ внутри контейнера */
+    flex-direction: row;
+    justify-content: center;
+    margin: 20px 0;
 }
 
-.painting {
-    width: calc(33.33% - 10px); /* Три в ряд с пробелами */
-    margin-bottom: 20px; /* Отступ снизу */
-    text-align: center; /* Центрирование текста */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin: 0 20px; /* Отступ между столбцами */
 }
 
-.painting img {
-    width: 100%; /* Ширина изображения 100% от родителя */
-    height: 300px; /* Фиксированная высота */
-    object-fit: cover; /* Обрезка изображения для соответствия размеру */
+.input-group input {
+    padding: 10px;
+    margin-bottom: 10px; /* Отступ между полями */
+    border: 1px solid #ddd; /* Светло-серая граница */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
 }
 
-.paintInfo {
-    margin-top: 5px; /* Отступ сверху для текста */
+.input-group input:focus {
+    border-color: #00CED1; /* Цвет границы при фокусе */
+    outline: none; /* Убираем стандартное выделение */
 }
 
-/* Кнопка "Сделать ставку" */
-.bid-button {
-    display: inline-block;
-    margin-top: 10px; /* Отступ сверху */
-    padding: 10px 15px; /* Отступы внутри кнопки */
+/* Кнопка "Найти" */
+#searchButton {
+    padding: 10px;
     background-color: #00CED1; /* Цвет фона */
     color: white; /* Цвет текста */
-    text-decoration: none; /* Без подчеркивания */
+    border: none; /* Без границы */
     border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
     transition: background-color 0.3s; /* Плавный переход цвета фона */
 }
 
-.bid-button:hover {
+#searchButton:hover {
     background-color: #008B8B; /* Цвет при наведении */
+}
+
+/* Стили для кнопки "Сбросить фильтры" */
+#resetButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+#resetButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+/* Изменяем стиль input-container для равномерного распределения */
+.input-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+/* Изменяем ширину input-group для более компактного отображения */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin: 0 10px; /* Уменьшен отступ между столбцами */
+}
+
+/* Стили для группы кнопок */
+.button-group {
+    display: flex; /* Используем flexbox для расположения кнопок в одну линию */
+    gap: 10px; /* Отступ между кнопками */
 }
 
 /* Стили для модального окна */
@@ -98,7 +174,6 @@ header img {
     text-decoration: none; /* Без подчеркивания */
     cursor: pointer; /* Указатель курсора */
 }
-
 
 /* Новый стиль для страницы с информацией о картине */
 .painting-info {
@@ -167,5 +242,13 @@ header img {
 
     .painting-details, .seller-info, .auction-info {
         width: 100%;
+    }
+
+    .input-container {
+        flex-direction: column; /* Изменяем на вертикальное расположение для мобильных */
+    }
+
+    .input-group {
+        margin: 10px 0; /* Отступ между полями для мобильных */
     }
 }
