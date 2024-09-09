@@ -188,6 +188,20 @@ header img {
     border-radius: 10px;
 }
 
+.other-info{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: rgba(0, 206, 209, 0.15);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 1200px; /* Ограничение по ширине */
+    border-radius: 10px;
+
+}
+
+
 /* Стили для изображения и информации о картине */
 .painting-img {
     width: 40%; /* Ширина изображения */
@@ -211,6 +225,35 @@ header img {
     line-height: 1.6;
 }
 
+.price-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: rgba(0, 206, 209, 0.15); /* Полупрозрачный фон */
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Легкая тень */
+}
+
+.price-details {
+    flex-grow: 1; /* Позволяет тексту занимать оставшееся пространство */
+}
+
+.bid-button {
+    padding: 10px 15px;
+    background-color: #00CED1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.bid-button:hover {
+    background-color: #008B8B;
+}
+
+
 /* Стили для информации о продавце и аукционе */
 .seller-info, .auction-info {
     margin-top: 20px;
@@ -218,7 +261,7 @@ header img {
 
 .seller-info h2, .auction-info h2 {
     margin-bottom: 10px;
-    color: #00CED1;
+    color: #555;
 }
 
 .seller-info p, .auction-info p {

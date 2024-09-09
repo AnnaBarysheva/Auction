@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HueHaven - Art Auction</title>
-
-    <!-- Add this line to connect your style.css file -->
     <link rel="stylesheet" href="style.css">
 
     <!-- Other head content like icon links or meta tags -->
@@ -26,8 +24,8 @@ if (isset($_GET['id_painting'])) {
 }
 
 // Подключение к базе данных
- $link = mysqli_connect("localhost", "root", "alina", "Auction");
-//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+//  $link = mysqli_connect("localhost", "root", "alina", "Auction");
+$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 
 if ($link == false) {
@@ -39,8 +37,8 @@ $sql = "
     SELECT Paintings.paint_name, Paintings.size, Paintings.materials, Paintings.style, 
            Paintings.creation_year, Paintings.author, Paintings.image_path, 
            Sellers.full_name AS seller_name, Sellers.phone AS seller_phone, Sellers.email AS seller_email,
-           Auctions.start_date, Auctions.end_date,
-           PaintingsOnAuction.purchase_price
+           Auctions.start_date, Auctions.end_date,  PaintingsOnAuction.starting_price,
+           PaintingsOnAuction.purchase_price, PaintingsOnAuction.lot_number 
     FROM Paintings
     JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
     LEFT JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
@@ -50,7 +48,73 @@ $sql = "
 
 $result = mysqli_query($link, $sql);
 
-if ($result) {
+if ($result && mysqli_num_rows($result) > 0) {
+    $painting = mysqli_fetch_assoc($result); // Сохраняем данные картины в переменной
+} else {
+    die("Картина с таким id не найдена или ошибка запроса.");
+}
+
+// Закрываем соединение
+mysqli_close($link);
+?>
+
+
+
+<div class="painting-info">
+    <!-- Вывод изображения картины -->
+    <img src="<?= htmlspecialchars($painting['image_path']) ?>" alt="<?= htmlspecialchars($painting['paint_name']) ?>" class="painting-img">
+
+    <!-- Вывод информации о картине -->
+    <div class="painting-details">
+        <h1><?= htmlspecialchars($painting['paint_name']) ?></h1>
+        <p>Лот № <?= htmlspecialchars($painting['lot_number']) ?></p>  
+        <p><strong>Размер:</strong> <?= htmlspecialchars($painting['size']) ?></p> 
+        <p><strong>Материалы:</strong> <?= htmlspecialchars($painting['materials']) ?></p>
+        <p><strong>Стиль:</strong> <?= htmlspecialchars($painting['style']) ?></p>
+        <p><strong>Год создания:</strong> <?= htmlspecialchars($painting['creation_year']) ?></p>
+        <p><strong>Автор:</strong> <?= htmlspecialchars($painting['author']) ?></p> 
+        <div class="price-info">
+            <div class="price-details">
+                <p><strong>Начальная цена:</strong> <?= htmlspecialchars($painting['starting_price']) ?></p>
+                <p><strong>Текущая цена:</strong> <?= htmlspecialchars($painting['purchase_price']) ?></p>
+            </div>
+            <!-- <form action="index.php" method="get">
+                <input type="hidden" name="id_painting" value="<?= htmlspecialchars($painting['id_painting']) ?>"> -->
+                <button type="submit" class="bid-button">Сделать ставку</button>
+            <!-- </form> -->
+        </div>
+    </div>
+</div>   
+<div class="other-info">    
+    <!-- Вывод информации о продавце -->
+    <div class="seller-info">
+        <h2>Информация о продавце</h2>
+        <p><strong>Имя продавца:</strong> <?= htmlspecialchars($painting['seller_name']) ?></p>
+        <p><strong>Телефон продавца:</strong> <?= htmlspecialchars($painting['seller_phone']) ?></p>
+        <p><strong>Email продавца:</strong> <?= htmlspecialchars($painting['seller_email']) ?></p>
+    </div>
+
+    <!-- Вывод информации об аукционе -->
+    <div class="auction-info">
+        <h2>Информация об аукционе</h2>
+        <p><strong>Дата начала аукциона:</strong> <?= htmlspecialchars($painting['start_date']) ?></p>
+        <p><strong>Дата окончания аукциона:</strong> <?= htmlspecialchars($painting['end_date']) ?></p>
+
+        <?php if ($painting['purchase_price']): ?>
+            <p><strong>Цена покупки:</strong> $<?= htmlspecialchars($painting['purchase_price']) ?></p>
+        <?php else: ?>
+            <p>Картина ещё не продана.</p>
+        <?php endif; ?>
+    </div>
+</div>
+ 
+</body>
+</html>
+
+
+
+
+<!-- if ($result) {
     // Проверка, есть ли записи в результате запроса
     if (mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_assoc($result);
@@ -69,6 +133,7 @@ if ($result) {
         echo "</div>";
         echo "</div>";
 
+        echo "<div class='painting-details'>";
         echo "<div class='seller-info'>";
         echo "<h2>Информация о продавце</h2>";
         echo "<p><strong>Имя продавца:</strong> " . $row['seller_name'] . "</p>";
@@ -100,8 +165,4 @@ if ($result) {
 
 // Закрываем соединение
 mysqli_close($link);
-?>
-
-
-</body>
-</html>
+?> -->
