@@ -43,7 +43,10 @@ $sql = "
     FROM Paintings
     JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
     JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+    JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
     WHERE Paintings.is_sold = FALSE
+    AND Auctions.start_date <= CURDATE()
+    AND Auctions.end_date >= CURDATE()
 ";
 
 $result = mysqli_query($link, $sql);
@@ -57,6 +60,7 @@ if ($result) {
                 <th>Год создания</th>
                 <th>Автор</th>
                 <th>Продавец</th>
+                <th>Действия</th>
               </tr>";
 
         while ($row = mysqli_fetch_assoc($result)) {
@@ -66,6 +70,10 @@ if ($result) {
             echo "<td>" . $row['creation_year'] . "</td>";
             echo "<td>" . $row['author'] . "</td>";
             echo "<td>" . $row['full_name'] . "</td>";
+            echo "<td>
+            <button class='editButton' data-id='" . $row['id_painting'] . "'>Редактировать</button>
+            <button class='deleteButton' data-id='" . $row['id_painting'] . "'>Удалить</button>
+          </td>";
             echo "</tr>";
         }
 
@@ -93,6 +101,19 @@ document.addEventListener('DOMContentLoaded', function() {
     var authorInput = document.getElementById('authorInput');
     var sellerInput = document.getElementById('sellerInput');
     var searchButton = document.getElementById('searchButton');
+    var resetButton = document.getElementById('resetButton');
+
+    var editButtons = document.getElementsByClassName('editButton');
+    var editModal = document.getElementById('editModal');
+    var closeEditButton = document.getElementById('closeEditModal');
+
+   
+    
+     // Проверка, было ли уже показано модальное окно
+     if (!localStorage.getItem('infoModalShown')) {
+        showModal();
+        localStorage.setItem('infoModalShown', 'true'); // Устанавливаем флаг в localStorage
+    }
 
     // Проходим по всем строкам таблицы
     for (var i = 1; i < rows.length; i++) {
@@ -149,11 +170,74 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Обновите обработчик для кнопки редактирования
+    for (var button of editButtons) {
+        button.addEventListener('click', function(event) {
+            event.stopPropagation(); // Предотвращаем всплытие события
+            var id = this.getAttribute('data-id');
+            var row = this.closest('tr');
+            var cells = row.getElementsByTagName('td');
+
+            document.getElementById('editId').value = id;
+            document.getElementById('editName').value = cells[0].textContent;
+            document.getElementById('editStyle').value = cells[1].textContent;
+            document.getElementById('editYear').value = cells[2].textContent;
+            document.getElementById('editAuthor').value = cells[3].textContent;
+            document.getElementById('editSeller').value = cells[4].textContent;
+
+            editModal.style.display = 'block'; // Открываем модальное окно
+        });
+    }
+
+    closeEditButton.addEventListener('click', function() {
+        editModal.style.display = 'none'; // Закрываем модальное окно
+    });
+
+    // Обновите обработчики для кнопки удаления
+for (var button of document.getElementsByClassName('deleteButton')) {
+    button.addEventListener('click', function(event) {
+        event.stopPropagation(); // Предотвращаем всплытие события
+        var id = this.getAttribute('data-id');
+
+        if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+            fetch('delete_painting.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id_painting: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Удаляем строку из таблицы
+                    var row = this.closest('tr');
+                    row.parentNode.removeChild(row);
+                    alert('Запись успешно удалена.');
+                } else {
+                    alert('Ошибка при удалении записи: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+        }
+    });
+}
+
     // Функция для отображения модального окна
     function showModal() {
         const modal = document.getElementById('infoModal');
         modal.style.display = 'block';
     }
+
+    // Закрытие модального окна при клике вне его
+    window.addEventListener('click', function(event) {
+        const editModal = document.getElementById('editModal');
+        if (event.target === editModal) {
+            editModal.style.display = 'none'; // Закрываем модальное окно
+        }
+    });
 
     // Закрытие модального окна при нажатии на кнопку
     const closeButton = document.querySelector('.close-button');
@@ -169,11 +253,12 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.style.display = 'none';
         }
     });
-
-    // Показ модального окна после загрузки страницы
-    showModal();
+  
+       
+   
 });
 </script>
+
 
 <!-- Модальное окно с информацией -->
 <div id="infoModal" class="modal">
@@ -187,6 +272,45 @@ document.addEventListener('DOMContentLoaded', function() {
         <p style="font-weight: bold; text-align: center;">HueHaven — откройте мир искусства!</p>
     </div>
 </div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeEditModal">&times;</span>
+        <h2>Редактировать картину</h2>
+        <form id="editForm" action="update_painting.php" method="POST">
+            <input type="hidden" id="editId" name="id_painting" required>
+            
+            <label for="editName">Название картины:</label>
+            <input type="text" class="modal-input" id="editName" name="paint_name" placeholder="Название картины" required maxlength="255">
+            
+            <label for="editStyle">Стиль:</label>
+            <input type="text" class="modal-input" id="editStyle" name="style" placeholder="Стиль" required maxlength="50">
+            
+            <label for="editYear">Год создания:</label>
+            <input type="text" class="modal-input" id="editYear" name="creation_year" placeholder="Год создания" pattern="\d{4}" maxlength="4" required title="Введите четыре цифры" max="<?php echo date('Y'); ?>">
+            
+            <label for="editAuthor">Автор:</label>
+            <input type="text" class="modal-input" id="editAuthor" name="author" placeholder="Автор" required maxlength="255">
+            
+            <label for="editSeller">Продавец:</label>
+            <input type="text" class="modal-input" id="editSeller" name="seller" placeholder="Продавец" required maxlength="255">
+            
+            <button type="submit" class="saveButton">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('editForm').addEventListener('submit', function(event) {
+        var yearInput = document.getElementById('editYear').value;
+        var currentYear = new Date().getFullYear();
+        
+        if (!/^\d{4}$/.test(yearInput) || yearInput > currentYear) {
+            alert('Пожалуйста, введите корректный год (от 1901 и не больше текущего года).');
+            event.preventDefault(); // Отменяем отправку формы
+        }
+    });
+</script>
 
 </body>
 </html>

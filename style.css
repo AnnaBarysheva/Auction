@@ -112,6 +112,78 @@ header img {
     background-color: #008B8B; /* Цвет при наведении */
 }
 
+/* Стили для кнопки "Редактировать" */
+.editButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.editButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+/* Стили для кнопки "Сохранить" */
+.saveButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+    
+}
+
+.saveButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+/* Стили для кнопки "Удалить" */
+.deleteButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.deleteButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+/* Стили для полей ввода в модальном окне */
+.modal-input {
+    padding: 10px;
+    margin-bottom: 10px; /* Отступ между полями */
+    border: 1px solid #ddd; /* Светло-серая граница */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    width: calc(100% - 22px); /* Учитываем отступы */
+}
+
+.modal-input:focus {
+    border-color: #00CED1; /* Цвет границы при фокусе */
+    outline: none; /* Убираем стандартное выделение */
+}
+
+.modal-content label {
+    display: block; /* Переводим подписи на новую строку */
+    margin-bottom: 3px; /* Отступ между подписью и полем ввода */
+    font-size: 14px; /* Размер шрифта для подписей */
+    color: #333; /* Цвет текста для подписей */
+    font-weight: bold; /* Жирный шрифт для подписей */
+}
+
 /* Изменяем стиль input-container для равномерного распределения */
 .input-container {
     display: flex;
@@ -174,6 +246,7 @@ header img {
     text-decoration: none; /* Без подчеркивания */
     cursor: pointer; /* Указатель курсора */
 }
+
 
 /* Новый стиль для страницы с информацией о картине */
 .painting-info {
