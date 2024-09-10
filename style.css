@@ -216,7 +216,7 @@ header img {
 }
 
 .painting-details h1 {
-    margin-bottom: 15px;
+    margin-bottom: 0px;
     color: #333;
 }
 
@@ -230,6 +230,7 @@ header img {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
+    padding-right: 30px;
     background-color: rgba(0, 206, 209, 0.15); /* Полупрозрачный фон */
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Легкая тень */
@@ -241,22 +242,52 @@ header img {
 
 .bid-button {
     padding: 10px 15px;
+    
     background-color: #00CED1;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+    font-size: 20px;
 }
 
 .bid-button:hover {
     background-color: #008B8B;
 }
 
+#priceProposalForm {
+    display: flex;
+    flex-direction: column; 
+    /* width: 50%; Установка ширины формы на 50% */
+    margin: 0 auto; /* Центрирование формы по горизонтали */
+}
+
+#priceProposalModal .modal-content {
+    width: 40%; /* Установка ширины 50% только для модального окна priceProposalModal */
+    margin: 15% auto; /* Центрирование по горизонтали и отступ сверху */
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #888;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+#bid_price {
+    width: 100%; /* Широкое поле ввода */
+    padding: 10px; /* Отступы внутри поля */
+    margin-bottom: 15px; /* Отступ снизу */
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Учесть паддинг в ширине */
+}
+
 
 /* Стили для информации о продавце и аукционе */
 .seller-info, .auction-info {
     margin-top: 20px;
+    margin: auto;
 }
 
 .seller-info h2, .auction-info h2 {
@@ -265,8 +296,8 @@ header img {
 }
 
 .seller-info p, .auction-info p {
-    margin: 5px 0;
-    font-size: 14px;
+    margin: 10px 0;
+    font-size: 17px;
     color: #555;
 }
 

@@ -67,7 +67,7 @@ mysqli_close($link);
     <!-- Вывод информации о картине -->
     <div class="painting-details">
         <h1><?= htmlspecialchars($painting['paint_name']) ?></h1>
-        <p>Лот № <?= htmlspecialchars($painting['lot_number']) ?></p>  
+        <p style="color: #00CED1; font-style: italic;">Лот № <?= htmlspecialchars($painting['lot_number']) ?></p>  
         <p><strong>Размер:</strong> <?= htmlspecialchars($painting['size']) ?></p> 
         <p><strong>Материалы:</strong> <?= htmlspecialchars($painting['materials']) ?></p>
         <p><strong>Стиль:</strong> <?= htmlspecialchars($painting['style']) ?></p>
@@ -88,7 +88,7 @@ mysqli_close($link);
 <div class="other-info">    
     <!-- Вывод информации о продавце -->
     <div class="seller-info">
-        <h2>Информация о продавце</h2>
+        <!-- <h2>Информация о продавце</h2> -->
         <p><strong>Имя продавца:</strong> <?= htmlspecialchars($painting['seller_name']) ?></p>
         <p><strong>Телефон продавца:</strong> <?= htmlspecialchars($painting['seller_phone']) ?></p>
         <p><strong>Email продавца:</strong> <?= htmlspecialchars($painting['seller_email']) ?></p>
@@ -96,7 +96,7 @@ mysqli_close($link);
 
     <!-- Вывод информации об аукционе -->
     <div class="auction-info">
-        <h2>Информация об аукционе</h2>
+        <!-- <h2>Информация об аукционе</h2> -->
         <p><strong>Дата начала аукциона:</strong> <?= htmlspecialchars($painting['start_date']) ?></p>
         <p><strong>Дата окончания аукциона:</strong> <?= htmlspecialchars($painting['end_date']) ?></p>
 
@@ -108,10 +108,46 @@ mysqli_close($link);
     </div>
 </div>
  
+<!-- Модальное окно для предложения цены -->
+<div id="priceProposalModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Предложение своей цены к лоту №<?= htmlspecialchars($painting['lot_number']) ?></h2>
+        <form id="priceProposalForm" action="submit_bid.php" method="post">
+            <!-- <input type="hidden" name="id_painting" value="<?= htmlspecialchars($painting['id_painting']) ?>"> -->           
+            <input type="number" name="bid_price" id="bid_price" placeholder="Введите вашу цену" required>
+            <button type="submit" class="bid-button">Предложить цену</button>
+        </form>
+    </div>
+</div>
+
 </body>
 </html>
 
+<script>
+// Получаем элементы модального окна и кнопки
+var modal = document.getElementById("priceProposalModal");
+var btn = document.querySelector(".bid-button");
+var closeButton = document.querySelector(".close-button");
 
+// Открытие модального окна при нажатии на кнопку "Сделать ставку"
+btn.addEventListener("click", function(event) {
+    event.preventDefault(); // Предотвращаем переход по ссылке
+    modal.style.display = "block"; // Показываем модальное окно
+});
+
+// Закрытие модального окна при нажатии на кнопку закрытия
+closeButton.addEventListener("click", function() {
+    modal.style.display = "none"; // Скрываем модальное окно
+});
+
+// Закрытие модального окна при клике вне его
+window.addEventListener("click", function(event) {
+    if (event.target === modal) {
+        modal.style.display = "none"; // Скрываем модальное окно
+    }
+});
+</script>
 
 
 <!-- if ($result) {
