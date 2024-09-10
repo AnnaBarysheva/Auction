@@ -233,6 +233,32 @@ header img {
     margin: 5px 0; /* Отступы для параграфов */
 }
 
+#editModal .modal-content {
+    width: 50%; /* Ширина формы */
+    max-width: 600px; /* Максимальная ширина формы */
+    padding: 20px;
+    box-sizing: border-box;
+    margin: auto auto; /* Центрирование формы */
+    background-color: white;
+    border-radius: 10px; /* Закругленные углы */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Тень */
+}
+
+
+
+/* Стили для содержимого модального окна */
+#editModal .modal-content {
+    width: 50%; /* Ширина формы */
+    max-width: 600px; /* Максимальная ширина формы */
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: white;
+    border-radius: 10px; /* Закругленные углы */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Тень */
+    position: relative;
+    margin-top: 5%;
+}
+
 .close-button {
     color: #aaa; /* Цвет кнопки закрытия */
     float: right; /* Справа */
@@ -314,15 +340,15 @@ header img {
 }
 
 .bid-button {
-    padding: 10px 15px;
-    
-    background-color: #00CED1;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 20px;
+
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
 }
 
 .bid-button:hover {

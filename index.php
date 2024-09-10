@@ -46,9 +46,11 @@ $sql = "
     JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
     JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
     WHERE Paintings.is_sold = FALSE
-    AND Auctions.start_date <= CURDATE()
-    AND Auctions.end_date >= CURDATE()
+    
 ";
+
+// AND Auctions.start_date <= CURDATE()
+// AND Auctions.end_date >= CURDATE()
 
 $result = mysqli_query($link, $sql);
 
@@ -92,10 +94,81 @@ mysqli_close($link);
 ?>
 
 <script>
-// Добавляем обработчик события для каждой картины
-document.addEventListener('DOMContentLoaded', function() {
+// Функция проверки соединения с сервером
+async function checkConnection() {
+    console.log("Checking connection to the server..."); // Проверка вызова функции
+
+    try {
+        const response = await fetch('check_connection.php');
+        console.log("Response from server: ", response);
+
+        // Проверяем, был ли успешен ответ с сервера
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        console.log("Data received from server: ", data);
+
+        // Проверяем, есть ли ошибка в данных
+        if (!data.success) {
+            throw new Error(data.message || "Unknown error from server.");
+        }
+
+        return true; // Соединение успешно
+    } catch (error) {
+        console.error("Error in checkConnection: ", error); // Вывод полной ошибки в консоль
+
+        // Показываем ошибку пользователю через модальное окно
+        showErrorModal("Ошибка подключения к серверу: " + error.message);
+        return false; // Соединение не удалось
+    }
+}
+
+// Функция для отображения ошибки в модальном окне
+function showErrorModal(message) {
+    var modal = document.getElementById('errorModal');
+    var errorMessage = document.getElementById('errorMessage');
+    var closeModal = document.getElementById('closeErrorModal');
+
+    // Устанавливаем текст ошибки
+    errorMessage.textContent = message;
+
+    // Показываем модальное окно
+    modal.style.display = 'block';
+
+    // Закрываем модальное окно при нажатии на "x"
+    closeModal.onclick = function() {
+        modal.style.display = 'none';
+    };
+
+    // Закрываем модальное окно, если кликнули вне его
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+}
+
+
+// Универсальная функция, которая оборачивает действие в проверку соединения
+async function handleWithConnection(callback) {
+    const connectionOK = await checkConnection();
+
+    if (!connectionOK) {
+        console.log("No connection to the server.");
+        return; // Прекращаем выполнение, если нет соединения
+    }
+
+    callback(); // Выполняем основное действие, если соединение успешно
+}
+
+// Добавляем обработчики событий после загрузки DOM
+document.addEventListener('DOMContentLoaded', async function () {
+    console.log("DOMContentLoaded event triggered");
+
     var table = document.getElementById('paintingsTable');
-    var rows = table.getElementsByTagName('tr');
+    var rows = table ? table.getElementsByTagName('tr') : [];
     var nameInput = document.getElementById('nameInput');
     var styleInput = document.getElementById('styleInput');
     var yearInput = document.getElementById('yearInput');
@@ -103,15 +176,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var sellerInput = document.getElementById('sellerInput');
     var searchButton = document.getElementById('searchButton');
     var resetButton = document.getElementById('resetButton');
-
     var editButtons = document.getElementsByClassName('editButton');
-    var editModal = document.getElementById('editModal');
+    var deleteButtons = document.getElementsByClassName('deleteButton');
     var closeEditButton = document.getElementById('closeEditModal');
 
-   
-    
-     // Проверка, было ли уже показано модальное окно
-     if (!localStorage.getItem('infoModalShown')) {
+         // Проверка, было ли уже показано модальное окно
+         if (!localStorage.getItem('infoModalShown')) {
         showModal();
         localStorage.setItem('infoModalShown', 'true'); // Устанавливаем флаг в localStorage
     }
@@ -125,54 +195,62 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Поиск по таблице
-    searchButton.addEventListener('click', function() {
-        var nameFilter = nameInput.value.toLowerCase();
-        var styleFilter = styleInput.value.toLowerCase();
-        var yearFilter = yearInput.value.toLowerCase();
-        var authorFilter = authorInput.value.toLowerCase();
-        var sellerFilter = sellerInput.value.toLowerCase();
+    searchButton.addEventListener('click', function () {
+        handleWithConnection(() => {
+            console.log("Search button clicked.");
 
-        for (var i = 1; i < rows.length; i++) {
-            var cells = rows[i].getElementsByTagName('td');
-            var matches = true;
+            var nameFilter = nameInput.value.toLowerCase();
+            var styleFilter = styleInput.value.toLowerCase();
+            var yearFilter = yearInput.value.toLowerCase();
+            var authorFilter = authorInput.value.toLowerCase();
+            var sellerFilter = sellerInput.value.toLowerCase();
 
-            if (nameFilter && !cells[0].textContent.toLowerCase().includes(nameFilter)) {
-                matches = false;
-            }
-            if (styleFilter && !cells[1].textContent.toLowerCase().includes(styleFilter)) {
-                matches = false;
-            }
-            if (yearFilter && !cells[2].textContent.toLowerCase().includes(yearFilter)) {
-                matches = false;
-            }
-            if (authorFilter && !cells[3].textContent.toLowerCase().includes(authorFilter)) {
-                matches = false;
-            }
-            if (sellerFilter && !cells[4].textContent.toLowerCase().includes(sellerFilter)) {
-                matches = false;
-            }
+            for (var i = 1; i < rows.length; i++) {
+                var cells = rows[i].getElementsByTagName('td');
+                var matches = true;
 
-            rows[i].style.display = matches ? '' : 'none';
-        }
+                if (nameFilter && !cells[0].textContent.toLowerCase().includes(nameFilter)) {
+                    matches = false;
+                }
+                if (styleFilter && !cells[1].textContent.toLowerCase().includes(styleFilter)) {
+                    matches = false;
+                }
+                if (yearFilter && !cells[2].textContent.toLowerCase().includes(yearFilter)) {
+                    matches = false;
+                }
+                if (authorFilter && !cells[3].textContent.toLowerCase().includes(authorFilter)) {
+                    matches = false;
+                }
+                if (sellerFilter && !cells[4].textContent.toLowerCase().includes(sellerFilter)) {
+                    matches = false;
+                }
+
+                rows[i].style.display = matches ? '' : 'none';
+            }
+        });
     });
 
     // Обработчик для кнопки сброса
-    resetButton.addEventListener('click', function() {
-        // Очищаем поля ввода
-        nameInput.value = '';
-        styleInput.value = '';
-        yearInput.value = '';
-        authorInput.value = '';
-        sellerInput.value = '';
+    resetButton.addEventListener('click', function () {
+        handleWithConnection(() => {
+            console.log("Reset button clicked.");
 
-        // Показываем все строки таблицы
-        for (var i = 1; i < rows.length; i++) {
-            rows[i].style.display = '';
-        }
+            // Очищаем поля ввода
+            nameInput.value = '';
+            styleInput.value = '';
+            yearInput.value = '';
+            authorInput.value = '';
+            sellerInput.value = '';
+
+            // Показываем все строки таблицы
+            for (var i = 1; i < rows.length; i++) {
+                rows[i].style.display = '';
+            }
+        });
     });
 
-    // Обновите обработчик для кнопки редактирования
-    for (var button of editButtons) {
+     // Обновите обработчик для кнопки редактирования
+     for (var button of editButtons) {
         button.addEventListener('click', function(event) {
             event.stopPropagation(); // Предотвращаем всплытие события
             var id = this.getAttribute('data-id');
@@ -189,12 +267,11 @@ document.addEventListener('DOMContentLoaded', function() {
             editModal.style.display = 'block'; // Открываем модальное окно
         });
     }
-
     closeEditButton.addEventListener('click', function() {
         editModal.style.display = 'none'; // Закрываем модальное окно
     });
 
-    // Обновите обработчики для кнопки удаления
+   // Обновите обработчики для кнопки удаления
 for (var button of document.getElementsByClassName('deleteButton')) {
     button.addEventListener('click', function(event) {
         event.stopPropagation(); // Предотвращаем всплытие события
@@ -226,38 +303,13 @@ for (var button of document.getElementsByClassName('deleteButton')) {
     });
 }
 
-    // Функция для отображения модального окна
-    function showModal() {
-        const modal = document.getElementById('infoModal');
-        modal.style.display = 'block';
-    }
-
-    // Закрытие модального окна при клике вне его
-    window.addEventListener('click', function(event) {
-        const editModal = document.getElementById('editModal');
-        if (event.target === editModal) {
-            editModal.style.display = 'none'; // Закрываем модальное окно
-        }
+    // Закрытие модального окна для редактирования
+    closeEditButton.addEventListener('click', function () {
+        document.getElementById('editModal').style.display = 'none';
     });
-
-    // Закрытие модального окна при нажатии на кнопку
-    const closeButton = document.querySelector('.close-button');
-    closeButton.addEventListener('click', function() {
-        const modal = document.getElementById('infoModal');
-        modal.style.display = 'none';
-    });
-
-    // Закрытие модального окна при клике вне его
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('infoModal');
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-  
-       
-   
 });
+
+
 </script>
 
 
@@ -298,6 +350,15 @@ for (var button of document.getElementsByClassName('deleteButton')) {
             
             <button type="submit" class="saveButton">Сохранить</button>
         </form>
+    </div>
+</div>
+
+<!-- Модальное окно ошибки -->
+<div id="errorModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="closeErrorModal" class="close-button">&times;</span>
+        <h2>Ошибка</h2>
+        <p id="errorMessage"></p>
     </div>
 </div>
 
