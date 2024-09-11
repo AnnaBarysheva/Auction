@@ -161,6 +161,40 @@ header img {
     background-color: #008B8B; /* Цвет при наведении */
 }
 
+/* Стили для кнопки "Добавить картину" */
+.addButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.addButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+/* Стили для контейнера с полями ввода */
+.input-container {
+    display: flex; /* Используем flexbox */
+    justify-content: space-between; /* Распределяем пространство между группами */
+    margin: 20px 0; /* Отступ сверху и снизу */
+}
+
+/* Изменяем ширину input-column для равномерного распределения */
+.input-column {
+    flex: 1; /* Каждая группа занимает равное пространство */
+    margin: 0 10px; /* Отступ между группами */
+}
+
+/* Убираем отступ справа у последней группы */
+.input-column:last-child {
+    margin-right: 0;
+}
+
 /* Стили для полей ввода в модальном окне */
 .modal-input {
     padding: 10px;
@@ -271,6 +305,19 @@ header img {
     color: black; /* Цвет при наведении */
     text-decoration: none; /* Без подчеркивания */
     cursor: pointer; /* Указатель курсора */
+}
+
+/* Стили для модального окна добавления картины */
+#addModal .modal-content {
+    width: 50%; /* Ширина формы */
+    max-width: 600px; /* Максимальная ширина формы */
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: white;
+    border-radius: 10px; /* Закругленные углы */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Тень */
+    position: relative;
+    margin-top: 1%;
 }
 
 
