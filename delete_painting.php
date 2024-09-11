@@ -1,5 +1,7 @@
 <?php
 $link = mysqli_connect("localhost", "root", "alina", "Auction");
+// $link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+
 
 if ($link === false) {
     die(json_encode(['success' => false, 'message' => 'Ошибка подключения к базе данных.']));
