@@ -46,6 +46,8 @@ $sql = "
     JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
     JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
     WHERE Paintings.is_sold = FALSE
+    AND Auctions.start_date <= CURDATE()
+    AND Auctions.end_date >= CURDATE()
     
 ";
 
@@ -92,6 +94,8 @@ if ($result) {
 
 mysqli_close($link);
 ?>
+
+<button id="addPaintingButton" class="addButton">Добавить картину</button>
 
 <script>
 // Функция проверки соединения с сервером
@@ -179,6 +183,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     var editButtons = document.getElementsByClassName('editButton');
     var deleteButtons = document.getElementsByClassName('deleteButton');
     var closeEditButton = document.getElementById('closeEditModal');
+
+    const addPaintingButton = document.getElementById('addPaintingButton');
+    const addModal = document.getElementById('addModal');
+    const closeAddModal = document.getElementById('closeAddModal');
 
          // Проверка, было ли уже показано модальное окно
          if (!localStorage.getItem('infoModalShown')) {
@@ -321,6 +329,61 @@ for (var button of document.getElementsByClassName('deleteButton')) {
     closeEditButton.addEventListener('click', function () {
         document.getElementById('editModal').style.display = 'none';
     });
+
+    // Закрытие модального окна при клике вне его
+    window.addEventListener('click', function(event) {
+            const editModal = document.getElementById('editModal');
+            if (event.target === editModal) {
+                editModal.style.display = 'none'; // Закрываем модальное окно
+            }
+        });
+
+        addPaintingButton.addEventListener('click', function () {
+            addModal.style.display = 'block'; // Открываем модальное окно для добавления
+        });
+
+        closeAddModal.addEventListener('click', function () {
+            addModal.style.display = 'none'; // Закрываем модальное окно
+
+            // Очищаем поля ввода
+            document.getElementById('addName').value = '';
+            document.getElementById('addSize').value = '';
+            document.getElementById('addMaterials').value = '';
+            document.getElementById('addStyle').value = '';
+            document.getElementById('addYear').value = '';
+            document.getElementById('addAuthor').value = '';
+            document.getElementById('addImageUrl').value = '';
+            document.getElementById('addSeller').value = '';
+            document.getElementById('addEmail').value = '';
+            document.getElementById('addPhone').value = '';
+            document.getElementById('addLotNumber').value = '';
+            document.getElementById('addStartingPrice').value = '';
+            document.getElementById('addStartDate').value = '';
+            document.getElementById('addEndDate').value = '';
+        });
+
+        // Закрытие модального окна при клике вне его
+        window.onclick = function (event) {
+            if (event.target == addModal) {
+                addModal.style.display = 'none';
+
+                // Очищаем поля ввода
+                document.getElementById('addName').value = '';
+                document.getElementById('addSize').value = '';
+                document.getElementById('addMaterials').value = '';
+                document.getElementById('addStyle').value = '';
+                document.getElementById('addYear').value = '';
+                document.getElementById('addAuthor').value = '';
+                document.getElementById('addImageUrl').value = '';
+                document.getElementById('addSeller').value = '';
+                document.getElementById('addEmail').value = '';
+                document.getElementById('addPhone').value = '';
+                document.getElementById('addLotNumber').value = '';
+                document.getElementById('addStartingPrice').value = '';
+                document.getElementById('addStartDate').value = '';
+                document.getElementById('addEndDate').value = '';
+            }
+        };
 });
 
 
@@ -373,6 +436,67 @@ for (var button of document.getElementsByClassName('deleteButton')) {
         <span id="closeErrorModal" class="close-button">&times;</span>
         <h2>Ошибка</h2>
         <p id="errorMessage"></p>
+    </div>
+</div>
+
+
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeAddModal">&times;</span>
+        <h2>Добавить картину</h2>
+        <form id="addForm" action="add_painting.php" method="POST">
+            <div class="input-container">
+                <div class="input-column">
+                    <label for="addName">Название картины:</label>
+                    <input type="text" id="addName" name="paint_name" class="modal-input" placeholder="Название картины" required maxlength="255">
+                    
+                    <label for="addSize">Размер:</label>
+                    <input type="text" id="addSize" name="size" class="modal-input" placeholder="XXxXX см" required maxlength="50" pattern="^\d{2}x\d{2} см$" title="Введите размер в формате XXxXX см">
+                    
+                    <label for="addMaterials">Материалы:</label>
+                    <input type="text" id="addMaterials" name="materials" class="modal-input" placeholder="Материалы" required maxlength="255">
+                    
+                    <label for="addStyle">Стиль:</label>
+                    <input type="text" id="addStyle" name="style" class="modal-input" placeholder="Стиль" required maxlength="50">
+                    
+                    <label for="addYear">Год создания:</label>
+                    <input type="text" id="addYear" name="creation_year" class="modal-input" placeholder="Год создания" pattern="\d{4}" maxlength="4" required title="Введите четыре цифры">
+                    
+                    <label for="addAuthor">Автор:</label>
+                    <input type="text" id="addAuthor" name="author" class="modal-input" placeholder="Автор" required maxlength="255">
+                    
+                    <label for="addImageUrl">URL картины:</label>
+                    <input type="text" id="addImageUrl" name="image_path" class="modal-input" placeholder="URL картины" required maxlength="255">
+                </div>
+                
+                <div class="input-column">
+                    <label for="addSeller">Имя продавца:</label>
+                    <input type="text" id="addSeller" name="seller" class="modal-input" placeholder="Имя продавца" required maxlength="255">
+                    
+                    <label for="addEmail">Email продавца:</label>
+                    <input type="email" id="addEmail" name="email" class="modal-input" placeholder="Email продавца" required>
+                    
+                    <label for="addPhone">Телефон продавца:</label>
+                    <input type="text" id="addPhone" name="phone" class="modal-input" placeholder="Телефон продавца" required maxlength="50">
+                </div>
+                
+                <div class="input-column">
+                    <label for="addLotNumber">Номер лота:</label>
+                    <input type="number" id="addLotNumber" name="lot_number" class="modal-input" required>
+                    
+                    <label for="addStartingPrice">Стартовая цена:</label>
+                    <input type="number" id="addStartingPrice" name="starting_price" class="modal-input" step="0.01" required>
+                    
+                    <label for="addStartDate">Дата начала аукциона:</label>
+                    <input type="date" id="addStartDate" name="start_date" class="modal-input" required>
+                    
+                    <label for="addEndDate">Дата конца аукциона:</label>
+                    <input type="date" id="addEndDate" name="end_date" class="modal-input" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="saveButton">Добавить</button>
+        </form>
     </div>
 </div>
 
