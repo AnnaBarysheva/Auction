@@ -9,9 +9,18 @@
     <!-- Other head content like icon links or meta tags -->
 </head>
 <body>
-    <header>
-        <img src="https://cdn-icons-png.flaticon.com/512/10613/10613919.png" alt="Art Gallery Logo">
-        <h1 style="color: white;font-style: italic;">HueHaven</h1>
+<header>
+        <div class="header-left">
+        <img src="https://cdn-icons-png.flaticon.com/512/10613/10613919.png" alt="Art Gallery Logo" class="logo">
+        <!-- <a href="index.php"><img src="https://cdn-icons-png.flaticon.com/512/10613/10613919.png" alt="Art Gallery Logo" class="logo"></a> -->
+            <h1>HueHaven</h1>
+        </div>
+        <div class="header-right">
+            <div class="return-home">
+                <a href="index.php" class="header-button">Вернуться на главную</a>
+            </div>
+        </div>
+
     </header>
 
 
@@ -24,8 +33,8 @@ if (isset($_GET['id_painting'])) {
 }
 
 // Подключение к базе данных
-  $link = mysqli_connect("localhost", "root", "alina", "Auction");
-// $link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+//   $link = mysqli_connect("localhost", "root", "alina", "Auction");
+$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 
 if ($link == false) {

@@ -8,8 +8,15 @@
 </head>
 <body>
     <header>
-        <img src="https://cdn-icons-png.flaticon.com/512/10613/10613919.png" alt="Art Gallery Logo">
-        <h1 style="color: white;font-style: italic;">HueHaven</h1>
+        <div class="header-left">
+            <img src="https://cdn-icons-png.flaticon.com/512/10613/10613919.png" alt="Art Gallery Logo" class="logo">
+            <h1>HueHaven</h1>
+        </div>
+
+        <div class="header-right">
+        <button class="header-button" onclick="handleLogin()">Войти</button>
+        <button class="header-button" onclick="handleRegister()">Зарегистрироваться</button>
+        </div>
     </header>
 
     <div class="input-container">
@@ -31,8 +38,8 @@
 </div>
 
 <?php
-$link = mysqli_connect("localhost", "root", "alina", "Auction");
-// $link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+// $link = mysqli_connect("localhost", "root", "alina", "Auction");
+$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 if ($link == false) {
     die("Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error());
@@ -169,10 +176,31 @@ async function handleWithConnection(callback) {
 
     callback(); // Выполняем основное действие, если соединение успешно
 }
+       // Обработчик для кнопки "Войти"
+       async function handleLogin() {
+            await handleWithConnection(() => {
+                location.href = 'login.php';
+            });
+        }
+
+        // Обработчик для кнопки "Зарегистрироваться"
+        async function handleRegister() {
+            await handleWithConnection(() => {
+                location.href = 'register.php';
+            });
+        }
 
 // Добавляем обработчики событий после загрузки DOM
 document.addEventListener('DOMContentLoaded', async function () {
     console.log("DOMContentLoaded event triggered");
+
+    // Проверка соединения с сервером
+    const connectionOK = await checkConnection();
+    
+    if (!connectionOK) {
+        console.log('No connection to the server.');
+        return; // Если соединение не удалось, ничего не делаем
+    }
 
     var table = document.getElementById('paintingsTable');
     var rows = table ? table.getElementsByTagName('tr') : [];
@@ -342,8 +370,12 @@ for (var button of document.getElementsByClassName('deleteButton')) {
         });
 
         addPaintingButton.addEventListener('click', function () {
+            handleWithConnection(() => {
             addModal.style.display = 'block'; // Открываем модальное окно для добавления
+            });
         });
+
+        
 
         closeAddModal.addEventListener('click', function () {
             addModal.style.display = 'none'; // Закрываем модальное окно

@@ -10,6 +10,7 @@ header {
     align-items: center; /* Центрирование элементов по вертикали */
     padding: 1px 10px; /* Уменьшено верхнее и нижнее значение */
     user-select: none; /* Отключение выделения текста */
+    justify-content: space-between;
 }
 
 header img {
@@ -17,6 +18,98 @@ header img {
     height: auto; /* Автоматическая высота */
     margin-right: 10px; /* Отступ справа от логотипа */
 }
+
+/* Логотип и название слева */
+.header-left {
+    display: flex;
+    align-items: center;
+}
+h1 {
+    color: white;
+    font-style: italic;
+   
+}
+
+
+/* Кнопки справа */
+.header-right {
+    display: flex;
+}
+
+.header-button {
+    background-color: transparent; /* Убираем фон */
+    color: white; /* Белый текст */
+    padding: 10px 20px; /* Отступы */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Скругление углов */
+    cursor: pointer; /* Курсор при наведении */
+    margin-left: 10px; /* Отступ между кнопками */
+    font-size: 18px; /* Размер текста */
+    text-decoration: none; /* Убираем подчеркивание */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Плавный переход цвета фона и текста */
+}
+
+/* Стили кнопки при наведении */
+.header-button:hover {
+    background-color: rgba(255, 255, 255, 0.3); /* Полупрозрачный белый фон при наведении */
+    color: white; /* Оставляем текст белым */
+}
+
+
+/* Стили регистрации */
+.registration-container, .login-container {
+    width: 50%;
+    max-width: 600px;
+    margin: 50px auto; /* Центрирование контейнера */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px; /* Закругленные углы */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Тень */
+}
+
+.registration-container h2, .login-container h2  {
+    text-align: center; /* Центрирование заголовка */
+    margin-bottom: 20px;
+}
+.register-form .modal-input,
+.login-container .modal-input {
+    margin-bottom: 20px; /* Увеличиваем отступ между полями */
+}
+.register-button, .login-button{
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+    
+#register-button .login-button{
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+#href-login-button, #href-register-button {
+    background-color: transparent; /* Прозрачный фон */
+    color: #00CED1; /* Бирюзовый текст */
+    border: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Наведение для кнопки "Уже есть аккаунт?" */
+#href-login-button:hover,
+#href-register-button:hover {
+    background-color: rgba(0, 206, 209, 0.1); /* Полупрозрачный бирюзовый фон */
+    color: #00CED1; /* Бирюзовый текст при наведении */
+}
+
+
+
+
 
 /* Стили для таблицы с картинами */
 #paintingsTable {
@@ -314,6 +407,9 @@ header img {
     cursor: pointer; /* Указатель курсора */
 }
 
+#addModal{
+    z-index: 1000;
+}
 /* Стили для модального окна добавления картины */
 #addModal .modal-content {
     width: 50%; /* Ширина формы */
@@ -325,6 +421,11 @@ header img {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Тень */
     position: relative;
     margin-top: 1%;
+    
+}
+
+#errorModal{
+    z-index: 1001;
 }
 
 
