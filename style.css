@@ -177,6 +177,13 @@ header img {
     background-color: #008B8B; /* Цвет при наведении */
 }
 
+.button-container {
+    display: flex; /* Используем Flexbox */
+    justify-content: center; /* Центрируем содержимое по горизонтали */
+    margin-top: 20px; /* Отступ сверху */
+    width: 100%; /* Ширина на 100% */
+}
+
 /* Стили для контейнера с полями ввода */
 .input-container {
     display: flex; /* Используем flexbox */

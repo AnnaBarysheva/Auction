@@ -83,6 +83,10 @@ if ($result) {
         }
 
         echo "</table>";
+
+        echo "<div class='button-container'>";
+        echo "<button id='addPaintingButton' class='addButton'>Добавить картину</button>";
+        echo "</div>";
     } else {
         echo "Нет доступных картин для отображения.";
     }
@@ -95,7 +99,6 @@ if ($result) {
 mysqli_close($link);
 ?>
 
-<button id="addPaintingButton" class="addButton">Добавить картину</button>
 
 <script>
 // Функция проверки соединения с сервером
@@ -451,8 +454,7 @@ for (var button of document.getElementsByClassName('deleteButton')) {
                     <input type="text" id="addName" name="paint_name" class="modal-input" placeholder="Название картины" required maxlength="255">
                     
                     <label for="addSize">Размер:</label>
-                    <input type="text" id="addSize" name="size" class="modal-input" placeholder="XXxXX см" required maxlength="50" pattern="^\d{2}x\d{2} см$" title="Введите размер в формате XXxXX см">
-                    
+                    <input type="text" id="addSize" name="size" class="modal-input" placeholder="XXxXX см или XXXxXXX см" required maxlength="50" pattern="^(?:\d{2}x\d{2} см|\d{3}x\d{3} см)$" title="Введите размер в формате XXxXX см или XXXxXXX см">                       
                     <label for="addMaterials">Материалы:</label>
                     <input type="text" id="addMaterials" name="materials" class="modal-input" placeholder="Материалы" required maxlength="255">
                     
@@ -477,8 +479,7 @@ for (var button of document.getElementsByClassName('deleteButton')) {
                     <input type="email" id="addEmail" name="email" class="modal-input" placeholder="Email продавца" required>
                     
                     <label for="addPhone">Телефон продавца:</label>
-                    <input type="text" id="addPhone" name="phone" class="modal-input" placeholder="Телефон продавца" required maxlength="50">
-                </div>
+                    <input type="text" id="addPhone" name="phone" class="modal-input" placeholder="Телефон продавца" required maxlength="15" pattern="^\+\d{0,14}$" title="Введите номер телефона, начиная с + и далее только цифры.">                </div>
                 
                 <div class="input-column">
                     <label for="addLotNumber">Номер лота:</label>
@@ -522,6 +523,45 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
     event.preventDefault();
 });
 
+</script>
+
+<script>
+document.getElementById('addForm').addEventListener('submit', function(event) {
+    var yearInput = document.getElementById('addYear').value;
+    var currentYear = new Date().getFullYear();
+    
+    // Проверка на корректность года
+    if (!/^\d{4}$/.test(yearInput) || yearInput < 1901 || yearInput > currentYear) {
+        alert('Пожалуйста, введите корректный год (от 1901 и не больше текущего года).');
+        event.preventDefault(); // Отменяем отправку формы
+        return; // Останавливаем дальнейшее выполнение
+    }
+
+    // Оборачиваем в handleWithConnection
+    handleWithConnection(() => {
+        // Если проверка успешна, форма отправляется
+        this.submit();
+    });
+
+    // Отменяем стандартную отправку формы до завершения проверки
+    event.preventDefault();
+});
+
+document.getElementById('addPhone').addEventListener('focus', function() {
+    if (this.value === '' || this.value === '+') {
+        this.value = '+'; // Добавляем + в начале
+    }
+});
+
+document.getElementById('addPhone').addEventListener('input', function() {
+    // Удаляем все символы, кроме + и цифр
+    this.value = this.value.replace(/[^+\d]/g, '');
+
+    // Если символ + был удален, восстанавливаем его
+    if (this.value.charAt(0) !== '+') {
+        this.value = '+' + this.value.replace(/^\+/, ''); // Восстанавливаем +
+    }
+});
 </script>
 
 </body>
