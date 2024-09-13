@@ -16,7 +16,8 @@
         </div>
         <div class="header-right">
             <div class="return-home">
-                <a href="index.php" class="header-buttonы">Вернуться на главную</a>
+                <!-- <a href="index.php" class="header-button">Вернуться на главную</a> -->
+                <button type="button" class="header-button" id="return-home-button" onclick="handleReturnHome()">Вернуться на главную</button>
             </div>
         </div>
 </header>        
@@ -24,11 +25,11 @@
 <div class="registration-container">
     <h2>Регистрация</h2>
     <form id="registerForm" class="register-form">
-    <input type="text" id="name" name="name" class="modal-input" required autocomplete="name" placeholder="Введите имя">
+    <input type="text" id="name" name="name" class="modal-input" required autocomplete="name" placeholder="Введите имя" maxlength="225">
 
-    <input type="text" id="username" name="username" class="modal-input" required autocomplete="username" placeholder="Введите логин">
+    <input type="text" id="username" name="username" class="modal-input" required autocomplete="username" placeholder="Введите логин" maxlength="225">
 
-    <input type="password" id="password" name="password" class="modal-input" required autocomplete="new-password" placeholder="Введите пароль">
+    <input type="password" id="password" name="password" class="modal-input" required autocomplete="new-password" placeholder="Введите пароль" minlength="8">
 
     <input type="password" id="confirm_password" name="confirm_password" class="modal-input" required autocomplete="new-password" placeholder="Повторите введённый пароль">
 
@@ -69,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('registerForm').addEventListener('submit', async function(event) {
         event.preventDefault(); // Отменяем стандартное действие отправки формы
 
+        await handleWithConnection(async () => {
         const formData = new FormData(this);
         const response = await fetch('register_handler.php', {
             method: 'POST',
@@ -84,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             showMessageModal("Ошибка", result.message);
         }
+         });
     });
 
     function showMessageModal(title, message) {
@@ -159,6 +162,12 @@ async function handleWithConnection(callback) {
 async function handleLogin() {
     await handleWithConnection(() => {
         location.href = 'login.php';
+    });
+}
+// Обработчик для кнопки "Вернуться на главную"
+async function handleReturnHome() {
+    await handleWithConnection(() => {
+        location.href = 'index.php';
     });
 }
 

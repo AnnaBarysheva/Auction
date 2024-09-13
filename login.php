@@ -15,7 +15,8 @@
         </div>
         <div class="header-right">
             <div class="return-home">
-                <a href="index.php" class="header-button">Вернуться на главную</a>
+                <!-- <a href="index.php" class="header-button">Вернуться на главную</a> -->
+                <button type="button" class="header-button" id="return-home-button" onclick="handleReturnHome()">Вернуться на главную</button>
             </div>
         </div>
 
@@ -132,6 +133,7 @@ async function handleWithConnection(callback) {
     document.getElementById('loginForm').addEventListener('submit', async function(event) {
         event.preventDefault(); // Отменяем стандартное действие отправки формы
 
+        await handleWithConnection(async () => {
         const formData = new FormData(this);
         const response = await fetch('login_handler.php', {
             method: 'POST',
@@ -144,6 +146,7 @@ async function handleWithConnection(callback) {
         } else {
             showErrorModal(result.message); // Показываем сообщение об ошибке
         }
+        });
     });
 
 
@@ -153,6 +156,14 @@ async function handleWithConnection(callback) {
                 location.href = 'register.php';
             });
         }
+
+        // Обработчик для кнопки "Вернуться на главную"
+        async function handleReturnHome() {
+            await handleWithConnection(() => {
+                location.href = 'index.php';
+            });
+        }
+
 
         //   // Обработчик отправки формы
         //   document.getElementById('registerForm').addEventListener('submit', async function(event) {

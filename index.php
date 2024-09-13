@@ -53,8 +53,8 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 
 <?php
- $link = mysqli_connect("localhost", "root", "alina", "Auction");
-//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+//  $link = mysqli_connect("localhost", "root", "alina", "Auction");
+$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 if ($link == false) {
     die("Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error());
@@ -144,33 +144,70 @@ mysqli_close($link);
 
 
 <script>
+    // Флаг для блокировки перезагрузки страницы
+let blockUnload = false;
+// // Функция проверки соединения с сервером
+// async function checkConnection() {
+//     console.log("Checking connection to the server..."); // Проверка вызова функции
+
+//     try {
+//         const response = await fetch('check_connection.php');
+//         console.log("Response from server: ", response);
+
+//         // Проверяем, был ли успешен ответ с сервера
+//         if (!response.ok) {
+//             throw new Error('Network response was not ok');
+//         }
+
+//         const data = await response.json();
+//         console.log("Data received from server: ", data);
+
+//         // Проверяем, есть ли ошибка в данных
+//         if (!data.success) {
+//             throw new Error(data.message || "Unknown error from server.");
+//         }
+
+//         return true; // Соединение успешно
+//     } catch (error) {
+//         console.error("Error in checkConnection: ", error); // Вывод полной ошибки в консоль
+
+//         // Показываем ошибку пользователю через модальное окно
+//         showErrorModal("Ошибка подключения к серверу. Попробуйте позже. ");
+//         blockUnload = true; // Блокируем страницу при отсутствии соединения
+//         return false; // Соединение не удалось
+//     }
+// }
+
 // Функция проверки соединения с сервером
 async function checkConnection() {
-    console.log("Checking connection to the server..."); // Проверка вызова функции
+    console.log("Проверка соединения с сервером...");
 
     try {
         const response = await fetch('check_connection.php');
-        console.log("Response from server: ", response);
+        console.log("Ответ от сервера получен:", response);
 
         // Проверяем, был ли успешен ответ с сервера
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error('Ошибка сети: не удалось подключиться.');
         }
 
         const data = await response.json();
-        console.log("Data received from server: ", data);
+        console.log("Получены данные от сервера:", data);
 
         // Проверяем, есть ли ошибка в данных
         if (!data.success) {
-            throw new Error(data.message || "Unknown error from server.");
+            throw new Error(data.message || "Неизвестная ошибка от сервера.");
         }
 
+        blockUnload = false; // Разблокируем страницу при успешном соединении
+        console.log("Соединение успешно.");
         return true; // Соединение успешно
     } catch (error) {
-        console.error("Error in checkConnection: ", error); // Вывод полной ошибки в консоль
+        console.error("Ошибка при проверке соединения:", error.message);
 
         // Показываем ошибку пользователю через модальное окно
-        showErrorModal("Ошибка подключения к серверу. Попробуйте позже. ");
+        showErrorModal("Ошибка подключения к серверу. Попробуйте позже.");
+        blockUnload = true; // Блокируем страницу при отсутствии соединения
         return false; // Соединение не удалось
     }
 }
@@ -209,7 +246,7 @@ async function handleWithConnection(callback) {
         console.log("No connection to the server.");
         return; // Прекращаем выполнение, если нет соединения
     }
-
+    console.log("Выполнение действия...");
     callback(); // Выполняем основное действие, если соединение успешно
 }
        // Обработчик для кнопки "Войти"
@@ -228,16 +265,66 @@ async function handleRegister() {
     });
 }
 
+// Обработчик для блокировки перезагрузки страницы
+window.addEventListener('beforeunload', function(event) {
+    if (blockUnload) {
+        // Если соединение отсутствует, блокируем перезагрузку
+        console.log("Попытка перезагрузки заблокирована.");
+        event.preventDefault();
+        alert('Страница не может быть перезагружена. Проверьте соединение с сервером.'); // Добавлено предупреждение
+        event.returnValue = ''; // Для старых браузеров
+        return ''; // Для современных браузеров
+    }
+});
+
+
+
+
+// Функция для блокировки всех попыток перезагрузки страницы
+window.addEventListener('keydown', function(event) {
+    if (blockUnload && (event.key === 'F5' || (event.ctrlKey && event.key === 'r'))) {
+        console.log("Попытка перезагрузки через клавишу заблокирована.");
+        event.preventDefault();
+        showErrorModal("Ошибка подключения к серверу. Перезагрузка страницы заблокирована.");
+    }
+});
+
+window.addEventListener('click', function(event) {
+    if (blockUnload && event.target.tagName === 'A') {
+        console.log("Попытка перехода по ссылке заблокирована.");
+        event.preventDefault();
+        showErrorModal("Ошибка подключения к серверу. Переход заблокирован.");
+    }
+});
+
+// Функция для повторной проверки соединения через несколько секунд
+function retryConnection() {
+    setTimeout(async () => {
+        console.log("Повторная попытка проверки соединения...");
+
+        const connectionOK = await checkConnection();
+
+        if (!connectionOK) {
+            retryConnection(); // Если соединение не удалось, пытаемся снова через несколько секунд
+        }
+    }, 5000); // Повторная проверка через 5 секунд
+}
+
+
+
+
+
 // Добавляем обработчики событий после загрузки DOM
 document.addEventListener('DOMContentLoaded', async function () {
-    console.log("DOMContentLoaded event triggered");
+    console.log("Событие DOMContentLoaded произошло. Запуск проверки соединения...");
 
     // Проверка соединения с сервером
     const connectionOK = await checkConnection();
-    
+
     if (!connectionOK) {
-        console.log('No connection to the server.');
-        return; // Если соединение не удалось, ничего не делаем
+        console.log('Соединение не установлено. Повторная попытка...');
+        showErrorModal("Ошибка подключения к серверу. Попробуйте позже.");
+        retryConnection(); // Если соединение не удалось, пытаемся снова
     }
 
     var table = document.getElementById('paintingsTable');
@@ -464,16 +551,19 @@ for (var button of document.getElementsByClassName('deleteButton')) {
 
 // Функция выхода из аккаунта
 async function handleLogout() {
-    const response = await fetch('logout.php');
-    const result = await response.json();
+    await handleWithConnection(async () => {
+        const response = await fetch('logout.php');
+        const result = await response.json();
 
-    if (result.success) {
-        // Перезагружаем страницу после выхода
-        location.reload();
-    } else {
-        alert('Ошибка выхода: ' + result.message);
-    }
+        if (result.success) {
+            // Перезагружаем страницу после выхода
+            location.reload();
+        } else {
+            alert('Ошибка выхода: ' + result.message);
+        }
+    });
 }
+
 
 </script>
 

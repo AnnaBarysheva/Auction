@@ -17,7 +17,8 @@
         </div>
         <div class="header-right">
             <div class="return-home">
-                <a href="index.php" class="header-button">Вернуться на главную</a>
+                <!-- <a href="index.php" class="header-button">Вернуться на главную</a> -->
+                <button type="button" class="header-button" id="return-home-button" onclick="handleReturnHome()">Вернуться на главную</button>
             </div>
         </div>
 
@@ -33,8 +34,8 @@ if (isset($_GET['id_painting'])) {
 }
 
 // Подключение к базе данных
-   $link = mysqli_connect("localhost", "root", "alina", "Auction");
-//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+//    $link = mysqli_connect("localhost", "root", "alina", "Auction");
+$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 
 if ($link == false) {
@@ -85,7 +86,7 @@ mysqli_close($link);
         <div class="price-info">
             <div class="price-details">
                 <p><strong>Начальная цена:</strong> <?= htmlspecialchars($painting['starting_price']) ?></p>
-                <p><strong>Текущая цена:</strong> <?= htmlspecialchars($painting['purchase_price']) ?></p>
+                <p><strong>Текущая цена:</strong> <?= htmlspecialchars($painting['purchase_price'] ?? '--') ?></p>
             </div>
             <!-- <form action="index.php" method="get">
                 <input type="hidden" name="id_painting" value="<?= htmlspecialchars($painting['id_painting']) ?>"> -->
@@ -130,6 +131,15 @@ mysqli_close($link);
     </div>
 </div>
 
+    <!-- Модальное окно ошибки -->
+    <div id="errorModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="closeErrorModal" class="close-button">&times;</span>
+        <h2>Ошибка</h2>
+        <p id="errorMessage"></p>
+    </div>
+</div>
+
 </body>
 </html>
 
@@ -156,6 +166,83 @@ window.addEventListener("click", function(event) {
         modal.style.display = "none"; // Скрываем модальное окно
     }
 });
+
+// Функция проверки соединения с сервером
+async function checkConnection() {
+    console.log("Checking connection to the server..."); // Проверка вызова функции
+
+    try {
+        const response = await fetch('check_connection.php');
+        console.log("Response from server: ", response);
+
+        // Проверяем, был ли успешен ответ с сервера
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        console.log("Data received from server: ", data);
+
+        // Проверяем, есть ли ошибка в данных
+        if (!data.success) {
+            throw new Error(data.message || "Unknown error from server.");
+        }
+
+        return true; // Соединение успешно
+    } catch (error) {
+        console.error("Error in checkConnection: ", error); // Вывод полной ошибки в консоль
+
+        // Показываем ошибку пользователю через модальное окно
+        showErrorModal("Ошибка подключения к серверу. Попробуйте позже. ");
+        return false; // Соединение не удалось
+    }
+}
+
+// Функция для отображения ошибки в модальном окне
+function showErrorModal(message) {
+    var modal = document.getElementById('errorModal');
+    var errorMessage = document.getElementById('errorMessage');
+    var closeModal = document.getElementById('closeErrorModal');
+
+    // Устанавливаем текст ошибки
+    errorMessage.textContent = message;
+
+    // Показываем модальное окно
+    modal.style.display = 'block';
+
+    // Закрываем модальное окно при нажатии на "x"
+    closeModal.onclick = function() {
+        modal.style.display = 'none';
+    };
+
+    // Закрываем модальное окно, если кликнули вне его
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+}
+
+
+// Универсальная функция, которая оборачивает действие в проверку соединения
+async function handleWithConnection(callback) {
+    const connectionOK = await checkConnection();
+
+    if (!connectionOK) {
+        console.log("No connection to the server.");
+        return; // Прекращаем выполнение, если нет соединения
+    }
+
+    callback(); // Выполняем основное действие, если соединение успешно
+}
+
+
+// Обработчик для кнопки "Вернуться на главную"
+async function handleReturnHome() {
+    await handleWithConnection(() => {
+        location.href = 'index.php';
+    });
+    }
 </script>
 
 
