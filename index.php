@@ -1,3 +1,12 @@
+<?php
+session_start(); // Начинаем сессию в начале файла
+
+// Проверяем, установлен ли user_id
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = null; // Устанавливаем в null, если не установлен
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,8 +23,14 @@
         </div>
 
         <div class="header-right">
-        <button class="header-button" onclick="handleLogin()">Войти</button>
-        <button class="header-button" onclick="handleRegister()">Зарегистрироваться</button>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <!-- Если пользователь вошел, показываем кнопку "Выход" -->
+                <button class="header-button" onclick="handleLogout()">Выход</button>
+            <?php else: ?>
+                <!-- Если пользователь не вошел, показываем кнопки "Войти" и "Зарегистрироваться" -->
+                <button class="header-button" onclick="handleLogin()">Войти</button>
+                <button class="header-button" onclick="handleRegister()">Зарегистрироваться</button>
+            <?php endif; ?>
         </div>
     </header>
 
@@ -38,11 +53,23 @@
 </div>
 
 <?php
-// $link = mysqli_connect("localhost", "root", "alina", "Auction");
-$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+ $link = mysqli_connect("localhost", "root", "alina", "Auction");
+//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 if ($link == false) {
     die("Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error());
+}
+
+// Проверка роли пользователя
+$isAdmin = false;
+if (isset($_SESSION['user_id'])) {
+    $userId = $_SESSION['user_id'];
+    $query = "SELECT role FROM Users WHERE id_user = $userId";
+    $result = mysqli_query($link, $query);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $user = mysqli_fetch_assoc($result);
+        $isAdmin = ($user['role'] === 'admin');
+    }
 }
 
 // SQL-запрос для получения картин, которые не проданы, с начальной ценой и именами продавцов
@@ -62,7 +89,6 @@ $sql = "
 // AND Auctions.end_date >= CURDATE()
 
 $result = mysqli_query($link, $sql);
-
 if ($result) {
     if (mysqli_num_rows($result) > 0) {
         echo "<table border='1' id='paintingsTable'>";
@@ -71,38 +97,48 @@ if ($result) {
                 <th>Стиль</th>
                 <th>Год создания</th>
                 <th>Автор</th>
-                <th>Продавец</th>
-                <th>Действия</th>
-              </tr>";
+                <th>Продавец</th>";
+
+        // Выводим столбец "Действия", если это администратор
+        if ($isAdmin) {
+            echo "<th>Действия</th>";
+        }
+
+        echo "</tr>";
 
         while ($row = mysqli_fetch_assoc($result)) {
-            echo "<tr data-id='" . $row['id_painting'] . "'>";            
+            echo "<tr data-id='" . $row['id_painting'] . "'>";
             echo "<td>" . $row['paint_name'] . "</td>";
             echo "<td>" . $row['style'] . "</td>";
             echo "<td>" . $row['creation_year'] . "</td>";
             echo "<td>" . $row['author'] . "</td>";
             echo "<td>" . $row['full_name'] . "</td>";
-            echo "<td>
-            <button class='editButton' data-id='" . $row['id_painting'] . "'>Редактировать</button>
-            <button class='deleteButton' data-id='" . $row['id_painting'] . "'>Удалить</button>
-          </td>";
+
+            // Добавляем кнопки "Редактировать" и "Удалить", если это администратор
+            if ($isAdmin) {
+                echo "<td>
+                        <button class='editButton' data-id='" . $row['id_painting'] . "'>Редактировать</button>
+                        <button class='deleteButton' data-id='" . $row['id_painting'] . "'>Удалить</button>
+                      </td>";
+            }
+
             echo "</tr>";
         }
-
         echo "</table>";
 
-        echo "<div class='button-container'>";
-        echo "<button id='addPaintingButton' class='addButton'>Добавить картину</button>";
-        echo "</div>";
+        // Кнопка "Добавить картину", доступна только для администратора
+        if ($isAdmin) {
+            echo "<div class='button-container'>";
+            echo "<button id='addPaintingButton' class='addButton'>Добавить картину</button>";
+            echo "</div>";
+        }
     } else {
         echo "Нет доступных картин для отображения.";
     }
-
     mysqli_free_result($result);
 } else {
     echo "Ошибка выполнения запроса: " . mysqli_error($link);
 }
-
 mysqli_close($link);
 ?>
 
@@ -177,18 +213,20 @@ async function handleWithConnection(callback) {
     callback(); // Выполняем основное действие, если соединение успешно
 }
        // Обработчик для кнопки "Войти"
-       async function handleLogin() {
-            await handleWithConnection(() => {
-                location.href = 'login.php';
-            });
-        }
+async function handleLogin() {
+    const currentUrl = window.location.href; // Получаем текущий URL
+    await handleWithConnection(() => {
+        location.href = 'login.php?redirect=' + encodeURIComponent(currentUrl); // Перенаправляем с параметром redirect
+    });
+}
 
         // Обработчик для кнопки "Зарегистрироваться"
-        async function handleRegister() {
-            await handleWithConnection(() => {
-                location.href = 'register.php';
-            });
-        }
+async function handleRegister() {
+    const currentUrl = window.location.href; // Получаем текущий URL
+    await handleWithConnection(() => {
+        location.href = 'register.php?redirect=' + encodeURIComponent(currentUrl); // Перенаправляем с параметром redirect
+    });
+}
 
 // Добавляем обработчики событий после загрузки DOM
 document.addEventListener('DOMContentLoaded', async function () {
@@ -369,11 +407,13 @@ for (var button of document.getElementsByClassName('deleteButton')) {
             }
         });
 
+        if (addPaintingButton) { // Проверяем, существует ли элемент
         addPaintingButton.addEventListener('click', function () {
             handleWithConnection(() => {
-            addModal.style.display = 'block'; // Открываем модальное окно для добавления
+                addModal.style.display = 'block'; // Открываем модальное окно для добавления
             });
         });
+    }
 
         
 
@@ -421,6 +461,19 @@ for (var button of document.getElementsByClassName('deleteButton')) {
         };
 });
 
+
+// Функция выхода из аккаунта
+async function handleLogout() {
+    const response = await fetch('logout.php');
+    const result = await response.json();
+
+    if (result.success) {
+        // Перезагружаем страницу после выхода
+        location.reload();
+    } else {
+        alert('Ошибка выхода: ' + result.message);
+    }
+}
 
 </script>
 

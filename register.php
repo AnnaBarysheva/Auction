@@ -23,7 +23,7 @@
 
 <div class="registration-container">
     <h2>Регистрация</h2>
-    <form action="register_handler.php" method="POST" class="register-form">
+    <form id="registerForm" class="register-form">
     <input type="text" id="name" name="name" class="modal-input" required autocomplete="name" placeholder="Введите имя">
 
     <input type="text" id="username" name="username" class="modal-input" required autocomplete="username" placeholder="Введите логин">
@@ -50,9 +50,60 @@
     </div>
 </div>
 
+<!-- Модальное окно для сообщений -->
+<div id="messageModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="closeMessageModal" class="close-button">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <p id="modalMessage"></p>
+    </div>
+</div>
+
 </body>
 </html>
 
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('registerForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Отменяем стандартное действие отправки формы
+
+        const formData = new FormData(this);
+        const response = await fetch('register_handler.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            showMessageModal("Успех", result.message);
+            setTimeout(() => {
+                window.location.href = 'index.php';
+            }, 2000);
+        } else {
+            showMessageModal("Ошибка", result.message);
+        }
+    });
+
+    function showMessageModal(title, message) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalMessage').textContent = message;
+        document.getElementById('messageModal').style.display = 'block';
+    }
+
+    document.getElementById('closeMessageModal').onclick = function() {
+        document.getElementById('messageModal').style.display = 'none';
+    };
+
+    // Закрытие модального окна при клике вне его
+    document.getElementById('messageModal').onclick = function(event) {
+        if (event.target === this) { // Проверяем, был ли клик по модальному фону
+            this.style.display = 'none';
+        }
+    };
+});
+</script>
 
 <script>
 // Функция проверки соединения с сервером

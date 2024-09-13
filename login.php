@@ -25,7 +25,7 @@
        
         <div class="login-container">
             <h2>Вход в аккаунт</h2>
-            <form action="login_handler.php" method="POST">
+            <form id="loginForm" class="login-form">
                 <input type="text" id="username" name="username" class="modal-input" required autocomplete="username" placeholder="Введите логин">
                 <input type="password" id="password" name="password" class="modal-input" required autocomplete="current-password" placeholder="Введите пароль">
                 <div class="button-container">
@@ -43,6 +43,15 @@
         <span id="closeErrorModal" class="close-button">&times;</span>
         <h2>Ошибка</h2>
         <p id="errorMessage"></p>
+    </div>
+</div>
+
+<!-- Модальное окно для сообщений -->
+<div id="messageModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="closeMessageModal" class="close-button">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <p id="modalMessage"></p>
     </div>
 </div>
 
@@ -120,11 +129,23 @@ async function handleWithConnection(callback) {
     callback(); // Выполняем основное действие, если соединение успешно
 }
        // Обработчик для кнопки "Войти"
-       async function handleLogin() {
-            await handleWithConnection(() => {
-                location.href = 'login.php';
-            });
+    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Отменяем стандартное действие отправки формы
+
+        const formData = new FormData(this);
+        const response = await fetch('login_handler.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            window.location.href = result.redirect; // Перенаправляем на страницу, откуда пришел
+        } else {
+            showErrorModal(result.message); // Показываем сообщение об ошибке
         }
+    });
+
 
         // Обработчик для кнопки "Зарегистрироваться"
         async function handleRegister() {
