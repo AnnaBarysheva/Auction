@@ -53,8 +53,8 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 
 <?php
-//  $link = mysqli_connect("localhost", "root", "alina", "Auction");
-$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+  $link = mysqli_connect("localhost", "root", "alina", "Auction");
+//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 if ($link == false) {
     die("Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error());
@@ -72,18 +72,27 @@ if (isset($_SESSION['user_id'])) {
     }
 }
 
-// SQL-запрос для получения картин, которые не проданы, с начальной ценой и именами продавцов
-$sql = "
-    SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
-    FROM Paintings
-    JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
-    JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
-    JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
-    WHERE Paintings.is_sold = FALSE
-    AND Auctions.start_date <= CURDATE()
-    AND Auctions.end_date >= CURDATE()
-    
-";
+// SQL-запрос в зависимости от роли пользователя
+if ($isAdmin) {
+    $sql = "
+        SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
+        FROM Paintings
+        JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+        JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+        JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+    ";
+} else {
+    $sql = "
+        SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
+        FROM Paintings
+        JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+        JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+        JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+        WHERE Paintings.is_sold = FALSE
+        AND Auctions.start_date <= CURDATE()
+        AND Auctions.end_date >= CURDATE()
+    ";
+}
 
 // AND Auctions.start_date <= CURDATE()
 // AND Auctions.end_date >= CURDATE()
