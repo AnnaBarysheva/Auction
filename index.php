@@ -687,26 +687,40 @@ async function handleLogout() {
 
 <script>
 document.getElementById('editForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Предотвращаем стандартную отправку формы
+
     var yearInput = document.getElementById('editYear').value;
     var currentYear = new Date().getFullYear();
     
     // Проверка на корректность года
-    if (!/^\d{4}$/.test(yearInput) || yearInput > currentYear) {
+    if (!/^\d{4}$/.test(yearInput) || yearInput < 1901 || yearInput > currentYear) {
         alert('Пожалуйста, введите корректный год (от 1901 и не больше текущего года).');
-        event.preventDefault(); // Отменяем отправку формы
         return; // Останавливаем дальнейшее выполнение
     }
 
     // Оборачиваем в handleWithConnection
     handleWithConnection(() => {
-        // Если проверка успешна, форма отправляется
-        this.submit();
+        // Если проверка успешна, отправляем данные формы через AJAX
+        var formData = new FormData(this); // Получаем данные формы
+
+        fetch('update_painting.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data.startsWith("Ошибка:")) {
+                alert(data); // Если возникла ошибка, показываем alert
+            } else {
+                // Если все прошло успешно, перенаправляем или скрываем модальное окно
+                window.location.href = 'index.php'; // Перенаправление на index.php
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
     });
-
-    // Отменяем стандартную отправку формы до завершения проверки
-    event.preventDefault();
 });
-
 </script>
 
 <script>
