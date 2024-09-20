@@ -638,7 +638,7 @@ async function handleLogout() {
                     <input type="text" id="addName" name="paint_name" class="modal-input" placeholder="Название картины" required maxlength="255">
 
                     <label for="addSize">Размер:</label>
-                    <input type="text" id="addSize" name="size" class="modal-input" placeholder="XXxXX см или XXXxXXX см" required maxlength="50" pattern="^(?:\d{2}x\d{2} см|\d{3}x\d{3} см)$" title="Введите размер в формате XXxXX см или XXXxXXX см">                       
+                    <input type="text" id="addSize" name="size" class="modal-input" placeholder="XxX см или XXxXX см или XXXxXXX см" required maxlength="50" pattern="^(?:\d{2}x\d{2} см|\d{3}x\d{3} см)$" title="Введите размер в формате XXxXX см или XXXxXXX см">                       
                     <label for="addMaterials">Материалы:</label>
                     <input type="text" id="addMaterials" name="materials" class="modal-input" placeholder="Материалы" required maxlength="255">
 
