@@ -636,50 +636,50 @@ async function handleLogout() {
                 <div class="input-column">
                     <label for="addName">Название картины:</label>
                     <input type="text" id="addName" name="paint_name" class="modal-input" placeholder="Название картины" required maxlength="255">
-                    
+
                     <label for="addSize">Размер:</label>
                     <input type="text" id="addSize" name="size" class="modal-input" placeholder="XXxXX см или XXXxXXX см" required maxlength="50" pattern="^(?:\d{2}x\d{2} см|\d{3}x\d{3} см)$" title="Введите размер в формате XXxXX см или XXXxXXX см">                       
                     <label for="addMaterials">Материалы:</label>
                     <input type="text" id="addMaterials" name="materials" class="modal-input" placeholder="Материалы" required maxlength="255">
-                    
+
                     <label for="addStyle">Стиль:</label>
                     <input type="text" id="addStyle" name="style" class="modal-input" placeholder="Стиль" required maxlength="50">
-                    
+
                     <label for="addYear">Год создания:</label>
                     <input type="text" id="addYear" name="creation_year" class="modal-input" placeholder="Год создания" pattern="\d{4}" maxlength="4" required title="Введите четыре цифры">
-                    
+
                     <label for="addAuthor">Автор:</label>
                     <input type="text" id="addAuthor" name="author" class="modal-input" placeholder="Автор" required maxlength="255">
-                    
+
                     <label for="addImageUrl">URL картины:</label>
                     <input type="text" id="addImageUrl" name="image_path" class="modal-input" placeholder="URL картины" required maxlength="255">
                 </div>
-                
+
                 <div class="input-column">
                     <label for="addSeller">Имя продавца:</label>
                     <input type="text" id="addSeller" name="seller" class="modal-input" placeholder="Имя продавца" required maxlength="255">
-                    
+
                     <label for="addEmail">Email продавца:</label>
                     <input type="email" id="addEmail" name="email" class="modal-input" placeholder="Email продавца" required>
-                    
+
                     <label for="addPhone">Телефон продавца:</label>
                     <input type="text" id="addPhone" name="phone" class="modal-input" placeholder="Телефон продавца" required maxlength="15" pattern="^\+\d{0,14}$" title="Введите номер телефона, начиная с + и далее только цифры.">                </div>
-                
+
                 <div class="input-column">
                     <label for="addLotNumber">Номер лота:</label>
                     <input type="number" id="addLotNumber" name="lot_number" class="modal-input" required>
-                    
+
                     <label for="addStartingPrice">Стартовая цена:</label>
                     <input type="number" id="addStartingPrice" name="starting_price" class="modal-input" step="0.01" required>
-                    
+
                     <label for="addStartDate">Дата начала аукциона:</label>
                     <input type="date" id="addStartDate" name="start_date" class="modal-input" required>
-                    
+
                     <label for="addEndDate">Дата конца аукциона:</label>
                     <input type="date" id="addEndDate" name="end_date" class="modal-input" required>
                 </div>
             </div>
-            
+
             <button type="submit" class="saveButton">Добавить</button>
         </form>
     </div>
@@ -745,6 +745,14 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
         return;
     }
 
+    // Проверка стартовой цены
+    var startingPrice = parseFloat(document.getElementById('addStartingPrice').value);
+    if (startingPrice <= 0) {
+        alert('Стартовая цена должна быть больше нуля.');
+        event.preventDefault();
+        return;
+    }
+
     // Оборачиваем в handleWithConnection
     handleWithConnection(() => {
         // Если проверка успешна, форма отправляется
@@ -770,6 +778,64 @@ document.getElementById('addPhone').addEventListener('input', function() {
         this.value = '+' + this.value.replace(/^\+/, ''); // Восстанавливаем +
     }
 });
+
+// Запрещаем ввод дополнительных символов +
+document.getElementById('addPhone').addEventListener('keypress', function(event) {
+    if (event.key === '+') {
+        event.preventDefault(); // Запрещаем ввод символа +
+    }
+});
+
+
+
+const addSizeInput = document.getElementById('addSize');
+
+    addSizeInput.addEventListener('focus', function() {
+        if (this.value === '') {
+            this.value = ''; // Убираем текст, если поле пустое
+        }
+    });
+
+    addSizeInput.addEventListener('blur', function() {
+        if (this.value === '') {
+            this.value = ''; // Удаляем текст при потере фокуса, если поле пустое
+        }
+    });
+
+    addSizeInput.addEventListener('input', function() {
+        // Удаляем все символы, кроме цифр и 'x'
+        this.value = this.value.replace(/[^0-9x]/g, '');
+
+        // Разделяем на части по 'x'
+        const parts = this.value.split('x');
+
+        // Ограничиваем количество символов перед 'x' до 3
+        if (parts[0].length > 3) {
+            this.value = parts[0].slice(0, 3) + 'x' + (parts[1] ? parts[1] : '');
+        }
+
+        // Ограничиваем количество символов после 'x' до 3
+        if (parts.length > 1 && parts[1].length > 3) {
+            this.value = parts[0] + 'x' + parts[1].slice(0, 3);
+        }
+
+        // Если поле не содержит 'x', очищаем его
+        if (parts[0] === '' && parts.length > 1) {
+            this.value = ''; // Если перед 'x' ничего нет, очищаем поле
+        }
+
+        // Добавляем " см" после "x", если оно присутствует
+        if (this.value.includes('x')) {
+            const afterX = this.value.split('x')[1];
+            this.value = this.value.replace(/(x\d*)(\s*см)?/, '$1 см');
+
+            // Удаляем " см", если после "x" нет цифр
+            if (afterX && afterX.trim() === '') {
+                this.value = this.value.replace(/ см$/, ''); // Удаляем " см", если после "x" ничего нет
+            }
+        }
+    });
+
 </script>
 
 </body>
