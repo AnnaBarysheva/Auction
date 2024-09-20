@@ -735,6 +735,16 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
         return; // Останавливаем дальнейшее выполнение
     }
 
+    // Проверка на корректность дат начала и конца аукциона
+    var startDate = new Date(document.getElementById('addStartDate').value);
+    var endDate = new Date(document.getElementById('addEndDate').value);
+    
+    if (startDate >= endDate) {
+        alert('Дата начала аукциона должна быть раньше даты конца аукциона.');
+        event.preventDefault();
+        return;
+    }
+
     // Оборачиваем в handleWithConnection
     handleWithConnection(() => {
         // Если проверка успешна, форма отправляется
