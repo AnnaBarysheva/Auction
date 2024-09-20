@@ -34,8 +34,8 @@ if (isset($_GET['id_painting'])) {
 }
 
 // Подключение к базе данных
-   $link = mysqli_connect("localhost", "root", "alina", "Auction");
-//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+//    $link = mysqli_connect("localhost", "root", "alina", "Auction");
+$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 
 if ($link == false) {

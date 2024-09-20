@@ -53,8 +53,8 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 
 <?php
-  $link = mysqli_connect("localhost", "root", "alina", "Auction");
-//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+//   $link = mysqli_connect("localhost", "root", "alina", "Auction");
+$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 if ($link == false) {
     die("Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error());
@@ -188,11 +188,46 @@ let blockUnload = false;
 // }
 
 // Функция проверки соединения с сервером
+// async function checkConnection() {
+//     console.log("Проверка соединения с сервером...");
+
+//     try {
+//         const response = await fetch('check_connection.php');
+//         console.log("Ответ от сервера получен:", response);
+
+//         // Проверяем, был ли успешен ответ с сервера
+//         if (!response.ok) {
+//             throw new Error('Ошибка сети: не удалось подключиться.');
+//         }
+
+//         const data = await response.json();
+//         console.log("Получены данные от сервера:", data);
+
+//         // Проверяем, есть ли ошибка в данных
+//         if (!data.success) {
+//             throw new Error(data.message || "Неизвестная ошибка от сервера.");
+//         }
+
+//         blockUnload = false; // Разблокируем страницу при успешном соединении
+//         console.log("Соединение успешно.");
+//         return true; // Соединение успешно
+//     } catch (error) {
+//         console.error("Ошибка при проверке соединения:", error.message);
+
+//         // Показываем ошибку пользователю через модальное окно
+//         showErrorModal("Ошибка подключения к серверу. Попробуйте позже.");
+//         blockUnload = true; // Блокируем страницу при отсутствии соединения
+//         return false; // Соединение не удалось
+//     }
+// }
+
+
+// Функция проверки соединения с сервером
 async function checkConnection() {
     console.log("Проверка соединения с сервером...");
 
     try {
-        const response = await fetch('check_connection.php');
+        const response = await fetch('check_connection.php'); // Убедитесь, что путь правильный
         console.log("Ответ от сервера получен:", response);
 
         // Проверяем, был ли успешен ответ с сервера
@@ -208,18 +243,23 @@ async function checkConnection() {
             throw new Error(data.message || "Неизвестная ошибка от сервера.");
         }
 
-        blockUnload = false; // Разблокируем страницу при успешном соединении
-        console.log("Соединение успешно.");
-        return true; // Соединение успешно
+        // Если соединение успешно, ничего не делаем
+        console.log("Соединение с базой данных успешно.");
+        return true;
     } catch (error) {
         console.error("Ошибка при проверке соединения:", error.message);
 
-        // Показываем ошибку пользователю через модальное окно
+        // Выводим alert с сообщением об ошибке
+        // alert("Ошибка подключения к серверу MySQL: " + error.message);
+        // return false;
+         // Показываем ошибку пользователю через модальное окно
         showErrorModal("Ошибка подключения к серверу. Попробуйте позже.");
-        blockUnload = true; // Блокируем страницу при отсутствии соединения
         return false; // Соединение не удалось
     }
 }
+// Вызовите функцию проверки соединения при загрузке страницы
+// window.onload = checkConnection;
+
 
 // Функция для отображения ошибки в модальном окне
 function showErrorModal(message) {
