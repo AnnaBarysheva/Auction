@@ -27,8 +27,8 @@
         <div class="login-container">
             <h2>Вход в аккаунт</h2>
             <form id="loginForm" class="login-form">
-                <input type="text" id="username" name="username" class="modal-input" required autocomplete="username" placeholder="Введите логин">
-                <input type="password" id="password" name="password" class="modal-input" required autocomplete="current-password" placeholder="Введите пароль">
+                <input type="text" id="username" name="username" class="modal-input" required autocomplete="username" placeholder="Введите логин" maxlength="255">
+                <input type="password" id="password" name="password" class="modal-input" required autocomplete="current-password" placeholder="Введите пароль" maxlength="255">
                 <div class="button-container">
                     <button type="submit" class="login-button">Войти</button>
                     <button type="button" class="header-button alt-button" id="href-register-button" onclick="handleRegister()">Зарегистрироваться</button>

@@ -53,8 +53,8 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 
 <?php
-//   $link = mysqli_connect("localhost", "root", "alina", "Auction");
-$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+   $link = mysqli_connect("localhost", "root", "alina", "Auction");
+//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
 if ($link == false) {
     die("Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error());
@@ -729,9 +729,20 @@ async function handleLogout() {
 document.getElementById('editForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Предотвращаем стандартную отправку формы
 
+    // Получаем значения полей
+    var nameInput = document.getElementById('editName').value.trim();
+    var styleInput = document.getElementById('editStyle').value.trim();
     var yearInput = document.getElementById('editYear').value;
+    var authorInput = document.getElementById('editAuthor').value.trim();
+    var sellerInput = document.getElementById('editSeller').value.trim();
     var currentYear = new Date().getFullYear();
-    
+
+    // Проверка на наличие только пробелов
+    if (!nameInput || !styleInput || !authorInput || !sellerInput) {
+        alert('Пожалуйста, заполните все поля, не оставляя только пробелы.');
+        return; // Останавливаем дальнейшее выполнение
+    }
+
     // Проверка на корректность года
     if (!/^\d{4}$/.test(yearInput) || yearInput < 1901 || yearInput > currentYear) {
         alert('Пожалуйста, введите корректный год (от 1901 и не больше текущего года).');
@@ -768,6 +779,23 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
     var yearInput = document.getElementById('addYear').value;
     var currentYear = new Date().getFullYear();
     
+    // Проверка на наличие только пробелов
+    var nameInput = document.getElementById('addName').value.trim();
+    var sizeInput = document.getElementById('addSize').value.trim();
+    var materialsInput = document.getElementById('addMaterials').value.trim();
+    var styleInput = document.getElementById('addStyle').value.trim();
+    var authorInput = document.getElementById('addAuthor').value.trim();
+    var imageUrlInput = document.getElementById('addImageUrl').value.trim();
+    var sellerInput = document.getElementById('addSeller').value.trim();
+    var emailInput = document.getElementById('addEmail').value.trim();
+    var phoneInput = document.getElementById('addPhone').value.trim();
+
+    if (!nameInput || !sizeInput || !materialsInput || !styleInput || !authorInput || !imageUrlInput || !sellerInput || !emailInput || !phoneInput) {
+        alert('Пожалуйста, заполните все поля, не оставляя только пробелы.');
+        event.preventDefault(); // Отменяем отправку формы
+        return; // Останавливаем дальнейшее выполнение
+    }
+
     // Проверка на корректность года
     if (!/^\d{4}$/.test(yearInput) || yearInput < 1901 || yearInput > currentYear) {
         alert('Пожалуйста, введите корректный год (от 1901 и не больше текущего года).');

@@ -25,9 +25,9 @@
 <div class="registration-container">
     <h2>Регистрация</h2>
     <form id="registerForm" class="register-form">
-    <input type="text" id="name" name="name" class="modal-input" required autocomplete="name" placeholder="Введите имя" maxlength="225">
+    <input type="text" id="name" name="name" class="modal-input" required autocomplete="name" placeholder="Введите имя" maxlength="255">
 
-    <input type="text" id="username" name="username" class="modal-input" required autocomplete="username" placeholder="Введите логин" maxlength="225">
+    <input type="text" id="username" name="username" class="modal-input" required autocomplete="username" placeholder="Введите логин" maxlength="255">
 
     <input type="password" id="password" name="password" class="modal-input" required autocomplete="new-password" placeholder="Введите пароль" minlength="8">
 

@@ -5,16 +5,16 @@ header('Content-Type: application/json');
 
 
 // // Настройки подключения к базе данных
-// $host = 'localhost';  // Имя хоста (обычно localhost)
-// $username = 'root';  // Имя пользователя MySQL
-// $password = 'alina';  // Пароль пользователя MySQL
-// $database = 'Auction';  // Имя базы данных
-
-// Настройки подключения к базе данных
 $host = 'localhost';  // Имя хоста (обычно localhost)
 $username = 'root';  // Имя пользователя MySQL
-$password = 'root_Passwrd132';  // Пароль пользователя MySQL
+$password = 'alina';  // Пароль пользователя MySQL
 $database = 'Auction';  // Имя базы данных
+
+// // Настройки подключения к базе данных
+// $host = 'localhost';  // Имя хоста (обычно localhost)
+// $username = 'root';  // Имя пользователя MySQL
+// $password = 'root_Passwrd132';  // Пароль пользователя MySQL
+// $database = 'Auction';  // Имя базы данных
 
 
 // try {
