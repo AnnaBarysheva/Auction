@@ -2,8 +2,9 @@
 session_start();
 header('Content-Type: application/json');
 
-  $link = mysqli_connect("localhost", "root", "alina", "Auction");
-//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+//   $link = mysqli_connect("localhost", "root", "alina", "Auction");
+// $link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+$link = include 'db_connect.php';
 
 if ($link === false) {
     echo json_encode(['success' => false, 'message' => "Ошибка подключения к базе данных."]);

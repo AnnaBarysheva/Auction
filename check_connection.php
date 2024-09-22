@@ -5,10 +5,10 @@ header('Content-Type: application/json');
 
 
 // // Настройки подключения к базе данных
-$host = 'localhost';  // Имя хоста (обычно localhost)
-$username = 'root';  // Имя пользователя MySQL
-$password = 'alina';  // Пароль пользователя MySQL
-$database = 'Auction';  // Имя базы данных
+// $host = 'localhost';  // Имя хоста (обычно localhost)
+// $username = 'root';  // Имя пользователя MySQL
+// $password = 'alina';  // Пароль пользователя MySQL
+// $database = 'Auction';  // Имя базы данных
 
 // // Настройки подключения к базе данных
 // $host = 'localhost';  // Имя хоста (обычно localhost)
@@ -16,6 +16,7 @@ $database = 'Auction';  // Имя базы данных
 // $password = 'root_Passwrd132';  // Пароль пользователя MySQL
 // $database = 'Auction';  // Имя базы данных
 
+$connection = include 'db_connect.php';  // здесь мы подключаем db_connect.php
 
 // try {
 //     // Подключение к базе данных
