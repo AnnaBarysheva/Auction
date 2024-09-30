@@ -1,6 +1,8 @@
 <?php
-    $link = mysqli_connect("localhost", "root", "alina", "Auction");
-//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+    // $link = mysqli_connect("localhost", "root", "alina", "Auction");
+// $link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+
+$link = include 'db_connect.php';
 
 if ($link == false) {
     die("Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error());

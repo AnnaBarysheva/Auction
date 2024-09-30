@@ -4,8 +4,9 @@ session_start(); // Инициализация сессии
 header('Content-Type: application/json'); // Указываем, что возвращаем JSON
 
 // Подключение к базе данных
-  $link = mysqli_connect("localhost", "root", "alina", "Auction");
-//$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+//   $link = mysqli_connect("localhost", "root", "alina", "Auction");
+// $link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
+$link = include 'db_connect.php';
 
 // Проверка соединения
 if ($link === false) {
