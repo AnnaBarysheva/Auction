@@ -678,7 +678,7 @@ async function handleLogout() {
                     <input type="text" id="addName" name="paint_name" class="modal-input" placeholder="Название картины" required maxlength="255">
 
                     <label for="addSize">Размер:</label>
-                    <input type="text" id="addSize" name="size" class="modal-input" placeholder="XxX см или XXxXX см или XXXxXXX см" required maxlength="50" pattern="^(?:\d{2}x\d{2} см|\d{3}x\d{3} см)$" title="Введите размер в формате XXxXX см или XXXxXXX см">                       
+                    <input type="text" id="addSize" name="size" class="modal-input" placeholder=" XxX см или XXxXX см или XXXxXXX см" required maxlength="50" pattern="^(?:\d{2}x\d{2} см|\d{3}x\d{3} см)$" title="Введите размер в формате XXxXX см или XXXxXXX см">                       
                     <label for="addMaterials">Материалы:</label>
                     <input type="text" id="addMaterials" name="materials" class="modal-input" placeholder="Материалы" required maxlength="255">
 
@@ -692,7 +692,7 @@ async function handleLogout() {
                     <input type="text" id="addAuthor" name="author" class="modal-input" placeholder="Автор" required maxlength="255">
 
                     <label for="addImageUrl">URL картины:</label>
-                    <input type="text" id="addImageUrl" name="image_path" class="modal-input" placeholder="URL картины" required maxlength="255">
+                    <input type="url" id="addImageUrl" name="image_path" class="modal-input" placeholder="URL картины" required maxlength="255" title="Введите корректный URL (например, https://example.com/image.jpg)">
                 </div>
 
                 <div class="input-column">
@@ -707,10 +707,10 @@ async function handleLogout() {
 
                 <div class="input-column">
                     <label for="addLotNumber">Номер лота:</label>
-                    <input type="number" id="addLotNumber" name="lot_number" class="modal-input" required>
+                    <input type="number" id="addLotNumber" name="lot_number" class="modal-input" required min="0" max="9999" maxlength="4>
 
                     <label for="addStartingPrice">Стартовая цена:</label>
-                    <input type="number" id="addStartingPrice" name="starting_price" class="modal-input" step="0.01" required>
+                    <input type="number" id="addStartingPrice" name="starting_price" class="modal-input" step="0.01" required min="0.01" max="99999999.99" title="Введите цену от 0.01 до 99999999.99">
 
                     <label for="addStartDate">Дата начала аукциона:</label>
                     <input type="date" id="addStartDate" name="start_date" class="modal-input" required>
@@ -772,10 +772,53 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
         });
     });
 });
+
+function trimLeadingSpaces(event) {
+    this.value = this.value.replace(/^\s+/, ''); // Удаляем пробелы в начале строки
+}
+
+// Применяем к всем текстовым полям
+const textInputs = [
+    'editName',
+    'editStyle',
+    'editYear',
+    'editAuthor',
+    'editSeller'
+];
+
+textInputs.forEach(id => {
+    document.getElementById(id).addEventListener('input', trimLeadingSpaces);
+});
 </script>
 
 <script>
 document.getElementById('addForm').addEventListener('submit', function(event) {
+
+    // Проверка на наличие только пробелов
+    const inputFields = [
+        'addName',
+        'addSize',
+        'addMaterials',
+        'addStyle',
+        'addYear',
+        'addAuthor',
+        'addImageUrl',
+        'addSeller',
+        'addEmail',
+        'addPhone',
+        'addLotNumber',
+        'addStartingPrice',
+    ];
+
+    for (const fieldId of inputFields) {
+        const inputValue = document.getElementById(fieldId).value;
+        if (inputValue.startsWith(' ')) {
+            alert(`Поля не должны начинаться с пробела.`);
+            event.preventDefault(); // Отменяем отправку формы
+            return; // Останавливаем дальнейшее выполнение
+        }
+    }
+
     var yearInput = document.getElementById('addYear').value;
     var currentYear = new Date().getFullYear();
     
@@ -803,15 +846,39 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
         return; // Останавливаем дальнейшее выполнение
     }
 
+    // Проверка на количество цифр в номере телефона
+var phoneInputValue = phoneInput.replace(/\D/g, ''); // Убираем все нецифровые символы
+if (phoneInputValue.length !== 9) {
+    alert('Номер телефона должен содержать ровно 9 цифр после знака +.');
+    event.preventDefault();
+    return;
+}
+
     // Проверка на корректность дат начала и конца аукциона
-    var startDate = new Date(document.getElementById('addStartDate').value);
-    var endDate = new Date(document.getElementById('addEndDate').value);
-    
-    if (startDate >= endDate) {
-        alert('Дата начала аукциона должна быть раньше даты конца аукциона.');
-        event.preventDefault();
-        return;
-    }
+var startDate = new Date(document.getElementById('addStartDate').value);
+var endDate = new Date(document.getElementById('addEndDate').value);
+
+// Проверка на корректность года начала и конца аукциона
+var startYear = startDate.getFullYear();
+var endYear = endDate.getFullYear();
+
+if (startYear < 1901 || startYear > 2155) {
+    alert('Год начала аукциона должен быть от 1901 до 2155.');
+    event.preventDefault();
+    return;
+}
+
+if (endYear < 1901 || endYear > 2155) {
+    alert('Год конца аукциона должен быть от 1901 до 2155.');
+    event.preventDefault();
+    return;
+}
+
+if (startDate >= endDate) {
+    alert('Дата начала аукциона должна быть раньше даты конца аукциона.');
+    event.preventDefault();
+    return;
+}
 
     // Проверка стартовой цены
     var startingPrice = parseFloat(document.getElementById('addStartingPrice').value);
@@ -831,6 +898,7 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
     event.preventDefault();
 });
 
+
 document.getElementById('addPhone').addEventListener('focus', function() {
     if (this.value === '' || this.value === '+') {
         this.value = '+'; // Добавляем + в начале
@@ -841,9 +909,25 @@ document.getElementById('addPhone').addEventListener('input', function() {
     // Удаляем все символы, кроме + и цифр
     this.value = this.value.replace(/[^+\d]/g, '');
 
+    // Проверяем, чтобы количество цифр не превышало 7
+    const digitsOnly = this.value.replace(/\D/g, ''); // Убираем все нецифровые символы
+    if (digitsOnly.length > 9) {
+        this.value = '+' + digitsOnly.slice(0, 9); // Оставляем только первые 7 цифр
+    }
+
     // Если символ + был удален, восстанавливаем его
     if (this.value.charAt(0) !== '+') {
         this.value = '+' + this.value.replace(/^\+/, ''); // Восстанавливаем +
+    }
+});
+
+document.getElementById('addLotNumber').addEventListener('input', function() {
+    // Удаляем все символы, кроме цифр
+    this.value = this.value.replace(/[^0-9]/g, '');
+
+    // Преобразуем значение в число и проверяем, чтобы оно было больше 0
+    if (this.value && parseInt(this.value, 10) < 1) {
+        this.value = ''; // Очищаем поле, если значение меньше 1
     }
 });
 
@@ -903,6 +987,39 @@ const addSizeInput = document.getElementById('addSize');
             }
         }
     });
+
+    document.getElementById('addLotNumber').addEventListener('input', function() {
+    // Удаляем все символы, кроме цифр
+    this.value = this.value.replace(/[^0-9]/g, '');
+
+    // Ограничиваем ввод до 4 цифр
+    if (this.value.length > 4) {
+        this.value = this.value.slice(0, 4);
+    }
+
+    // Преобразуем значение в число и проверяем, чтобы оно было больше 0
+    if (this.value && parseInt(this.value, 10) < 1) {
+        this.value = ''; // Очищаем поле, если значение меньше 1
+    }
+});
+
+document.getElementById('addStartingPrice').addEventListener('input', function() {
+    const value = parseFloat(this.value);
+    if (value > 99999999.99) {
+        alert('Стартовая цена не может превышать 99999999.99.');
+        this.value = ''; // Очищаем поле, если значение слишком большое
+    }
+});
+    
+document.getElementById('addForm').addEventListener('submit', function(event) {
+    const urlInput = document.getElementById('addImageUrl');
+    const urlPattern = /^(ftp|http|https):\/\/[^ "]+$/;
+
+    if (!urlPattern.test(urlInput.value)) {
+        alert('Введите корректный URL, начинающийся с http:// или https://');
+        event.preventDefault(); // Отменяем отправку формы
+    }
+}); 
 
 </script>
 

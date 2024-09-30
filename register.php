@@ -66,9 +66,22 @@
 
 
 <script>
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Запретить ввод пробелов в поля
+    const inputs = ['name', 'username', 'password', 'confirm_password'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('keydown', function(event) {
+            if (event.key === ' ') {
+                event.preventDefault(); // Запретить ввод пробела
+            }
+        });
+    });
+    
     document.getElementById('registerForm').addEventListener('submit', async function(event) {
         event.preventDefault(); // Отменяем стандартное действие отправки формы
+
+        if (!validateInput()) return; 
 
         await handleWithConnection(async () => {
         const formData = new FormData(this);
@@ -105,6 +118,28 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.display = 'none';
         }
     };
+
+    // Проверка на наличие только пробелов
+    function validateInput() {
+        const name = document.getElementById('name').value.trim();
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const confirmPassword = document.getElementById('confirm_password').value.trim();
+
+        if (!name || !username || !password || !confirmPassword) {
+            alert('Пожалуйста, заполните все поля, не оставляя только пробелы.');
+            return false; // Останавливаем дальнейшее выполнение
+        }
+
+        // Дополнительная проверка для логина
+        if (username.length === 0) {
+            alert('Логин не может состоять только из пробелов.');
+            return false;
+        }
+
+        return true; // Валидация прошла успешно
+    }
+
 });
 </script>
 
@@ -170,6 +205,8 @@ async function handleReturnHome() {
         location.href = 'index.php';
     });
 }
+
+
 
 // // Обработчик отправки формы
 // document.getElementById('registerForm').addEventListener('submit', async function(event) {

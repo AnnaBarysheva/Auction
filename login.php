@@ -117,6 +117,19 @@ function showErrorModal(message) {
     };
 }
 
+// Проверка на наличие только пробелов
+function validateInput() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!username || !password) {
+                alert('Пожалуйста, заполните все поля, не оставляя только пробелы.');
+                return false; // Останавливаем дальнейшее выполнение
+            }
+            return true; // Валидация прошла успешно
+}
+
+
 
 // Универсальная функция, которая оборачивает действие в проверку соединения
 async function handleWithConnection(callback) {
