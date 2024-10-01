@@ -973,6 +973,17 @@ const addSizeInput = document.getElementById('addSize');
             this.value = parts[0] + 'x' + parts[1].slice(0, 3);
         }
 
+        // Проверка на невалидные размеры
+        if (/^(0+|0x0|00x00|000x000|[1-9][0-9]*x0|[1-9][0-9]*x00|[1-9][0-9]*x000)$/.test(this.value)) {
+            if (parts.length > 1 && parts[1] === '0') {
+                this.value = parts[0] + 'x'; // Удаляем только 0, оставляем 'x'
+            } else {
+                this.value = ''; // Очищаем поле, если значение невалидное
+                alert('Введите корректный размер, например, 30x40 см.');
+                return;
+            }
+        }
+        
         // Если поле не содержит 'x', очищаем его
         if (parts[0] === '' && parts.length > 1) {
             this.value = ''; // Если перед 'x' ничего нет, очищаем поле
