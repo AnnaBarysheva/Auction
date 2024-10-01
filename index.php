@@ -850,8 +850,8 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
 
     // Проверка на количество цифр в номере телефона
 var phoneInputValue = phoneInput.replace(/\D/g, ''); // Убираем все нецифровые символы
-if (phoneInputValue.length !== 9) {
-    alert('Номер телефона должен содержать ровно 9 цифр после знака +.');
+if (phoneInputValue.length !== 12) {
+    alert('Номер телефона должен содержать ровно 12 цифр после знака +.');
     event.preventDefault();
     return;
 }
@@ -913,8 +913,8 @@ document.getElementById('addPhone').addEventListener('input', function() {
 
     // Проверяем, чтобы количество цифр не превышало 7
     const digitsOnly = this.value.replace(/\D/g, ''); // Убираем все нецифровые символы
-    if (digitsOnly.length > 9) {
-        this.value = '+' + digitsOnly.slice(0, 9); // Оставляем только первые 7 цифр
+    if (digitsOnly.length > 12) {
+        this.value = '+' + digitsOnly.slice(0, 12); // Оставляем только первые 7 цифр
     }
 
     // Если символ + был удален, восстанавливаем его
