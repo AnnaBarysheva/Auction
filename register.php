@@ -33,6 +33,12 @@
 
     <input type="password" id="confirm_password" name="confirm_password" class="modal-input" required autocomplete="new-password" placeholder="Повторите введённый пароль">
 
+    <select id="role" name="role" class="modal-input" required>
+            <option value="" disabled selected>Выберите роль</option>
+            <option value="buyer">Покупатель</option>
+            <option value="seller">Продавец</option>
+        </select>
+
     <div class="button-container">
         <button type="submit" class="register-button">Зарегистрироваться</button>
         <button type="button" class="header-button alt-button" id="href-login-button" onclick="handleLogin()">Уже есть аккаунт?</button>
@@ -40,7 +46,11 @@
 </form>
 
 </div>
-
+<style>
+    #role option[value=""][disabled] {
+        color: #ccc; /* Светло-серый цвет */
+    }
+</style>
 
 <!-- Модальное окно ошибки -->
 <div id="errorModal" class="modal" style="display:none;">

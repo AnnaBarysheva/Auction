@@ -56,6 +56,7 @@ if (!isset($_SESSION['user_id'])) {
 // $link = mysqli_connect("localhost", "root", "alina", "Auction");
 // $link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 
+// Подключение к базе данных
 $link = include 'db_connect.php';
 
 if ($link == false) {
@@ -96,8 +97,79 @@ if ($isAdmin) {
     ";
 }
 
-// AND Auctions.start_date <= CURDATE()
-// AND Auctions.end_date >= CURDATE()
+
+
+// // Если отправлена форма, сохраняем выбранный фильтр в сессии
+// if (isset($_POST['filter'])) {
+//     $_SESSION['filter'] = $_POST['filter'];
+// }
+
+// // Определяем состояние фильтра (по умолчанию — показываем текущие аукционы)
+// $filter = isset($_SESSION['filter']) ? $_SESSION['filter'] : 'current';
+
+// // Проверка роли пользователя
+// $isAdmin = false;
+// if (isset($_SESSION['user_id'])) {
+//     $userId = $_SESSION['user_id'];
+//     $query = "SELECT role FROM Users WHERE id_user = $userId";
+//     $result = mysqli_query($link, $query);
+//     if ($result && mysqli_num_rows($result) > 0) {
+//         $user = mysqli_fetch_assoc($result);
+//         $isAdmin = ($user['role'] === 'admin');
+//     }
+// }
+
+// // SQL-запрос в зависимости от роли пользователя
+// if ($isAdmin) {
+//     // Администратор видит все картины
+//     $sql = "
+//         SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
+//         FROM Paintings
+//         JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+//         JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+//         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+//     ";
+// } else {
+//     // Пользователь может выбирать между текущими и будущими аукционами
+//     if ($filter == 'current') {
+//         // Показ картин с текущими аукционами
+//         $sql = "
+//             SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
+//             FROM Paintings
+//             JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+//             JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+//             JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+//             WHERE Paintings.is_sold = FALSE
+//             AND Auctions.start_date <= CURDATE()
+//             AND Auctions.end_date >= CURDATE()
+//         ";
+//     } elseif ($filter == 'future') {
+//         // Показ картин с будущими аукционами
+//         $sql = "
+//             SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
+//             FROM Paintings
+//             JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+//             JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+//             JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+//             WHERE Paintings.is_sold = FALSE
+//             AND Auctions.start_date > CURDATE()
+//         ";
+//     }
+
+//     // Отображение радиокнопок только для пользователей (не администраторов)
+//     echo "
+//     <form method='POST'>
+//         <label>
+//             <input type='radio' name='filter' value='current' " . ($filter == 'current' ? 'checked' : '') . "> Текущие аукционы
+//         </label>
+//         <label>
+//             <input type='radio' name='filter' value='future' " . ($filter == 'future' ? 'checked' : '') . "> Будущие аукционы
+//         </label>
+//         <button type='submit'>Применить</button>
+//     </form>
+//     ";
+// } 
+
 
 $result = mysqli_query($link, $sql);
 if ($result) {

@@ -1,7 +1,11 @@
 body {
+    background-image: url('https://img.freepik.com/free-photo/abstract-luxury-blur-dark-grey-black-gradient-used-as-background-studio-wall-display-your-products_1258-72601.jpg?t=st=1727859902~exp=1727863502~hmac=496903fc44f2c0f1d113c2ffa49684f059b0cae6d7bcf2a5da693631a8905127&w=1060');
     margin: 0;
     font-family: Arial, sans-serif;
     user-select: none; /* Отключение выделения текста */
+    background-size: cover; /* Фон будет покрывать весь экран */
+    background-position: center; /* Фон будет центрироваться */
+    background-repeat: no-repeat; /* Отключаем повторение изображения */
 }
 
 header {
