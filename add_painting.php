@@ -10,8 +10,8 @@ if ($link == false) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['paint_name'];
     $size = $_POST['size'];
-    $materials = $_POST['materials'];
-    $style = $_POST['style'];
+    $styleId = $_POST['style'];  // Здесь будет ID выбранного стиля
+    $materialId = $_POST['materials'];  // Здесь будет ID выбранного материала
     $year = $_POST['creation_year'];
     $author = $_POST['author'];
     $imagePath = $_POST['image_path'];
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $auctionId = mysqli_insert_id($link);
 
             // Вставляем картину
-            $insertPainting = "INSERT INTO Paintings (paint_name, size, materials, style, creation_year, author, image_path, id_seller) VALUES ('$name', '$size', '$materials', '$style', '$year', '$author', '$imagePath', '$sellerId')";
+            $insertPainting = "INSERT INTO Paintings (paint_name, size, id_material, id_style, creation_year, author, image_path, id_seller) VALUES ('$name', '$size', '$materialId', '$styleId', '$year', '$author', '$imagePath', '$sellerId')";
             if (mysqli_query($link, $insertPainting)) {
                 $paintingId = mysqli_insert_id($link);
 

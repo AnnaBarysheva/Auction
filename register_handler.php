@@ -20,6 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $login = mysqli_real_escape_string($link, $_POST['username']);
     $password = mysqli_real_escape_string($link, $_POST['password']);
     $confirm_password = mysqli_real_escape_string($link, $_POST['confirm_password']);
+    $role = mysqli_real_escape_string($link, $_POST['role']); // Получаем выбранную роль
 
     // Проверка совпадения паролей
     if ($password !== $confirm_password) {
@@ -40,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
     // SQL-запрос на вставку
-    $sql = "INSERT INTO Users (full_name, login, password) VALUES ('$full_name', '$login', '$hashed_password')";
+    $sql = "INSERT INTO Users (full_name, login, password, role) VALUES ('$full_name', '$login', '$hashed_password', '$role')";
 
     // Выполнение запроса и проверка результата
     if (mysqli_query($link, $sql)) {

@@ -44,15 +44,18 @@ if ($link == false) {
 
 // SQL-запрос для получения полной информации о картине
 $sql = "
-    SELECT Paintings.paint_name, Paintings.size, Paintings.materials, Paintings.style, 
+    SELECT Paintings.paint_name, Paintings.size, 
+           Styles.style_name, Materials.material_name, 
            Paintings.creation_year, Paintings.author, Paintings.image_path, 
            Sellers.full_name AS seller_name, Sellers.phone AS seller_phone, Sellers.email AS seller_email,
-           Auctions.start_date, Auctions.end_date,  PaintingsOnAuction.starting_price,
-           PaintingsOnAuction.purchase_price, PaintingsOnAuction.lot_number 
+           Auctions.start_date, Auctions.end_date,  
+           PaintingsOnAuction.starting_price, PaintingsOnAuction.purchase_price, PaintingsOnAuction.lot_number 
     FROM Paintings
     JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
     LEFT JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
     LEFT JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+    JOIN Styles ON Paintings.id_style = Styles.id_style
+    JOIN Materials ON Paintings.id_material = Materials.id_material
     WHERE Paintings.id_painting = $id_painting
 ";
 
@@ -76,24 +79,25 @@ mysqli_close($link);
 
     <!-- Вывод информации о картине -->
     <div class="painting-details">
-        <h1><?= htmlspecialchars($painting['paint_name']) ?></h1>
-        <p style="color: #00CED1; font-style: italic;">Лот № <?= htmlspecialchars($painting['lot_number']) ?></p>  
-        <p><strong>Размер:</strong> <?= htmlspecialchars($painting['size']) ?></p> 
-        <p><strong>Материалы:</strong> <?= htmlspecialchars($painting['materials']) ?></p>
-        <p><strong>Стиль:</strong> <?= htmlspecialchars($painting['style']) ?></p>
-        <p><strong>Год создания:</strong> <?= htmlspecialchars($painting['creation_year']) ?></p>
-        <p><strong>Автор:</strong> <?= htmlspecialchars($painting['author']) ?></p> 
-        <div class="price-info">
-            <div class="price-details">
-                <p><strong>Начальная цена:</strong> <?= htmlspecialchars($painting['starting_price']) ?></p>
-                <p><strong>Текущая цена:</strong> <?= htmlspecialchars($painting['purchase_price'] ?? '--') ?></p>
-            </div>
-            <!-- <form action="index.php" method="get">
-                <input type="hidden" name="id_painting" value="<?= htmlspecialchars($painting['id_painting']) ?>"> -->
-                <button type="submit" class="bid-button">Сделать ставку</button>
-            <!-- </form> -->
+    <h1><?= htmlspecialchars($painting['paint_name']) ?></h1>
+    <p style="color: #00CED1; font-style: italic;">Лот № <?= htmlspecialchars($painting['lot_number']) ?></p>  
+    <p><strong>Размер:</strong> <?= htmlspecialchars($painting['size']) ?></p> 
+    <p><strong>Материалы:</strong> <?= htmlspecialchars($painting['material_name']) ?></p>
+    <p><strong>Стиль:</strong> <?= htmlspecialchars($painting['style_name']) ?></p>
+    <p><strong>Год создания:</strong> <?= htmlspecialchars($painting['creation_year']) ?></p>
+    <p><strong>Автор:</strong> <?= htmlspecialchars($painting['author']) ?></p> 
+    <div class="price-info">
+        <div class="price-details">
+            <p><strong>Начальная цена:</strong> <?= htmlspecialchars($painting['starting_price']) ?></p>
+            <p><strong>Текущая цена:</strong> <?= htmlspecialchars($painting['purchase_price'] ?? '--') ?></p>
         </div>
+        <!-- <form action="index.php" method="get">
+            <input type="hidden" name="id_painting" value="<?= htmlspecialchars($painting['id_painting']) ?>"> -->
+            <button type="submit" class="bid-button">Сделать ставку</button>
+        <!-- </form> -->
     </div>
+</div>
+
 </div>   
 <div class="other-info">    
     <!-- Вывод информации о продавце -->

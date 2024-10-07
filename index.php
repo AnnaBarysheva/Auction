@@ -65,38 +65,74 @@ if ($link == false) {
 
 // Проверка роли пользователя
 $isAdmin = false;
+$isSeller = false;
 if (isset($_SESSION['user_id'])) {
     $userId = $_SESSION['user_id'];
     $query = "SELECT role FROM Users WHERE id_user = $userId";
     $result = mysqli_query($link, $query);
     if ($result && mysqli_num_rows($result) > 0) {
         $user = mysqli_fetch_assoc($result);
+        $isSeller = ($user['role'] === 'seller');
         $isAdmin = ($user['role'] === 'admin');
     }
 }
 
+// SQL-запрос для получения стилей и материалов
+$stylesQuery = "SELECT * FROM Styles";
+$stylesResult = mysqli_query($link, $stylesQuery);
+if (!$stylesResult) {
+    die("Ошибка выполнения запроса стилей: " . mysqli_error($link));
+}
+
+$materialsQuery = "SELECT * FROM Materials";
+$materialsResult = mysqli_query($link, $materialsQuery);
+if (!$materialsResult) {
+    die("Ошибка выполнения запроса материалов: " . mysqli_error($link));
+}
+
 // SQL-запрос в зависимости от роли пользователя
-if ($isAdmin) {
+if ($isSeller || $isAdmin) {
     $sql = "
-        SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
+        SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+               Styles.style_name, Materials.material_name
         FROM Paintings
         JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
         JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+        JOIN Styles ON Paintings.id_style = Styles.id_style
+        JOIN Materials ON Paintings.id_material = Materials.id_material
+        
     ";
 } else {
     $sql = "
-        SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
+        SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+               Styles.style_name, Materials.material_name
         FROM Paintings
         JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
         JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+        JOIN Styles ON Paintings.id_style = Styles.id_style
+        JOIN Materials ON Paintings.id_material = Materials.id_material
         WHERE Paintings.is_sold = FALSE
         AND Auctions.start_date <= CURDATE()
         AND Auctions.end_date >= CURDATE()
+        
     ";
 }
 
+
+// Запрос для получения стилей
+$stylesQuery = "SELECT id_style AS id, style_name AS name FROM Styles";
+$stylesResult = mysqli_query($link, $stylesQuery);
+
+// Получение материалов
+$materialsQuery = "SELECT id_material AS id, material_name AS name FROM Materials";
+$materialsResult = mysqli_query($link, $materialsQuery);
+
+// Проверьте, что оба результата не равны false
+if (!$stylesResult || !$materialsResult) {
+    die("Ошибка: Невозможно получить данные из базы данных. " . mysqli_error($link));
+}
 
 
 // // Если отправлена форма, сохраняем выбранный фильтр в сессии
@@ -171,7 +207,23 @@ if ($isAdmin) {
 // } 
 
 
+// Функция для создания выпадающего списка
+function createDropdown($result, $dropdownId, $defaultOptionText) {
+    $dropdown = "<select name='{$dropdownId}' id='{$dropdownId}' required>";
+    $dropdown .= "<option value=''>{$defaultOptionText}</option>";
+    
+    while ($row = mysqli_fetch_assoc($result)) {
+        $dropdown .= "<option value='{$row['id']}'>{$row['name']}</option>";
+    }
+    
+    $dropdown .= "</select>";
+    return $dropdown;
+}
+
+
+// Выполнение запроса
 $result = mysqli_query($link, $sql);
+
 if ($result) {
     if (mysqli_num_rows($result) > 0) {
         echo "<table border='1' id='paintingsTable'>";
@@ -182,23 +234,24 @@ if ($result) {
                 <th>Автор</th>
                 <th>Продавец</th>";
 
-        // Выводим столбец "Действия", если это администратор
-        if ($isAdmin) {
+        // Выводим столбец "Действия", если это продавец или администратор
+        if ($isSeller || $isAdmin) {
             echo "<th>Действия</th>";
         }
 
         echo "</tr>";
 
+        // Вывод каждой строки данных
         while ($row = mysqli_fetch_assoc($result)) {
             echo "<tr data-id='" . $row['id_painting'] . "'>";
             echo "<td>" . $row['paint_name'] . "</td>";
-            echo "<td>" . $row['style'] . "</td>";
+            echo "<td>" . $row['style_name'] . "</td>";
             echo "<td>" . $row['creation_year'] . "</td>";
             echo "<td>" . $row['author'] . "</td>";
             echo "<td>" . $row['full_name'] . "</td>";
 
-            // Добавляем кнопки "Редактировать" и "Удалить", если это администратор
-            if ($isAdmin) {
+            // Добавляем кнопки "Редактировать" и "Удалить", если это продавец или администратор
+            if ($isSeller || $isAdmin) {
                 echo "<td>
                         <button class='editButton' data-id='" . $row['id_painting'] . "'>Редактировать</button>
                         <button class='deleteButton' data-id='" . $row['id_painting'] . "'>Удалить</button>
@@ -209,19 +262,24 @@ if ($result) {
         }
         echo "</table>";
 
-        // Кнопка "Добавить картину", доступна только для администратора
-        if ($isAdmin) {
+        // Кнопка "Добавить картину", доступная только для продавцов и администраторов
+        if ($isSeller || $isAdmin) {
             echo "<div class='button-container'>";
             echo "<button id='addPaintingButton' class='addButton'>Добавить картину</button>";
+            echo "<button id='addStyleButton' class='addButton'>Добавить стиль</button>";
+            echo "<button id='addMaterialButton' class='addButton'>Добавить материал</button>";
             echo "</div>";
         }
     } else {
         echo "Нет доступных картин для отображения.";
     }
+
     mysqli_free_result($result);
 } else {
     echo "Ошибка выполнения запроса: " . mysqli_error($link);
 }
+
+// Закрытие соединения
 mysqli_close($link);
 ?>
 
@@ -550,10 +608,17 @@ for (var button of editButtons) {
             var id = this.getAttribute('data-id');
             var row = this.closest('tr');
             var cells = row.getElementsByTagName('td');
+            
 
             document.getElementById('editId').value = id;
             document.getElementById('editName').value = cells[0].textContent;
-            document.getElementById('editStyle').value = cells[1].textContent;
+
+            // Получаем элемент выпадающего списка
+            var styleDropdown = document.getElementById('editStyle');
+            var selectedStyle = cells[1].textContent; 
+            styleDropdown.value = Array.from(styleDropdown.options)
+                .find(option => option.text === selectedStyle)?.value || '';
+
             document.getElementById('editYear').value = cells[2].textContent;
             document.getElementById('editAuthor').value = cells[3].textContent;
             document.getElementById('editSeller').value = cells[4].textContent;
@@ -714,8 +779,8 @@ async function handleLogout() {
             <label for="editName">Название картины:</label>
             <input type="text" class="modal-input" id="editName" name="paint_name" placeholder="Название картины" required maxlength="255">
             
-            <label for="editStyle">Стиль:</label>
-            <input type="text" class="modal-input" id="editStyle" name="style" placeholder="Стиль" required maxlength="50">
+            <label for="editstyleDropdown">Стиль:</label>
+                <?= createDropdown($stylesResult, 'editStyle', 'Выберите стиль') ?>
             
             <label for="editYear">Год создания:</label>
             <input type="text" class="modal-input" id="editYear" name="creation_year" placeholder="Год создания" pattern="\d{4}" maxlength="4" required title="Введите четыре цифры" max="<?php echo date('Y'); ?>">
@@ -753,12 +818,12 @@ async function handleLogout() {
 
                     <label for="addSize">Размер:</label>
                     <input type="text" id="addSize" name="size" class="modal-input" placeholder=" XxX см или XXxXX см или XXXxXXX см" required maxlength="50" pattern="^(?:\d{2}x\d{2} см|\d{3}x\d{3} см)$" title="Введите размер в формате XXxXX см или XXXxXXX см">                       
-                    <label for="addMaterials">Материалы:</label>
-                    <input type="text" id="addMaterials" name="materials" class="modal-input" placeholder="Материалы" required maxlength="255">
-
-                    <label for="addStyle">Стиль:</label>
-                    <input type="text" id="addStyle" name="style" class="modal-input" placeholder="Стиль" required maxlength="50">
-
+                    
+                    <label for="styleDropdown">Стиль:</label>
+                    <?= createDropdown($stylesResult, 'style', 'Выберите стиль') ?>
+    
+    <label for="materialDropdown">Материал:</label>
+    <?= createDropdown($materialsResult, 'materials', 'Выберите материал') ?>
                     <label for="addYear">Год создания:</label>
                     <input type="text" id="addYear" name="creation_year" class="modal-input" placeholder="Год создания" pattern="\d{4}" maxlength="4" required title="Введите четыре цифры">
 
@@ -805,7 +870,7 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
 
     // Получаем значения полей
     var nameInput = document.getElementById('editName').value.trim();
-    var styleInput = document.getElementById('editStyle').value.trim();
+    var styleInput = document.getElementById('editStyle').value; // Используем новый идентификатор для стиля
     var yearInput = document.getElementById('editYear').value;
     var authorInput = document.getElementById('editAuthor').value.trim();
     var sellerInput = document.getElementById('editSeller').value.trim();
@@ -854,7 +919,7 @@ function trimLeadingSpaces(event) {
 // Применяем к всем текстовым полям
 const textInputs = [
     'editName',
-    'editStyle',
+    
     'editYear',
     'editAuthor',
     'editSeller'
