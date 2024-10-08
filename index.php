@@ -77,11 +77,26 @@ if (isset($_SESSION['user_id'])) {
     }
 }
 
-// SQL-запрос для получения стилей и материалов
+
+// // SQL-запрос для получения стилей из таблицы Styles
+// $stylesQuery = "SELECT * FROM Styles";
+// $stylesResult = mysqli_query($link, $stylesQuery);
+// if (!$stylesResult) {
+//     die("Ошибка выполнения запроса стилей: " . mysqli_error($link));
+// }
+
+// SQL-запрос для получения стилей из таблицы Styles
 $stylesQuery = "SELECT * FROM Styles";
 $stylesResult = mysqli_query($link, $stylesQuery);
+
 if (!$stylesResult) {
     die("Ошибка выполнения запроса стилей: " . mysqli_error($link));
+}
+
+// Сохраняем стили в массив
+$stylesArray = [];
+while ($row = mysqli_fetch_assoc($stylesResult)) {
+    $stylesArray[] = $row;
 }
 
 $materialsQuery = "SELECT * FROM Materials";
@@ -214,6 +229,24 @@ function createDropdown($result, $dropdownId, $defaultOptionText) {
     
     while ($row = mysqli_fetch_assoc($result)) {
         $dropdown .= "<option value='{$row['id']}'>{$row['name']}</option>";
+    }
+    
+    $dropdown .= "</select>";
+    return $dropdown;
+}
+
+function createDropdownFromArray($dataArray, $dropdownId, $defaultOptionText) {
+    $dropdown = "<select name='{$dropdownId}' id='{$dropdownId}' required>";
+    $dropdown .= "<option value=''>{$defaultOptionText}</option>";
+    
+    foreach ($dataArray as $row) {
+        // Используем правильные ключи
+        if (isset($row['id_style']) && isset($row['style_name'])) {
+            $dropdown .= "<option value='{$row['id_style']}'>{$row['style_name']}</option>";
+        } else {
+            // Логируем или обрабатываем ошибку
+            $dropdown .= "<option value=''>Неверные данные</option>";
+        }
     }
     
     $dropdown .= "</select>";
@@ -820,7 +853,8 @@ async function handleLogout() {
                     <input type="text" id="addSize" name="size" class="modal-input" placeholder=" XxX см или XXxXX см или XXXxXXX см" required maxlength="50" pattern="^(?:\d{2}x\d{2} см|\d{3}x\d{3} см)$" title="Введите размер в формате XXxXX см или XXXxXXX см">                       
                     
                     <label for="styleDropdown">Стиль:</label>
-                    <?= createDropdown($stylesResult, 'style', 'Выберите стиль') ?>
+<?= createDropdownFromArray($stylesArray, 'styles', 'Выберите стиль') ?>
+
     
     <label for="materialDropdown">Материал:</label>
     <?= createDropdown($materialsResult, 'materials', 'Выберите материал') ?>

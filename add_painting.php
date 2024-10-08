@@ -10,7 +10,7 @@ if ($link == false) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['paint_name'];
     $size = $_POST['size'];
-    $styleId = $_POST['style'];  // Здесь будет ID выбранного стиля
+    $styleId = $_POST['styles'];  // Обратите внимание на имя поля, возможно, это 'styles'
     $materialId = $_POST['materials'];  // Здесь будет ID выбранного материала
     $year = $_POST['creation_year'];
     $author = $_POST['author'];
@@ -22,6 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $startingPrice = $_POST['starting_price'];
     $startDate = $_POST['start_date'];
     $endDate = $_POST['end_date'];
+
+    // Проверка, выбраны ли стиль и материал
+    if (empty($styleId) || empty($materialId)) {
+        die("Ошибка: Выберите стиль и материал для картины.");
+    }
 
     // Сначала вставляем продавца и получаем его ID
     $insertSeller = "INSERT INTO Sellers (full_name, phone, email) VALUES ('$seller', '$phone', '$email')";
@@ -38,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $insertPainting = "INSERT INTO Paintings (paint_name, size, id_material, id_style, creation_year, author, image_path, id_seller) VALUES ('$name', '$size', '$materialId', '$styleId', '$year', '$author', '$imagePath', '$sellerId')";
             if (mysqli_query($link, $insertPainting)) {
                 $paintingId = mysqli_insert_id($link);
-
+                
                 // Вставляем в PaintingsOnAuction
                 $insertAuctionPainting = "INSERT INTO PaintingsOnAuction (id_painting, id_auction, lot_number, starting_price) VALUES ('$paintingId', '$auctionId', '$lotNumber', '$startingPrice')";
                 if (mysqli_query($link, $insertAuctionPainting)) {
