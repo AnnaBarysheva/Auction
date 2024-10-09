@@ -92,17 +92,27 @@ $stylesResult = mysqli_query($link, $stylesQuery);
 if (!$stylesResult) {
     die("Ошибка выполнения запроса стилей: " . mysqli_error($link));
 }
-
 // Сохраняем стили в массив
 $stylesArray = [];
 while ($row = mysqli_fetch_assoc($stylesResult)) {
     $stylesArray[] = $row;
 }
 
+// Выполняем запрос к базе данных для получения списка материалов
 $materialsQuery = "SELECT * FROM Materials";
 $materialsResult = mysqli_query($link, $materialsQuery);
+
 if (!$materialsResult) {
     die("Ошибка выполнения запроса материалов: " . mysqli_error($link));
+}
+
+// Преобразование результата в массив (с теми же ключами, что и для стилей)
+$materialsArray = [];
+while ($row = mysqli_fetch_assoc($materialsResult)) {
+    $materialsArray[] = [
+        'id_style' => $row['id_material'], // Используем тот же ключ 'id_style'
+        'style_name' => $row['material_name'] // Используем тот же ключ 'style_name'
+    ];
 }
 
 // SQL-запрос в зависимости от роли пользователя
@@ -235,16 +245,38 @@ function createDropdown($result, $dropdownId, $defaultOptionText) {
     return $dropdown;
 }
 
-function createDropdownFromArray($dataArray, $dropdownId, $defaultOptionText) {
-    $dropdown = "<select name='{$dropdownId}' id='{$dropdownId}' required>";
+// function createDropdownFromArray($dataArray, $dropdownId, $defaultOptionText) {
+//     $dropdown = "<select name='{$dropdownId}' id='{$dropdownId}' required>";
+//     $dropdown .= "<option value=''>{$defaultOptionText}</option>";
+    
+//     foreach ($dataArray as $row) {
+//         // Используем правильные ключи
+//         if (isset($row['id_style']) && isset($row['style_name'])) {
+//             $dropdown .= "<option value='{$row['id_style']}'>{$row['style_name']}</option>";
+//         } else {
+//             // Логируем или обрабатываем ошибку
+//             $dropdown .= "<option value=''>Неверные данные</option>";
+//         }
+//     }
+    
+//     $dropdown .= "</select>";
+//     return $dropdown;
+// }
+
+function createDropdownFromArray($dataArray, $dropdownId, $defaultOptionText, $class = '') {
+    // Если класс передан, добавляем его в тег select
+    $classAttribute = $class ? "class='{$class}'" : '';
+    
+    // Создаем тег select с заданным id, именем и классом
+    $dropdown = "<select name='{$dropdownId}' id='{$dropdownId}' {$classAttribute} required>";
     $dropdown .= "<option value=''>{$defaultOptionText}</option>";
     
     foreach ($dataArray as $row) {
-        // Используем правильные ключи
+        // Проверяем, что массив данных содержит ключи 'id_style' и 'style_name'
         if (isset($row['id_style']) && isset($row['style_name'])) {
             $dropdown .= "<option value='{$row['id_style']}'>{$row['style_name']}</option>";
         } else {
-            // Логируем или обрабатываем ошибку
+            // Логируем или обрабатываем ошибку, если данные некорректны
             $dropdown .= "<option value=''>Неверные данные</option>";
         }
     }
@@ -254,11 +286,16 @@ function createDropdownFromArray($dataArray, $dropdownId, $defaultOptionText) {
 }
 
 
+
 // Выполнение запроса
 $result = mysqli_query($link, $sql);
 
+
 if ($result) {
     if (mysqli_num_rows($result) > 0) {
+
+        echo "<div class='table-wrapper'>";
+
         echo "<table border='1' id='paintingsTable'>";
         echo "<tr>
                 <th>Название картины</th>
@@ -294,6 +331,9 @@ if ($result) {
             echo "</tr>";
         }
         echo "</table>";
+
+        // Закрываем div для подложки
+        echo "</div>";
 
         // Кнопка "Добавить картину", доступная только для продавцов и администраторов
         if ($isSeller || $isAdmin) {
@@ -812,8 +852,18 @@ async function handleLogout() {
             <label for="editName">Название картины:</label>
             <input type="text" class="modal-input" id="editName" name="paint_name" placeholder="Название картины" required maxlength="255">
             
-            <label for="editstyleDropdown">Стиль:</label>
-                <?= createDropdown($stylesResult, 'editStyle', 'Выберите стиль') ?>
+            <!-- <label for="editstyleDropdown">Стиль:</label> -->
+                <!-- <?= createDropdown($stylesResult, 'editStyle', 'Выберите стиль') ?> -->
+                <!-- <?=createDropdownFromArray($stylesArray, 'editStyle', 'Выберите стиль') ?> -->
+
+                <!-- <label for="editstyleDropdown">Стиль:</label> -->
+                <!-- <div class="modal-input"> -->
+                    <!-- <?= createDropdownFromArray($stylesArray, 'editStyle', 'Выберите стиль') ?> -->
+                <!-- </div> -->
+
+                <label for="editStyleDropdown">Стиль:</label>
+                <?= createDropdownFromArray($stylesArray, 'editStyle', 'Выберите стиль', 'modal-input') ?>
+
             
             <label for="editYear">Год создания:</label>
             <input type="text" class="modal-input" id="editYear" name="creation_year" placeholder="Год создания" pattern="\d{4}" maxlength="4" required title="Введите четыре цифры" max="<?php echo date('Y'); ?>">
@@ -852,12 +902,17 @@ async function handleLogout() {
                     <label for="addSize">Размер:</label>
                     <input type="text" id="addSize" name="size" class="modal-input" placeholder=" XxX см или XXxXX см или XXXxXXX см" required maxlength="50" pattern="^(?:\d{2}x\d{2} см|\d{3}x\d{3} см)$" title="Введите размер в формате XXxXX см или XXXxXXX см">                       
                     
-                    <label for="styleDropdown">Стиль:</label>
-<?= createDropdownFromArray($stylesArray, 'styles', 'Выберите стиль') ?>
+                    <!-- <label for="styleDropdown">Стиль:</label> -->
+                    <!-- <?= createDropdownFromArray($stylesArray, 'styles', 'Выберите стиль') ?> -->    
+                    <!-- <label for="materialDropdown">Материал:</label> -->
+                    <!-- <?= createDropdown($materialsResult, 'materials', 'Выберите материал') ?> -->
 
-    
-    <label for="materialDropdown">Материал:</label>
-    <?= createDropdown($materialsResult, 'materials', 'Выберите материал') ?>
+                        <label for="styleDropdown">Стиль:</label>
+                    <?= createDropdownFromArray($stylesArray, 'styles', 'Выберите стиль', 'select-dropdown') ?>
+
+                    <label for="materialDropdown">Материал:</label>
+                    <?= createDropdownFromArray($materialsArray, 'materials', 'Выберите материал', 'select-dropdown') ?>
+
                     <label for="addYear">Год создания:</label>
                     <input type="text" id="addYear" name="creation_year" class="modal-input" placeholder="Год создания" pattern="\d{4}" maxlength="4" required title="Введите четыре цифры">
 

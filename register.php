@@ -33,11 +33,17 @@
 
     <input type="password" id="confirm_password" name="confirm_password" class="modal-input" required autocomplete="new-password" placeholder="Повторите введённый пароль">
 
-    <select id="role" name="role" class="modal-input">
+    <!-- <select id="role" name="role" class="modal-input">
         <option value="" disabled selected>Выберите роль</option>
         <option value="user">Покупатель</option>
         <option value="seller">Продавец</option>
-    </select>
+    </select> -->
+
+    <select id="role" name="role" class="modal-input select-dropdown">
+    <option value="" disabled selected>Выберите роль</option>
+    <option value="user">Покупатель</option>
+    <option value="seller">Продавец</option>
+</select>
 
     <div class="button-container">
         <button type="submit" class="register-button">Зарегистрироваться</button>

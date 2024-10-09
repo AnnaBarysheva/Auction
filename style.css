@@ -1,11 +1,21 @@
 body {
-    background-image: url('https://img.freepik.com/free-photo/abstract-luxury-blur-dark-grey-black-gradient-used-as-background-studio-wall-display-your-products_1258-72601.jpg?t=st=1727859902~exp=1727863502~hmac=496903fc44f2c0f1d113c2ffa49684f059b0cae6d7bcf2a5da693631a8905127&w=1060');
+    background-image: url('https://images.unsplash.com/photo-1578926078640-668b1fb75403?q=80&w=1966&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
     margin: 0;
     font-family: Arial, sans-serif;
     user-select: none; /* Отключение выделения текста */
     background-size: cover; /* Фон будет покрывать весь экран */
     background-position: center; /* Фон будет центрироваться */
     background-repeat: no-repeat; /* Отключаем повторение изображения */
+}
+
+ /* Полупрозрачная подложка */
+.table-wrapper {
+    background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный белый фон */
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 1340px;
+    margin: 20px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень для глубины */
 }
 
 header {
@@ -292,6 +302,7 @@ h1 {
 .input-column {
     flex: 1; /* Каждая группа занимает равное пространство */
     margin: 0 10px; /* Отступ между группами */
+    
 }
 
 /* Убираем отступ справа у последней группы */
@@ -301,12 +312,13 @@ h1 {
 
 /* Стили для полей ввода в модальном окне */
 .modal-input {
+    
     padding: 10px;
     margin-bottom: 10px; /* Отступ между полями */
     border: 1px solid #ddd; /* Светло-серая граница */
     border-radius: 5px; /* Закругленные углы */
     font-size: 16px; /* Размер шрифта */
-    width: calc(100% - 22px); /* Учитываем отступы */
+    width: calc(100% - 22px);
 }
 
 .modal-input:focus {
@@ -321,6 +333,21 @@ h1 {
     color: #333; /* Цвет текста для подписей */
     font-weight: bold; /* Жирный шрифт для подписей */
 }
+
+/* Убираем стандартное выделение и добавляем стиль для выпадающего списка */
+.modal-input select {
+    width: 100%; /* Устанавливаем ширину 100% для select */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+}
+
 
 /* Изменяем стиль input-container для равномерного распределения */
 .input-container {
@@ -370,6 +397,56 @@ h1 {
 .modal-content p {
     margin: 5px 0; /* Отступы для параграфов */
 }
+
+
+/* Стили для выпадающего списка с ID #editStyle */
+#editStyle {
+    width: 100%; /* Установим ширину 100% для выпадающего списка */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    -webkit-appearance: none; /* Убираем стандартный вид стрелки в браузерах */
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+    background: url('data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDAwMDAwIiBoZWlnaHQ9IjQwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMTYuNWEuOTguOTggMCAwIDEtLjcyLS4zMmwtNC01YTEgMSAwIDAgMSAxLjQ0LTEuMDFMMTIgMTQuMjlsMy4yOC0zLjMyYTEgMSAwIDEgMSAxLjQ0IDEuMDFsLTQgNWEuOTguOTggMCAwIDEtLjcyLjMyWiIvPjwvc3ZnPg==') no-repeat right 10px center; /* Добавляем стрелку */
+    background-color: #fff; /* Белый фон для выпадающего списка */
+    background-size: 14px; /* Размер стрелки */
+}
+
+/* Стили для выпадающего списка при фокусе */
+#editStyle:focus {
+    border-color: #00CED1; /* Цвет границы при фокусе */
+    outline: none; /* Убираем стандартное выделение */
+}
+
+/* Универсальные стили для всех выпадающих списков */
+.select-dropdown {
+    width: 100%; /* Устанавливаем ширину 100% для всех select */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 35px; /* Добавляем больше пространства для стрелки */
+    appearance: none;
+    outline: none;
+    background: url('data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDAwMDAwIiBoZWlnaHQ9IjQwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMTYuNWEuOTguOTggMCAwIDEtLjcyLS4zMmwtNC01YTEgMSAwIDAgMSAxLjQ0LTEuMDFMMTIgMTQuMjlsMy4yOC0zLjMyYTEgMSAwIDEgMSAxLjQ0IDEuMDFsLTQgNWEuOTguOTggMCAwIDEtLjcyLjMyWiIvPjwvc3ZnPg==') no-repeat right 10px center;
+    background-color: #fff;
+    background-size: 12px;
+}
+
+/* Стиль при фокусе */
+.select-dropdown:focus {
+    border-color: #00CED1; /* Цвет границы при фокусе */
+    outline: none; /* Убираем стандартное выделение */
+}
+
+
 
 #editModal .modal-content {
     width: 50%; /* Ширина формы */
@@ -451,7 +528,7 @@ h1 {
     flex-wrap: wrap;
     justify-content: space-between;
     padding: 20px;
-    background-color: rgba(0, 206, 209, 0.15);
+    background-color: rgba(0, 206, 209, 0.5);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin: 20px auto;
     max-width: 1200px; /* Ограничение по ширине */
@@ -550,13 +627,13 @@ h1 {
 
 .seller-info h2, .auction-info h2 {
     margin-bottom: 10px;
-    color: #555;
+    color: #000000;
 }
 
 .seller-info p, .auction-info p {
     margin: 10px 0;
     font-size: 17px;
-    color: #555;
+    color: #000000;
 }
 
 /* Для мобильных устройств */
