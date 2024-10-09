@@ -150,6 +150,78 @@ h1 {
     font-size: 16px; /* Размер шрифта для ячеек */
 }
 
+/* Стили для таблицы со стилями */
+#stylesTable {
+    width: 500px; /* Фиксированная ширина таблицы */
+    margin: 20px auto; /* Центрирование таблицы */
+    border-collapse: collapse; /* Убираем двойные границы */
+    user-select: none; /* Отключение выделения текста */
+}
+
+#stylesTable th, #stylesTable td {
+    padding: 15px; /* Отступы внутри ячеек */
+    text-align: left; /* Выравнивание текста по левому краю */
+    border: 1px solid #ddd; /* Светло-серая граница */
+    user-select: none; /* Отключение выделения текста */
+}
+
+#stylesTable th {
+    background-color: #00CED1; /* Цвет фона для заголовков */
+    color: white; /* Цвет текста для заголовков */
+    font-weight: bold; /* Жирный шрифт для заголовков */
+}
+
+#stylesTable tr:nth-child(even) {
+    background-color: rgba(0, 206, 209, 0.2); /* Полупрозрачный фон для четных строк */
+}
+
+#stylesTable tr:hover {
+    background-color: rgba(221, 221, 221, 0.6); /* Полупрозрачный цвет при наведении на строку */
+    cursor: pointer; /* Указатель курсора при наведении */
+}
+
+#stylesTable td {
+    color: #333; /* Цвет текста для ячеек */
+    font-size: 16px; /* Размер шрифта для ячеек */
+}
+
+/* Стили для таблицы с материалами */
+#materialsTable {
+    width: 500px; /* Фиксированная ширина таблицы */
+    margin: 20px auto; /* Центрирование таблицы */
+    border-collapse: collapse; /* Убираем двойные границы */
+    user-select: none; /* Отключение выделения текста */
+}
+
+#materialsTable th, #materialsTable td {
+    padding: 15px; /* Отступы внутри ячеек */
+    text-align: left; /* Выравнивание текста по левому краю */
+    border: 1px solid #ddd; /* Светло-серая граница */
+    user-select: none; /* Отключение выделения текста */
+}
+
+#materialsTable th {
+    background-color: #00CED1; /* Цвет фона для заголовков */
+    color: white; /* Цвет текста для заголовков */
+    font-weight: bold; /* Жирный шрифт для заголовков */
+}
+
+#materialsTable tr:nth-child(even) {
+    background-color: rgba(0, 206, 209, 0.2); /* Полупрозрачный фон для четных строк */
+}
+
+#materialsTable tr:hover {
+    background-color: rgba(221, 221, 221, 0.6); /* Полупрозрачный цвет при наведении на строку */
+    cursor: pointer; /* Указатель курсора при наведении */
+}
+
+#materialsTable td {
+    color: #333; /* Цвет текста для ячеек */
+    font-size: 16px; /* Размер шрифта для ячеек */
+}
+
+
+
 /* Стили для полей ввода */
 .input-container {
     display: flex;
@@ -225,6 +297,38 @@ h1 {
     background-color: #008B8B; /* Цвет при наведении */
 }
 
+.editStyleButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.editStyleButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+.editMaterialButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.editMaterialButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+
+
 /* Стили для кнопки "Сохранить" */
 .saveButton {
     padding: 10px;
@@ -243,7 +347,7 @@ h1 {
 }
 
 /* Стили для кнопки "Удалить" */
-.deleteButton {
+.deleteButton, .deleteStyleButton {
     padding: 10px;
     background-color: #00CED1; /* Цвет фона */
     color: white; /* Цвет текста */
@@ -254,9 +358,26 @@ h1 {
     transition: background-color 0.3s; /* Плавный переход цвета фона */
 }
 
-.deleteButton:hover {
+.deleteButton, .deleteStyleButton:hover {
     background-color: #008B8B; /* Цвет при наведении */
 }
+
+.deleteMaterialButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.deleteMaterialButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+
 
 /* Стили для кнопки "Добавить картину" */
 .addButton {

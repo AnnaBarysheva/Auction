@@ -34,7 +34,7 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </header>
 
-    <div class="input-container">
+    <!-- <div class="input-container">
     <div class="input-group">
         <input type="text" id="nameInput" placeholder="Название картины">
         <input type="text" id="styleInput" placeholder="Стиль">
@@ -47,7 +47,7 @@ if (!isset($_SESSION['user_id'])) {
             <button id="searchButton">Найти</button>
             <button id="resetButton">Сбросить фильтры</button>
         </div>
-    </div>
+    </div> -->
     
     
 </div>
@@ -76,6 +76,30 @@ if (isset($_SESSION['user_id'])) {
         $isAdmin = ($user['role'] === 'admin');
     }
 }
+
+ // Отображение полей для поиска только если пользователь не администратор
+ if (!$isAdmin) {
+    ?>
+    <div class="input-container">
+        <div class="input-group">
+            <input type="text" id="nameInput" placeholder="Название картины">
+            <input type="text" id="styleInput" placeholder="Стиль">
+            <input type="text" id="yearInput" placeholder="Год создания">
+        </div>
+        <div class="input-group">
+            <input type="text" id="authorInput" placeholder="Автор">
+            <input type="text" id="sellerInput" placeholder="Продавец">
+            <div class="button-group">
+                <button id="searchButton">Найти</button>
+                <button id="resetButton">Сбросить фильтры</button>
+            </div>
+        </div>
+    </div>
+    <?php
+    } 
+?>
+
+<?php
 
 
 // // SQL-запрос для получения стилей из таблицы Styles
@@ -326,29 +350,54 @@ if (!$isAdmin) {
 // Если пользователь администратор, выводим таблицы стилей и материалов
 if ($isAdmin) {
     // Таблица стилей
-    $stylesQuery = "SELECT style_name FROM Styles";
+    $stylesQuery = "SELECT * FROM Styles";
     $stylesResult = mysqli_query($link, $stylesQuery);
 
     if ($stylesResult) {
         echo "<h2>Стили</h2>";
         echo "<table border='1' id='stylesTable'>";
-        echo "<tr><th>Стиль</th></tr>";
+    
+        // Добавляем столбец "Действия" в заголовок таблицы
+        echo "<tr><th>Стиль</th><th>Действия</th></tr>";
+        
         while ($row = mysqli_fetch_assoc($stylesResult)) {
-            echo "<tr><td>" . $row['style_name'] . "</td></tr>";
+            echo "<tr data-id='" . $row['id_style'] . "'>"; // Используйте правильный id стиля, если он есть в БД
+            echo "<td>" . $row['style_name'] . "</td>";
+    
+            // Добавляем кнопки "Редактировать" и "Удалить"
+            echo "<td>
+                    <button class='editStyleButton' data-id='" . $row['id_style'] . "'>Редактировать</button>
+                    <button class='deleteStyleButton' data-id='" . $row['id_style'] . "'>Удалить</button>
+                  </td>";
+            
+            echo "</tr>";
         }
         echo "</table>";
     }
 
     // Таблица материалов
-    $materialsQuery = "SELECT material_name FROM Materials";
+    $materialsQuery = "SELECT * FROM Materials";
     $materialsResult = mysqli_query($link, $materialsQuery);
 
     if ($materialsResult) {
         echo "<h2>Материалы</h2>";
         echo "<table border='1' id='materialsTable'>";
-        echo "<tr><th>Материал</th></tr>";
+    
+        // Добавляем столбец "Действия" в заголовок таблицы
+        echo "<tr><th>Материал</th><th>Действия</th></tr>";
+        
         while ($row = mysqli_fetch_assoc($materialsResult)) {
-            echo "<tr><td>" . $row['material_name'] . "</td></tr>";
+            // Используем правильный id материала из структуры таблицы
+            echo "<tr data-id='" . $row['id_material'] . "'>"; // id_material вместо material_id
+            echo "<td>" . $row['material_name'] . "</td>";
+    
+            // Добавляем кнопки "Редактировать" и "Удалить"
+            echo "<td>
+                    <button class='editMaterialButton' data-id='" . $row['id_material'] . "'>Редактировать</button>
+                    <button class='deleteMaterialButton' data-id='" . $row['id_material'] . "'>Удалить</button>
+                  </td>";
+            
+            echo "</tr>";
         }
         echo "</table>";
     }
