@@ -106,7 +106,7 @@ if (!$materialsResult) {
 }
 
 // SQL-запрос в зависимости от роли пользователя
-if ($isSeller || $isAdmin) {
+if ($isSeller) {
     $sql = "
         SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
                Styles.style_name, Materials.material_name
@@ -116,9 +116,21 @@ if ($isSeller || $isAdmin) {
         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
         JOIN Styles ON Paintings.id_style = Styles.id_style
         JOIN Materials ON Paintings.id_material = Materials.id_material
+        WHERE Paintings.id_user = {$_SESSION['user_id']}
         
     ";
-} else {
+} elseif (!$isAdmin) {
+//     $sql = "
+//         SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+//                Styles.style_name, Materials.material_name
+//         FROM Paintings
+//         JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+//         JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+//         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+//         JOIN Styles ON Paintings.id_style = Styles.id_style
+//         JOIN Materials ON Paintings.id_material = Materials.id_material
+//     ";
+// } else {
     $sql = "
         SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
                Styles.style_name, Materials.material_name
@@ -254,63 +266,100 @@ function createDropdownFromArray($dataArray, $dropdownId, $defaultOptionText) {
 }
 
 
-// Выполнение запроса
-$result = mysqli_query($link, $sql);
+if (!$isAdmin) {
+    $result = mysqli_query($link, $sql);
 
-if ($result) {
-    if (mysqli_num_rows($result) > 0) {
-        echo "<table border='1' id='paintingsTable'>";
-        echo "<tr>
-                <th>Название картины</th>
-                <th>Стиль</th>
-                <th>Год создания</th>
-                <th>Автор</th>
-                <th>Продавец</th>";
+    if ($result) {
+        if (mysqli_num_rows($result) > 0) {
+            echo "<table border='1' id='paintingsTable'>";
+            echo "<tr>
+                    <th>Название картины</th>
+                    <th>Стиль</th>
+                    <th>Год создания</th>
+                    <th>Автор</th>
+                    <th>Продавец</th>";
 
-        // Выводим столбец "Действия", если это продавец или администратор
-        if ($isSeller || $isAdmin) {
-            echo "<th>Действия</th>";
-        }
-
-        echo "</tr>";
-
-        // Вывод каждой строки данных
-        while ($row = mysqli_fetch_assoc($result)) {
-            echo "<tr data-id='" . $row['id_painting'] . "'>";
-            echo "<td>" . $row['paint_name'] . "</td>";
-            echo "<td>" . $row['style_name'] . "</td>";
-            echo "<td>" . $row['creation_year'] . "</td>";
-            echo "<td>" . $row['author'] . "</td>";
-            echo "<td>" . $row['full_name'] . "</td>";
-
-            // Добавляем кнопки "Редактировать" и "Удалить", если это продавец или администратор
-            if ($isSeller || $isAdmin) {
-                echo "<td>
-                        <button class='editButton' data-id='" . $row['id_painting'] . "'>Редактировать</button>
-                        <button class='deleteButton' data-id='" . $row['id_painting'] . "'>Удалить</button>
-                      </td>";
+            // Выводим столбец "Действия", если это продавец
+            if ($isSeller) {
+                echo "<th>Действия</th>";
             }
 
             echo "</tr>";
+
+            // Вывод каждой строки данных
+            while ($row = mysqli_fetch_assoc($result)) {
+                echo "<tr data-id='" . $row['id_painting'] . "'>";
+                echo "<td>" . $row['paint_name'] . "</td>";
+                echo "<td>" . $row['style_name'] . "</td>";
+                echo "<td>" . $row['creation_year'] . "</td>";
+                echo "<td>" . $row['author'] . "</td>";
+                echo "<td>" . $row['full_name'] . "</td>";
+
+                // Добавляем кнопки "Редактировать" и "Удалить", если это продавец
+                if ($isSeller) {
+                    echo "<td>
+                            <button class='editButton' data-id='" . $row['id_painting'] . "'>Редактировать</button>
+                            <button class='deleteButton' data-id='" . $row['id_painting'] . "'>Удалить</button>
+                          </td>";
+                }
+
+                echo "</tr>";
+            }
+            echo "</table>";
+
+            // Кнопка "Добавить картину", доступная только для продавцов
+            if ($isSeller) {
+                echo "<div class='button-container'>";
+                echo "<button id='addPaintingButton' class='addButton'>Добавить картину</button>";
+                echo "</div>";
+            }
+        } else {
+            echo "Нет доступных картин для отображения.";
+        }
+
+        mysqli_free_result($result);
+    } else {
+        echo "Ошибка выполнения запроса: " . mysqli_error($link);
+    }
+}
+
+// Если пользователь администратор, выводим таблицы стилей и материалов
+if ($isAdmin) {
+    // Таблица стилей
+    $stylesQuery = "SELECT style_name FROM Styles";
+    $stylesResult = mysqli_query($link, $stylesQuery);
+
+    if ($stylesResult) {
+        echo "<h2>Стили</h2>";
+        echo "<table border='1' id='stylesTable'>";
+        echo "<tr><th>Стиль</th></tr>";
+        while ($row = mysqli_fetch_assoc($stylesResult)) {
+            echo "<tr><td>" . $row['style_name'] . "</td></tr>";
         }
         echo "</table>";
-
-        // Кнопка "Добавить картину", доступная только для продавцов и администраторов
-        if ($isSeller || $isAdmin) {
-            echo "<div class='button-container'>";
-            echo "<button id='addPaintingButton' class='addButton'>Добавить картину</button>";
-            echo "<button id='addStyleButton' class='addButton'>Добавить стиль</button>";
-            echo "<button id='addMaterialButton' class='addButton'>Добавить материал</button>";
-            echo "</div>";
-        }
-    } else {
-        echo "Нет доступных картин для отображения.";
     }
 
-    mysqli_free_result($result);
-} else {
-    echo "Ошибка выполнения запроса: " . mysqli_error($link);
+    // Таблица материалов
+    $materialsQuery = "SELECT material_name FROM Materials";
+    $materialsResult = mysqli_query($link, $materialsQuery);
+
+    if ($materialsResult) {
+        echo "<h2>Материалы</h2>";
+        echo "<table border='1' id='materialsTable'>";
+        echo "<tr><th>Материал</th></tr>";
+        while ($row = mysqli_fetch_assoc($materialsResult)) {
+            echo "<tr><td>" . $row['material_name'] . "</td></tr>";
+        }
+        echo "</table>";
+    }
+
+    // Кнопки для добавления стиля и материала
+    echo "<div class='button-container'>";
+    echo "<button id='addStyleButton' class='addButton'>Добавить стиль</button>";
+    echo "<button id='addMaterialButton' class='addButton'>Добавить материал</button>";
+    echo "</div>";
 }
+
 
 // Закрытие соединения
 mysqli_close($link);
@@ -558,11 +607,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     const addModal = document.getElementById('addModal');
     const closeAddModal = document.getElementById('closeAddModal');
 
-         // Проверка, было ли уже показано модальное окно
-         if (!localStorage.getItem('infoModalShown')) {
-        showModal();
-        localStorage.setItem('infoModalShown', 'true'); // Устанавливаем флаг в localStorage
-    }
+        //  // Проверка, было ли уже показано модальное окно
+        //  if (!localStorage.getItem('infoModalShown')) {
+        // showModal();
+        // localStorage.setItem('infoModalShown', 'true'); // Устанавливаем флаг в localStorage
+    //}
 
 // Проходим по всем строкам таблицы
 for (var i = 1; i < rows.length; i++) {
