@@ -1,4 +1,5 @@
 <?php
+session_start();
 //    $link = mysqli_connect("localhost", "root", "alina", "Auction");
 //$link = mysqli_connect("localhost", "root", "root_Passwrd132", "Auction");
 $link = include 'db_connect.php';
@@ -8,6 +9,7 @@ if ($link == false) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $userId = $_SESSION['user_id'];
     $name = $_POST['paint_name'];
     $size = $_POST['size'];
     $styleId = $_POST['styles'];  // Обратите внимание на имя поля, возможно, это 'styles'
@@ -40,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $auctionId = mysqli_insert_id($link);
 
             // Вставляем картину
-            $insertPainting = "INSERT INTO Paintings (paint_name, size, id_material, id_style, creation_year, author, image_path, id_seller) VALUES ('$name', '$size', '$materialId', '$styleId', '$year', '$author', '$imagePath', '$sellerId')";
+            $insertPainting = "INSERT INTO Paintings (paint_name, size, id_material, id_style, creation_year, author, image_path, id_seller, id_user) VALUES ('$name', '$size', '$materialId', '$styleId', '$year', '$author', '$imagePath', '$sellerId', '$userId')";
             if (mysqli_query($link, $insertPainting)) {
                 $paintingId = mysqli_insert_id($link);
                 

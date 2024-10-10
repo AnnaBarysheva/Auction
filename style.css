@@ -8,15 +8,18 @@ body {
     background-repeat: no-repeat; /* Отключаем повторение изображения */
 }
 
- /* Полупрозрачная подложка */
-.table-wrapper {
-    background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный белый фон */
+.tables-container {
+    display: flex; /* Выстраиваем таблицы по горизонтали */
+    justify-content: space-between; /* Пространство между таблицами */
+    align-items: flex-start; /* Выравнивание таблиц по верхнему краю */
+    gap: 20px; /* Расстояние между таблицами */
+    max-width: 1200px; /* Максимальная ширина контейнера */
+    margin: 0 auto; /* Центрируем контейнер */
     padding: 20px;
-    border-radius: 10px;
-    max-width: 1340px;
-    margin: 20px auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень для глубины */
 }
+
+
+
 
 header {
     background-color: #00CED1; /* Цвет фона */
@@ -160,6 +163,83 @@ h1 {
     font-size: 16px; /* Размер шрифта для ячеек */
 }
 
+
+ /* Полупрозрачная подложка */
+ .table-wrapper {
+    background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный белый фон */
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 1340px;
+    margin: 20px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень для глубины */
+    
+}
+
+/* Общий контейнер для таблиц с белым фоном */
+.main-tables-wrapper {
+    background-color: rgba(255, 255, 255, 0.9); /* Белый фон */
+    padding: 20px;
+    border-radius: 10px; /* Закругленные углы */
+    max-width: 1340px; /* Максимальная ширина общего контейнера */
+    margin: 20px auto; /* Центрирование контейнера */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень для глубины */
+}
+
+/* Flex-контейнер для таблиц */
+.tables-container {
+    display: flex; /* Выстраиваем таблицы по горизонтали */
+    justify-content: space-between; /* Пространство между таблицами */
+    gap: 20px; /* Расстояние между таблицами */
+    align-items: flex-start; /* Выравнивание таблиц по верхнему краю */
+    padding: 20px; /* Отступы для красоты */
+}
+
+/* Индивидуальные контейнеры для таблиц */
+.styles-table-container, .materials-table-container {
+    flex: 1; /* Таблицы занимают равное пространство */
+    display: flex;
+    justify-content: center; /* Центрируем таблицы внутри их контейнеров */
+}
+
+/* Таблицы должны занимать больше ширины */
+#stylesTable, #materialsTable {
+    width: 90%; /* Таблицы растягиваются до 90% ширины контейнера */
+    max-width: 600px; /* Максимальная ширина таблицы */
+    border-collapse: collapse; /* Убираем двойные границы */
+    user-select: none; /* Отключение выделения текста */
+}
+
+#stylesTable th, #materialsTable th,
+#stylesTable td, #materialsTable td {
+    padding: 15px; /* Отступы внутри ячеек */
+    text-align: left; /* Выравнивание текста по левому краю */
+    border: 1px solid #ddd; /* Светло-серая граница */
+    user-select: none; /* Отключение выделения текста */
+}
+
+#stylesTable th, #materialsTable th {
+    background-color: #00CED1; /* Цвет фона для заголовков */
+    color: white; /* Цвет текста для заголовков */
+    font-weight: bold; /* Жирный шрифт для заголовков */
+}
+
+#stylesTable tr:nth-child(even), #materialsTable tr:nth-child(even) {
+    background-color: rgba(0, 206, 209, 0.2); /* Полупрозрачный фон для четных строк */
+}
+
+#stylesTable tr:hover, #materialsTable tr:hover {
+    background-color: rgba(221, 221, 221, 0.6); /* Полупрозрачный цвет при наведении на строку */
+    cursor: pointer; /* Указатель курсора при наведении */
+}
+
+#stylesTable td, #materialsTable td {
+    color: #333; /* Цвет текста для ячеек */
+    font-size: 16px; /* Размер шрифта для ячеек */
+}
+
+
+
+
 /* Стили для полей ввода */
 .input-container {
     display: flex;
@@ -235,6 +315,38 @@ h1 {
     background-color: #008B8B; /* Цвет при наведении */
 }
 
+.editStyleButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.editStyleButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+.editMaterialButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.editMaterialButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+
+
 /* Стили для кнопки "Сохранить" */
 .saveButton {
     padding: 10px;
@@ -268,6 +380,39 @@ h1 {
     background-color: #008B8B; /* Цвет при наведении */
 }
 
+.deleteStyleButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.deleteStyleButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+
+.deleteMaterialButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.deleteMaterialButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+
+
 /* Стили для кнопки "Добавить картину" */
 .addButton {
     padding: 10px;
@@ -289,6 +434,7 @@ h1 {
     justify-content: center; /* Центрируем содержимое по горизонтали */
     margin-top: 20px; /* Отступ сверху */
     width: 100%; /* Ширина на 100% */
+   
 }
 
 /* Стили для контейнера с полями ввода */

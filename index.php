@@ -34,7 +34,7 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </header>
 
-    <div class="input-container">
+    <!-- <div class="input-container">
     <div class="input-group">
         <input type="text" id="nameInput" placeholder="Название картины">
         <input type="text" id="styleInput" placeholder="Стиль">
@@ -47,7 +47,7 @@ if (!isset($_SESSION['user_id'])) {
             <button id="searchButton">Найти</button>
             <button id="resetButton">Сбросить фильтры</button>
         </div>
-    </div>
+    </div> -->
     
     
 </div>
@@ -76,6 +76,30 @@ if (isset($_SESSION['user_id'])) {
         $isAdmin = ($user['role'] === 'admin');
     }
 }
+
+ // Отображение полей для поиска только если пользователь не администратор
+ if (!$isAdmin) {
+    ?>
+    <div class="input-container">
+        <div class="input-group">
+            <input type="text" id="nameInput" placeholder="Название картины">
+            <input type="text" id="styleInput" placeholder="Стиль">
+            <input type="text" id="yearInput" placeholder="Год создания">
+        </div>
+        <div class="input-group">
+            <input type="text" id="authorInput" placeholder="Автор">
+            <input type="text" id="sellerInput" placeholder="Продавец">
+            <div class="button-group">
+                <button id="searchButton">Найти</button>
+                <button id="resetButton">Сбросить фильтры</button>
+            </div>
+        </div>
+    </div>
+    <?php
+    } 
+?>
+
+<?php
 
 
 // // SQL-запрос для получения стилей из таблицы Styles
@@ -116,7 +140,7 @@ while ($row = mysqli_fetch_assoc($materialsResult)) {
 }
 
 // SQL-запрос в зависимости от роли пользователя
-if ($isSeller || $isAdmin) {
+if ($isSeller) {
     $sql = "
         SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
                Styles.style_name, Materials.material_name
@@ -126,9 +150,21 @@ if ($isSeller || $isAdmin) {
         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
         JOIN Styles ON Paintings.id_style = Styles.id_style
         JOIN Materials ON Paintings.id_material = Materials.id_material
+        WHERE Paintings.id_user = {$_SESSION['user_id']}
         
     ";
-} else {
+} elseif (!$isAdmin) {
+//     $sql = "
+//         SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+//                Styles.style_name, Materials.material_name
+//         FROM Paintings
+//         JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+//         JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+//         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+//         JOIN Styles ON Paintings.id_style = Styles.id_style
+//         JOIN Materials ON Paintings.id_material = Materials.id_material
+//     ";
+// } else {
     $sql = "
         SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
                Styles.style_name, Materials.material_name
@@ -287,74 +323,455 @@ function createDropdownFromArray($dataArray, $dropdownId, $defaultOptionText, $c
 
 
 
-// Выполнение запроса
-$result = mysqli_query($link, $sql);
+if (!$isAdmin) {
+    $result = mysqli_query($link, $sql);
 
+    if ($result) {
+        if (mysqli_num_rows($result) > 0) {
+            echo "<div class='table-wrapper'>";
+            echo "<table border='1' id='paintingsTable'>";
+            echo "<tr>
+                    <th>Название картины</th>
+                    <th>Стиль</th>
+                    <th>Год создания</th>
+                    <th>Автор</th>
+                    <th>Продавец</th>";
 
-if ($result) {
-    if (mysqli_num_rows($result) > 0) {
-
-        echo "<div class='table-wrapper'>";
-
-        echo "<table border='1' id='paintingsTable'>";
-        echo "<tr>
-                <th>Название картины</th>
-                <th>Стиль</th>
-                <th>Год создания</th>
-                <th>Автор</th>
-                <th>Продавец</th>";
-
-        // Выводим столбец "Действия", если это продавец или администратор
-        if ($isSeller || $isAdmin) {
-            echo "<th>Действия</th>";
-        }
-
-        echo "</tr>";
-
-        // Вывод каждой строки данных
-        while ($row = mysqli_fetch_assoc($result)) {
-            echo "<tr data-id='" . $row['id_painting'] . "'>";
-            echo "<td>" . $row['paint_name'] . "</td>";
-            echo "<td>" . $row['style_name'] . "</td>";
-            echo "<td>" . $row['creation_year'] . "</td>";
-            echo "<td>" . $row['author'] . "</td>";
-            echo "<td>" . $row['full_name'] . "</td>";
-
-            // Добавляем кнопки "Редактировать" и "Удалить", если это продавец или администратор
-            if ($isSeller || $isAdmin) {
-                echo "<td>
-                        <button class='editButton' data-id='" . $row['id_painting'] . "'>Редактировать</button>
-                        <button class='deleteButton' data-id='" . $row['id_painting'] . "'>Удалить</button>
-                      </td>";
+            // Выводим столбец "Действия", если это продавец
+            if ($isSeller) {
+                echo "<th>Действия</th>";
             }
 
             echo "</tr>";
+
+            // Вывод каждой строки данных
+            while ($row = mysqli_fetch_assoc($result)) {
+                echo "<tr data-id='" . $row['id_painting'] . "'>";
+                echo "<td>" . $row['paint_name'] . "</td>";
+                echo "<td>" . $row['style_name'] . "</td>";
+                echo "<td>" . $row['creation_year'] . "</td>";
+                echo "<td>" . $row['author'] . "</td>";
+                echo "<td>" . $row['full_name'] . "</td>";
+
+                // Добавляем кнопки "Редактировать" и "Удалить", если это продавец
+                if ($isSeller) {
+                    echo "<td>
+                            <button class='editButton' data-id='" . $row['id_painting'] . "'>Редактировать</button>
+                            <button class='deleteButton' data-id='" . $row['id_painting'] . "'>Удалить</button>
+                          </td>";
+                }
+
+                echo "</tr>";
+            }
+            echo "</table>";
+
+            echo "</div>";
+
+            // Кнопка "Добавить картину", доступная только для продавцов
+            if ($isSeller) {
+                echo "<div class='button-container'>";
+                echo "<button id='addPaintingButton' class='addButton'>Добавить картину</button>";
+                echo "</div>";
+            }
+        } else {
+            echo "Нет доступных картин для отображения.";
+            if ($isSeller) {
+                echo "<div class='button-container'>";
+                echo "<button id='addPaintingButton' class='addButton'>Добавить картину</button>";
+                echo "</div>";
+            }
+        }
+
+        mysqli_free_result($result);
+    } else {
+        echo "Ошибка выполнения запроса: " . mysqli_error($link);
+    }
+}
+
+
+
+// Если пользователь администратор, выводим таблицы стилей и материалов
+if ($isAdmin) {
+    // Запросы на получение данных из таблиц
+    $stylesQuery = "SELECT * FROM Styles";
+    $stylesResult = mysqli_query($link, $stylesQuery);
+    
+    $materialsQuery = "SELECT * FROM Materials";
+    $materialsResult = mysqli_query($link, $materialsQuery);
+    
+    // Общий контейнер для таблиц с белой подложкой
+    echo "<div class='main-tables-wrapper'>"; // Начало общего контейнера
+    
+    echo "<div class='tables-container'>"; // Flex-контейнер для обеих таблиц
+    
+    // Таблица стилей
+    if ($stylesResult) {
+        echo "<div class='styles-table-container'>"; // Контейнер для таблицы стилей
+        
+        echo "<table border='1' id='stylesTable'>";
+        echo "<tr><th>Стиль</th><th>Действия</th></tr>";
+        
+        while ($row = mysqli_fetch_assoc($stylesResult)) {
+            echo "<tr data-id='" . $row['id_style'] . "'>";
+            echo "<td>" . $row['style_name'] . "</td>";
+            echo "<td>
+                    <button class='editStyleButton' data-id='" . $row['id_style'] . "'>Редактировать</button>
+                    <button class='deleteStyleButton' data-id='" . $row['id_style'] . "'>Удалить</button>
+                  </td>";
+            echo "</tr>";
         }
         echo "</table>";
-
-        // Закрываем div для подложки
-        echo "</div>";
-
-        // Кнопка "Добавить картину", доступная только для продавцов и администраторов
-        if ($isSeller || $isAdmin) {
-            echo "<div class='button-container'>";
-            echo "<button id='addPaintingButton' class='addButton'>Добавить картину</button>";
-            echo "<button id='addStyleButton' class='addButton'>Добавить стиль</button>";
-            echo "<button id='addMaterialButton' class='addButton'>Добавить материал</button>";
-            echo "</div>";
-        }
-    } else {
-        echo "Нет доступных картин для отображения.";
+        echo "</div>"; // Закрываем styles-table-container
     }
 
-    mysqli_free_result($result);
-} else {
-    echo "Ошибка выполнения запроса: " . mysqli_error($link);
+    // Таблица материалов
+    if ($materialsResult) {
+        echo "<div class='materials-table-container'>"; // Контейнер для таблицы материалов
+        
+        echo "<table border='1' id='materialsTable'>";
+        echo "<tr><th>Материал</th><th>Действия</th></tr>";
+        
+        while ($row = mysqli_fetch_assoc($materialsResult)) {
+            echo "<tr data-id='" . $row['id_material'] . "'>";
+            echo "<td>" . $row['material_name'] . "</td>";
+            echo "<td>
+                    <button class='editMaterialButton' data-id='" . $row['id_material'] . "'>Редактировать</button>
+                    <button class='deleteMaterialButton' data-id='" . $row['id_material'] . "'>Удалить</button>
+                  </td>";
+            echo "</tr>";
+        }
+        echo "</table>";
+        echo "</div>"; // Закрываем materials-table-container
+    }
+
+    echo "</div>"; // Закрываем flex-контейнер для таблиц
+
+    echo "</div>"; // Закрываем общий div main-tables-wrapper
+
+    // Кнопки для добавления стиля и материала
+    echo "<div class='button-container'>";
+    echo "<button id='addStyleButton' class='addButton'>Добавить стиль</button>";
+    echo "<button id='addMaterialButton' class='addButton'>Добавить материал</button>";
+    echo "</div>";
 }
+
 
 // Закрытие соединения
 mysqli_close($link);
 ?>
+
+
+<!-- Модальное окно для добавления стиля -->
+
+<div id="addStyleModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeAddStyleModal">&times;</span>
+        <h2>Добавить стиль</h2>
+        <form id="styleForm" action="add_style.php" method="POST">
+            <label for="style_name">Название стиля:</label>
+            <input type="text" class="modal-input" id="styleName" name="style_name" placeholder="Название стиля" required maxlength="100">
+            <button type="submit" class="saveButton">Сохранить</button>
+        </form>
+    </div>
+</div>
+<script>
+document.getElementById('addStyleButton').addEventListener('click', function() {
+    // Открываем модальное окно
+    document.getElementById('addStyleModal').style.display = 'block';
+});
+
+document.getElementById('closeAddStyleModal').addEventListener('click', function() {
+    // Закрываем модальное окно
+    document.getElementById('addStyleModal').style.display = 'none';
+});
+
+window.onclick = function(event) {
+    // Закрываем модальное окно при клике вне его
+    var modal = document.getElementById('addStyleModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+};
+
+// Обработчик отправки формы
+document.getElementById('styleForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Предотвращаем стандартную отправку формы
+
+    var styleName = document.getElementById('styleName').value.trim();
+
+    // Проверяем на пустое значение или наличие только пробелов
+    if (!styleName) {
+        alert('Пожалуйста, введите название стиля.');
+        return;
+    }
+
+    // Оборачиваем отправку в handleWithConnection (если требуется)
+    handleWithConnection(() => {
+        // Собираем данные формы
+        var formData = new FormData(this);
+
+        fetch('add_style.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data.startsWith('Ошибка:')) {
+                alert(data); // Если есть ошибка, выводим её
+            } else {
+                // Закрываем модальное окно и обновляем страницу или обновляем список стилей
+                document.getElementById('addStyleModal').style.display = 'none';
+                window.location.reload(); // Обновляем страницу
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
+    });
+});
+</script>
+
+<div id="addMaterialModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeAddMaterialModal">&times;</span>
+        <h2>Добавить материал</h2>
+        <form id="materialForm" action="add_material.php" method="POST">
+            <label for="material_name">Название материала:</label>
+            <input type="text" class="modal-input" id="materialName" name="material_name" placeholder="Название материала" required maxlength="100">
+            <button type="submit" class="saveButton">Сохранить</button>
+        </form>
+    </div>
+</div>
+<script>
+// Открытие модального окна
+document.getElementById('addMaterialButton').addEventListener('click', function() {
+    document.getElementById('addMaterialModal').style.display = 'block';
+});
+
+// Закрытие модального окна
+document.getElementById('closeAddMaterialModal').addEventListener('click', function() {
+    document.getElementById('addMaterialModal').style.display = 'none';
+});
+
+// Закрытие при клике вне модального окна
+window.onclick = function(event) {
+    var modal = document.getElementById('addMaterialModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+};
+
+// Обработчик отправки формы
+document.getElementById('materialForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Предотвращаем стандартную отправку формы
+
+    var materialName = document.getElementById('materialName').value.trim();
+
+    // Проверяем на пустое значение или наличие только пробелов
+    if (!materialName) {
+        alert('Пожалуйста, введите название материала.');
+        return;
+    }
+
+    // AJAX запрос для отправки данных
+    var formData = new FormData(this);
+
+    fetch('add_material.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data.startsWith('Ошибка:')) {
+            alert(data); // Выводим сообщение об ошибке, если что-то не так
+        } else {
+            document.getElementById('addMaterialModal').style.display = 'none'; // Закрываем модальное окно
+            window.location.reload(); // Обновляем страницу
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+    });
+});
+</script>
+
+
+<div id="editStyleModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeEditStyleModal">&times;</span>
+        <h2>Редактировать стиль</h2>
+        <form id="editStyleForm" action="update_style.php" method="POST">
+            <input type="hidden" id="editStyleId" name="id_style"> <!-- Скрытое поле для ID стиля -->
+
+            <label for="editStyleName">Название картины:</label>
+            <input type="text" class="modal-input" id="editStyleName" name="style_name" placeholder="Введите название стиля" required maxlength="255">
+
+            <button type="submit" class="saveButton">Сохранить изменения</button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Открытие модального окна для редактирования стиля
+document.querySelectorAll('.editStyleButton').forEach(button => {
+    button.addEventListener('click', function() {
+        var styleId = this.getAttribute('data-id'); // Получаем ID стиля
+        document.getElementById('editStyleId').value = styleId; // Устанавливаем ID в скрытое поле формы
+
+        // Открываем модальное окно
+        document.getElementById('editStyleModal').style.display = 'block';
+    });
+});
+
+// Закрываем модальное окно
+document.getElementById('closeEditStyleModal').addEventListener('click', function() {
+    document.getElementById('editStyleModal').style.display = 'none';
+});
+
+// Обработчик отправки формы для редактирования стиля
+document.getElementById('editStyleForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Предотвращаем стандартную отправку формы
+
+    var formData = new FormData(this); // Получаем данные формы
+
+    fetch('update_style.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data.startsWith('Ошибка:')) {
+            alert(data); // Если возникла ошибка, показываем её
+        } else {
+            // Закрываем модальное окно и перезагружаем страницу
+            document.getElementById('editStyleModal').style.display = 'none';
+            window.location.reload(); // Обновляем страницу для применения изменений
+        }
+    })
+    .catch(error => console.error('Ошибка:', error));
+});
+</script>
+
+
+
+<div id="editMaterialModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeEditMaterialModal">&times;</span>
+        <h2>Редактировать материал</h2>
+        <form id="editMaterialForm" action="update_material.php" method="POST">
+            <input type="hidden" id="editMaterialId" name="id_material"> <!-- Скрытое поле для ID материала -->
+
+            <label for="editMaterialName">Название материала:</label>
+            <input type="text" class="modal-input" id="editMaterialName" name="material_name" placeholder="Введите название материала" required maxlength="255">
+
+            <button type="submit" class="saveButton">Сохранить изменения</button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Открытие модального окна для редактирования материала
+document.querySelectorAll('.editMaterialButton').forEach(button => {
+    button.addEventListener('click', function() {
+        var materialId = this.getAttribute('data-id'); // Получаем ID материала
+        document.getElementById('editMaterialId').value = materialId; // Устанавливаем ID в скрытое поле формы
+
+        // Открываем модальное окно
+        document.getElementById('editMaterialModal').style.display = 'block';
+    });
+});
+
+// Закрываем модальное окно
+document.getElementById('closeEditMaterialModal').addEventListener('click', function() {
+    document.getElementById('editMaterialModal').style.display = 'none';
+});
+
+// Обработчик отправки формы для редактирования материала
+document.getElementById('editMaterialForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Предотвращаем стандартную отправку формы
+
+    var formData = new FormData(this); // Получаем данные формы
+
+    fetch('update_material.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data.startsWith('Ошибка:')) {
+            alert(data); // Если возникла ошибка, показываем её
+        } else {
+            // Закрываем модальное окно и перезагружаем страницу
+            document.getElementById('editMaterialModal').style.display = 'none';
+            window.location.reload(); // Обновляем страницу для применения изменений
+        }
+    })
+    .catch(error => console.error('Ошибка:', error));
+});
+</script>
+
+<script>
+
+// Обновите обработчики для кнопки удаления стиля
+for (var button of document.getElementsByClassName('deleteStyleButton')) {
+    button.addEventListener('click', function(event) {
+        event.stopPropagation(); // Предотвращаем всплытие события
+
+        // Обертываем основное действие в handleWithConnection
+        handleWithConnection(() => {
+            var id = this.getAttribute('data-id');
+
+            console.log("Запрос на удаление стиля с ID:", id); // Отладочное сообщение
+
+            if (confirm('Вы уверены, что хотите удалить этот стиль?')) {
+                fetch('delete_style.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id_style: id })
+                })
+                .then(response => {
+                    console.log("Ответ от сервера:", response); // Отладочное сообщение
+                    return response.text(); // Измените на .text(), чтобы увидеть оригинальный ответ
+                })
+                .then(data => {
+                    console.log("Полученные данные:", data); // Отладочное сообщение
+                    try {
+                        var jsonData = JSON.parse(data); // Парсим JSON
+                        if (jsonData.success) {
+                            // Удаляем строку из таблицы
+                            var row = this.closest('tr');
+                            row.parentNode.removeChild(row);
+                            alert('Стиль успешно удалён.');
+                        } else {
+                            alert('Ошибка при удалении стиля: ' + jsonData.message);
+                        }
+                    } catch (e) {
+                        console.error("Ошибка при парсинге JSON:", e); // Отладочное сообщение
+                        alert('Ответ сервера не является допустимым JSON.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка подключения к серверу. Попробуйте позже.');
+                });
+            }
+        });
+    });
+}
+
+</script>
+
+
+
+
+
+
+
+
+
+
 
 
 <script>
@@ -598,11 +1015,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     const addModal = document.getElementById('addModal');
     const closeAddModal = document.getElementById('closeAddModal');
 
-         // Проверка, было ли уже показано модальное окно
-         if (!localStorage.getItem('infoModalShown')) {
-        showModal();
-        localStorage.setItem('infoModalShown', 'true'); // Устанавливаем флаг в localStorage
-    }
+        //  // Проверка, было ли уже показано модальное окно
+        //  if (!localStorage.getItem('infoModalShown')) {
+        // showModal();
+        // localStorage.setItem('infoModalShown', 'true'); // Устанавливаем флаг в localStorage
+    //}
 
 // Проходим по всем строкам таблицы
 for (var i = 1; i < rows.length; i++) {
