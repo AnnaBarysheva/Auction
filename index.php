@@ -5,6 +5,7 @@ session_start(); // Начинаем сессию в начале файла
 if (!isset($_SESSION['user_id'])) {
     $_SESSION['user_id'] = null; // Устанавливаем в null, если не установлен
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -142,14 +143,14 @@ while ($row = mysqli_fetch_assoc($materialsResult)) {
 // SQL-запрос в зависимости от роли пользователя
 if ($isSeller) {
     $sql = "
-                SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+        SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
                Styles.style_name, Materials.material_name
         FROM Paintings
         JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
         JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
-        LEFT JOIN Styles ON Paintings.id_style = Styles.id_style -- Используем LEFT JOIN
-        JOIN Materials ON Paintings.id_material = Materials.id_material
+        LEFT JOIN Styles ON Paintings.id_style = Styles.id_style -- Используем LEFT JOIN для стилей
+        LEFT JOIN Materials ON Paintings.id_material = Materials.id_material -- Используем LEFT JOIN для материалов
         WHERE Paintings.id_user = {$_SESSION['user_id']}
     ";
 } elseif (!$isAdmin) {
@@ -758,34 +759,34 @@ for (var button of document.getElementsByClassName('deleteStyleButton')) {
 
             console.log("Запрос на удаление стиля с ID:", id); // Отладочное сообщение
 
-            if (confirm('Вы уверены, что хотите удалить этот стиль?')) {
-                fetch('delete_style.php', {
+            if (confirm('Вы уверены, что хотите удалить этот материал?')) {
+                fetch('delete_style.php', {  // URL для удаления материала
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ id_style: id })
+                    body: JSON.stringify({ id_style: id }) // Отправляем ID материала
                 })
                 .then(response => {
-                    console.log("Ответ от сервера (raw):", response); // Добавьте это для отладки
+                    console.log("Ответ от сервера (raw):", response); // Отладочное сообщение
                     return response.text();  // Возвращаем текстовый ответ для парсинга
                 })
                 .then(data => {
-                console.log("Полученные данные (raw):", data); // Выводим текстовые данные перед попыткой парсинга
-                try {
-                    var jsonData = JSON.parse(data); // Парсим JSON
-                    if (jsonData.success) {
-                        // Если удаление прошло успешно, обновляем UI
-                        var rows = document.querySelectorAll('tr');
-                        rows.forEach(row => {
-                            if (row.querySelector('[data-id="' + id + '"]')) {
-                                row.querySelector('.styleCell').innerText = 'Стиль недоступен'; // Обновляем название стиля
-                            }
-                        });
-                        alert('Стиль успешно удалён.');
-                    } else {
-                        alert('Ошибка при удалении стиля: ' + jsonData.message);
-                    }
+                    console.log("Полученные данные (raw):", data); // Выводим текстовые данные перед попыткой парсинга
+                    try {
+                        var jsonData = JSON.parse(data); // Парсим JSON
+                        if (jsonData.success) {
+                            // Если удаление прошло успешно, обновляем UI
+                            var rows = document.querySelectorAll('tr');
+                            rows.forEach(row => {
+                                if (row.querySelector('[data-id="' + id + '"]')) {
+                                    row.remove(); // Удаляем строку с материалом
+                                    alert('Стиль успешно удалён.');
+                                }
+                            });
+                        } else {
+                            alert('Ошибка при удалении стиля: ' + jsonData.message);
+                        }
                     } catch (e) {
                         console.error("Ошибка при парсинге JSON:", e);
                         alert('Ответ сервера не является допустимым JSON.');
@@ -799,6 +800,63 @@ for (var button of document.getElementsByClassName('deleteStyleButton')) {
         });
     });
 }
+
+
+///////////////////////////////////////// Обновите обработчики для кнопки удаления материала
+for (var button of document.getElementsByClassName('deleteMaterialButton')) {
+    button.addEventListener('click', function(event) {
+        event.stopPropagation(); // Предотвращаем всплытие события
+
+        // Обертываем основное действие в handleWithConnection
+        handleWithConnection(() => {
+            var id = this.getAttribute('data-id');
+
+            console.log("Запрос на удаление материала с ID:", id); // Отладочное сообщение
+
+            if (confirm('Вы уверены, что хотите удалить этот материал?')) {
+                fetch('delete_material.php', {  // URL для удаления материала
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id_material: id }) // Отправляем ID материала
+                })
+                .then(response => {
+                    console.log("Ответ от сервера (raw):", response); // Отладочное сообщение
+                    return response.text();  // Возвращаем текстовый ответ для парсинга
+                })
+                .then(data => {
+                    console.log("Полученные данные (raw):", data); // Выводим текстовые данные перед попыткой парсинга
+                    try {
+                        var jsonData = JSON.parse(data); // Парсим JSON
+                        if (jsonData.success) {
+                            // Если удаление прошло успешно, обновляем UI
+                            var rows = document.querySelectorAll('tr');
+                            rows.forEach(row => {
+                                if (row.querySelector('[data-id="' + id + '"]')) {
+                                    row.remove(); // Удаляем строку с материалом
+                                    alert('Материал успешно удалён.');
+                                }
+                            });
+                        } else {
+                            alert('Ошибка при удалении материала: ' + jsonData.message);
+                        }
+                    } catch (e) {
+                        console.error("Ошибка при парсинге JSON:", e);
+                        alert('Ответ сервера не является допустимым JSON.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка подключения к серверу. Попробуйте позже.');
+                });
+            }
+        });
+    });
+}
+
+
+
 });
 </script>
 

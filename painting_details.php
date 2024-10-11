@@ -82,8 +82,17 @@ mysqli_close($link);
     <h1><?= htmlspecialchars($painting['paint_name']) ?></h1>
     <p style="color: #00CED1; font-style: italic;">Лот № <?= htmlspecialchars($painting['lot_number']) ?></p>  
     <p><strong>Размер:</strong> <?= htmlspecialchars($painting['size']) ?></p> 
-    <p><strong>Материалы:</strong> <?= htmlspecialchars($painting['material_name']) ?></p>
-    <p><strong>Стиль:</strong> <span style="color: red;"><?= htmlspecialchars($painting['style_name'] ?? 'Стиль недоступен') ?></span></p>
+    
+    <p><strong>Материалы:</strong>  
+        <span style="color: <?= $painting['material_name'] ? 'black' : 'red' ?>;">
+            <?= htmlspecialchars($painting['material_name'] ?? 'Материал недоступен') ?>
+        </span>
+    </p>
+    <p><strong>Стиль:</strong>  
+        <span style="color: <?= $painting['style_name'] ? 'black' : 'red' ?>;">
+            <?= htmlspecialchars($painting['style_name'] ?? 'Стиль недоступен') ?>
+        </span>
+    </p>
     <p><strong>Год создания:</strong> <?= htmlspecialchars($painting['creation_year']) ?></p>
     <p><strong>Автор:</strong> <?= htmlspecialchars($painting['author']) ?></p> 
     <div class="price-info">
