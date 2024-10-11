@@ -554,7 +554,7 @@ h1 {
 
 
 /* Стили для выпадающего списка с ID #editStyle */
-#editStyle {
+#editStyle, #editMaterial {
     width: 100%; /* Установим ширину 100% для выпадающего списка */
     padding: 10px;
     margin-bottom: 10px;
@@ -571,7 +571,8 @@ h1 {
 }
 
 /* Стили для выпадающего списка при фокусе */
-#editStyle:focus {
+#editStyle:focus,
+#editMaterial:focus {
     border-color: #00CED1; /* Цвет границы при фокусе */
     outline: none; /* Убираем стандартное выделение */
 }

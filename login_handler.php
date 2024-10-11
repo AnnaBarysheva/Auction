@@ -34,6 +34,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Сохранение ID пользователя в сессии
     $_SESSION['user_id'] = $user['id_user'];
 
+    $_SESSION['user_role'] = $user['role']; // Сохраняем роль пользователя
+
+    // Проверка, является ли пользователь продавцом
+    if ($user['role'] === 'seller') {
+        $_SESSION['seller_logged_in'] = true; // Устанавливаем флаг для продавца
+    }
+
     // Перенаправление
     $redirect_url = isset($_GET['redirect']) ? $_GET['redirect'] : 'index.php';
     echo json_encode(['success' => true, 'redirect' => $redirect_url]);

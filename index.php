@@ -328,6 +328,9 @@ if (!$isAdmin) {
 
     if ($result) {
         if (mysqli_num_rows($result) > 0) {
+
+            $missingStyleOrMaterial = false;
+
             echo "<div class='table-wrapper'>";
             echo "<table border='1' id='paintingsTable'>";
             echo "<tr>
@@ -354,12 +357,14 @@ if (!$isAdmin) {
                     echo "<td>" . $row['style_name'] . "</td>";
                 } else {
                     echo "<td style='color: red;'>Стиль недоступен</td>";
+                    $missingStyleOrMaterial = true; 
                 }
                  // Проверка, есть ли материал, если нет — выводим "Материал недоступен" красным
                  if ($row['material_name']) {
                     echo "<td>" . $row['material_name'] . "</td>";
                 } else {
                     echo "<td style='color: red;'>Материал недоступен</td>";
+                    $missingStyleOrMaterial = true;
                 }
                 echo "<td>" . $row['creation_year'] . "</td>";
                 echo "<td>" . $row['author'] . "</td>";
@@ -385,6 +390,18 @@ if (!$isAdmin) {
                 echo "<button id='addPaintingButton' class='addButton'>Добавить картину</button>";
                 echo "</div>";
             }
+
+            // Проверяем флаг, если продавец только что вошел
+            if (isset($_SESSION['seller_logged_in']) && $_SESSION['seller_logged_in'] === true) {
+                if ($missingStyleOrMaterial) {
+                    echo "<script>
+                            alert('Внимание: У некоторых ваших картин отсутствуют стиль или материал. Пожалуйста, обновите данные.');
+                          </script>";
+                }
+                // После показа алерта сбрасываем флаг
+                unset($_SESSION['seller_logged_in']);
+            }
+
         } else {
             echo "Нет доступных картин для отображения.";
             if ($isSeller) {
