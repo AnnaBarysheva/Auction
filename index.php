@@ -142,16 +142,15 @@ while ($row = mysqli_fetch_assoc($materialsResult)) {
 // SQL-запрос в зависимости от роли пользователя
 if ($isSeller) {
     $sql = "
-        SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+                SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
                Styles.style_name, Materials.material_name
         FROM Paintings
         JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
         JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
-        JOIN Styles ON Paintings.id_style = Styles.id_style
+        LEFT JOIN Styles ON Paintings.id_style = Styles.id_style -- Используем LEFT JOIN
         JOIN Materials ON Paintings.id_material = Materials.id_material
         WHERE Paintings.id_user = {$_SESSION['user_id']}
-        
     ";
 } elseif (!$isAdmin) {
 //     $sql = "
@@ -333,6 +332,7 @@ if (!$isAdmin) {
             echo "<tr>
                     <th>Название картины</th>
                     <th>Стиль</th>
+                    <th>Материал</th> <!-- Добавлено поле для материала -->
                     <th>Год создания</th>
                     <th>Автор</th>
                     <th>Продавец</th>";
@@ -348,7 +348,18 @@ if (!$isAdmin) {
             while ($row = mysqli_fetch_assoc($result)) {
                 echo "<tr data-id='" . $row['id_painting'] . "'>";
                 echo "<td>" . $row['paint_name'] . "</td>";
-                echo "<td>" . $row['style_name'] . "</td>";
+                    // Проверка, есть ли стиль, если нет — выводим "Стиль недоступен" красным
+                    if ($row['style_name']) {
+                    echo "<td>" . $row['style_name'] . "</td>";
+                } else {
+                    echo "<td style='color: red;'>Стиль недоступен</td>";
+                }
+                 // Проверка, есть ли материал, если нет — выводим "Материал недоступен" красным
+                 if ($row['material_name']) {
+                    echo "<td>" . $row['material_name'] . "</td>";
+                } else {
+                    echo "<td style='color: red;'>Материал недоступен</td>";
+                }
                 echo "<td>" . $row['creation_year'] . "</td>";
                 echo "<td>" . $row['author'] . "</td>";
                 echo "<td>" . $row['full_name'] . "</td>";
@@ -474,7 +485,54 @@ mysqli_close($link);
         </form>
     </div>
 </div>
+
+<div id="addMaterialModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeAddMaterialModal">&times;</span>
+        <h2>Добавить материал</h2>
+        <form id="materialForm" action="add_material.php" method="POST">
+            <label for="material_name">Название материала:</label>
+            <input type="text" class="modal-input" id="materialName" name="material_name" placeholder="Название материала" required maxlength="100">
+            <button type="submit" class="saveButton">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+
+
+<div id="editStyleModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeEditStyleModal">&times;</span>
+        <h2>Редактировать стиль</h2>
+        <form id="editStyleForm" action="update_style.php" method="POST">
+            <input type="hidden" id="editStyleId" name="id_style"> <!-- Скрытое поле для ID стиля -->
+
+            <label for="editStyleName">Название картины:</label>
+            <input type="text" class="modal-input" id="editStyleName" name="style_name" placeholder="Введите название стиля" required maxlength="255">
+
+            <button type="submit" class="saveButton">Сохранить изменения</button>
+        </form>
+    </div>
+</div>
+
+<div id="editMaterialModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeEditMaterialModal">&times;</span>
+        <h2>Редактировать материал</h2>
+        <form id="editMaterialForm" action="update_material.php" method="POST">
+            <input type="hidden" id="editMaterialId" name="id_material"> <!-- Скрытое поле для ID материала -->
+
+            <label for="editMaterialName">Название материала:</label>
+            <input type="text" class="modal-input" id="editMaterialName" name="material_name" placeholder="Введите название материала" required maxlength="255">
+
+            <button type="submit" class="saveButton">Сохранить изменения</button>
+        </form>
+    </div>
+</div>
+
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+
 document.getElementById('addStyleButton').addEventListener('click', function() {
     // Открываем модальное окно
     document.getElementById('addStyleModal').style.display = 'block';
@@ -529,20 +587,8 @@ document.getElementById('styleForm').addEventListener('submit', function(event) 
         });
     });
 });
-</script>
 
-<div id="addMaterialModal" class="modal">
-    <div class="modal-content">
-        <span class="close-button" id="closeAddMaterialModal">&times;</span>
-        <h2>Добавить материал</h2>
-        <form id="materialForm" action="add_material.php" method="POST">
-            <label for="material_name">Название материала:</label>
-            <input type="text" class="modal-input" id="materialName" name="material_name" placeholder="Название материала" required maxlength="100">
-            <button type="submit" class="saveButton">Сохранить</button>
-        </form>
-    </div>
-</div>
-<script>
+//////////////////////////////////////////////
 // Открытие модального окна
 document.getElementById('addMaterialButton').addEventListener('click', function() {
     document.getElementById('addMaterialModal').style.display = 'block';
@@ -593,25 +639,8 @@ document.getElementById('materialForm').addEventListener('submit', function(even
         console.error('Ошибка:', error);
     });
 });
-</script>
 
-
-<div id="editStyleModal" class="modal">
-    <div class="modal-content">
-        <span class="close-button" id="closeEditStyleModal">&times;</span>
-        <h2>Редактировать стиль</h2>
-        <form id="editStyleForm" action="update_style.php" method="POST">
-            <input type="hidden" id="editStyleId" name="id_style"> <!-- Скрытое поле для ID стиля -->
-
-            <label for="editStyleName">Название картины:</label>
-            <input type="text" class="modal-input" id="editStyleName" name="style_name" placeholder="Введите название стиля" required maxlength="255">
-
-            <button type="submit" class="saveButton">Сохранить изменения</button>
-        </form>
-    </div>
-</div>
-
-<script>
+//////////////////////////////////////////////////
 /// Открытие модального окна для редактирования стиля
 document.querySelectorAll('.editStyleButton').forEach(button => {
     button.addEventListener('click', function() {
@@ -662,27 +691,8 @@ document.getElementById('editStyleForm').addEventListener('submit', function(eve
     })
     .catch(error => console.error('Ошибка:', error));
 });
-</script>
 
-
-
-<div id="editMaterialModal" class="modal">
-    <div class="modal-content">
-        <span class="close-button" id="closeEditMaterialModal">&times;</span>
-        <h2>Редактировать материал</h2>
-        <form id="editMaterialForm" action="update_material.php" method="POST">
-            <input type="hidden" id="editMaterialId" name="id_material"> <!-- Скрытое поле для ID материала -->
-
-            <label for="editMaterialName">Название материала:</label>
-            <input type="text" class="modal-input" id="editMaterialName" name="material_name" placeholder="Введите название материала" required maxlength="255">
-
-            <button type="submit" class="saveButton">Сохранить изменения</button>
-        </form>
-    </div>
-</div>
-
-<script>
-// Открытие модального окна для редактирования материала
+///////////////////////////////////////////////// Открытие модального окна для редактирования материала
 document.querySelectorAll('.editMaterialButton').forEach(button => {
     button.addEventListener('click', function() {
         var materialId = this.getAttribute('data-id'); // Получаем ID материала
@@ -735,11 +745,9 @@ document.getElementById('editMaterialForm').addEventListener('submit', function(
     })
     .catch(error => console.error('Ошибка:', error));
 });
-</script>
 
-<script>
 
-// Обновите обработчики для кнопки удаления стиля
+////////////////////////////////////////// Обновите обработчики для кнопки удаления стиля
 for (var button of document.getElementsByClassName('deleteStyleButton')) {
     button.addEventListener('click', function(event) {
         event.stopPropagation(); // Предотвращаем всплытие события
@@ -759,23 +767,27 @@ for (var button of document.getElementsByClassName('deleteStyleButton')) {
                     body: JSON.stringify({ id_style: id })
                 })
                 .then(response => {
-                    console.log("Ответ от сервера:", response); // Отладочное сообщение
-                    return response.text(); // Измените на .text(), чтобы увидеть оригинальный ответ
+                    console.log("Ответ от сервера (raw):", response); // Добавьте это для отладки
+                    return response.text();  // Возвращаем текстовый ответ для парсинга
                 })
                 .then(data => {
-                    console.log("Полученные данные:", data); // Отладочное сообщение
-                    try {
-                        var jsonData = JSON.parse(data); // Парсим JSON
-                        if (jsonData.success) {
-                            // Удаляем строку из таблицы
-                            var row = this.closest('tr');
-                            row.parentNode.removeChild(row);
-                            alert('Стиль успешно удалён.');
-                        } else {
-                            alert('Ошибка при удалении стиля: ' + jsonData.message);
-                        }
+                console.log("Полученные данные (raw):", data); // Выводим текстовые данные перед попыткой парсинга
+                try {
+                    var jsonData = JSON.parse(data); // Парсим JSON
+                    if (jsonData.success) {
+                        // Если удаление прошло успешно, обновляем UI
+                        var rows = document.querySelectorAll('tr');
+                        rows.forEach(row => {
+                            if (row.querySelector('[data-id="' + id + '"]')) {
+                                row.querySelector('.styleCell').innerText = 'Стиль недоступен'; // Обновляем название стиля
+                            }
+                        });
+                        alert('Стиль успешно удалён.');
+                    } else {
+                        alert('Ошибка при удалении стиля: ' + jsonData.message);
+                    }
                     } catch (e) {
-                        console.error("Ошибка при парсинге JSON:", e); // Отладочное сообщение
+                        console.error("Ошибка при парсинге JSON:", e);
                         alert('Ответ сервера не является допустимым JSON.');
                     }
                 })
@@ -787,7 +799,7 @@ for (var button of document.getElementsByClassName('deleteStyleButton')) {
         });
     });
 }
-
+});
 </script>
 
 
@@ -1116,34 +1128,48 @@ for (var i = 1; i < rows.length; i++) {
     });
 
  // Обновите обработчик для кнопки редактирования
-for (var button of editButtons) {
+ for (var button of editButtons) {
     button.addEventListener('click', function(event) {
         event.stopPropagation(); // Предотвращаем всплытие события
-        // Обертываем обработчик в функцию handleWithConnection
         handleWithConnection(() => {
-            
-            var id = this.getAttribute('data-id');
-            var row = this.closest('tr');
-            var cells = row.getElementsByTagName('td');
-            
+            var id = this.getAttribute('data-id'); // Получаем ID картины
+            console.log('Editing painting ID:', id); // Отладочное сообщение
+            var row = this.closest('tr'); // Находим ближайшую строку таблицы
+            var cells = row.getElementsByTagName('td'); // Получаем все ячейки строки
 
+            // Заполняем поля в модальном окне
             document.getElementById('editId').value = id;
-            document.getElementById('editName').value = cells[0].textContent;
+            document.getElementById('editName').value = cells[0].textContent; // Название картины
+            console.log('Paint name:', cells[0].textContent); // Отладочное сообщение
 
-            // Получаем элемент выпадающего списка
+            // Получаем элемент выпадающего списка для стиля
             var styleDropdown = document.getElementById('editStyle');
             var selectedStyle = cells[1].textContent; 
             styleDropdown.value = Array.from(styleDropdown.options)
-                .find(option => option.text === selectedStyle)?.value || '';
+                .find(option => option.text === selectedStyle)?.value || ''; // Устанавливаем выбранный стиль
+            console.log('Selected style:', selectedStyle); // Отладочное сообщение
 
-            document.getElementById('editYear').value = cells[2].textContent;
-            document.getElementById('editAuthor').value = cells[3].textContent;
-            document.getElementById('editSeller').value = cells[4].textContent;
+            // Получаем элемент выпадающего списка для материала
+            var materialDropdown = document.getElementById('editMaterial'); // Обновите ID если нужно
+            var selectedMaterial = cells[2].textContent; // Предполагая, что материал в третьем столбце
+            materialDropdown.value = Array.from(materialDropdown.options)
+                .find(option => option.text === selectedMaterial)?.value || ''; // Устанавливаем выбранный материал
+            console.log('Selected material:', selectedMaterial); // Отладочное сообщение
+
+            document.getElementById('editYear').value = cells[3].textContent; // Год создания
+            console.log('Creation year:', cells[3].textContent); // Отладочное сообщение
+            document.getElementById('editAuthor').value = cells[4].textContent; // Автор
+            console.log('Author:', cells[4].textContent); // Отладочное сообщение
+            document.getElementById('editSeller').value = cells[5].textContent; // Продавец
+            console.log('Seller:', cells[5].textContent); // Отладочное сообщение
 
             editModal.style.display = 'block'; // Открываем модальное окно
         });
     });
 }
+
+
+
 
 closeEditButton.addEventListener('click', function() {
     editModal.style.display = 'none'; // Закрываем модальное окно
@@ -1296,17 +1322,11 @@ async function handleLogout() {
             <label for="editName">Название картины:</label>
             <input type="text" class="modal-input" id="editName" name="paint_name" placeholder="Название картины" required maxlength="255">
             
-            <!-- <label for="editstyleDropdown">Стиль:</label> -->
-                <!-- <?= createDropdown($stylesResult, 'editStyle', 'Выберите стиль') ?> -->
-                <!-- <?=createDropdownFromArray($stylesArray, 'editStyle', 'Выберите стиль') ?> -->
+            <label for="editStyleDropdown">Стиль:</label>
+            <?= createDropdownFromArray($stylesArray, 'editStyle', 'Выберите стиль', 'modal-input') ?>
 
-                <!-- <label for="editstyleDropdown">Стиль:</label> -->
-                <!-- <div class="modal-input"> -->
-                    <!-- <?= createDropdownFromArray($stylesArray, 'editStyle', 'Выберите стиль') ?> -->
-                <!-- </div> -->
-
-                <label for="editStyleDropdown">Стиль:</label>
-                <?= createDropdownFromArray($stylesArray, 'editStyle', 'Выберите стиль', 'modal-input') ?>
+            <label for="editMaterial">Материал:</label>
+            <?= createDropdownFromArray($materialsArray, 'editMaterial', 'Выберите материал', 'modal-input') ?>
 
             
             <label for="editYear">Год создания:</label>
@@ -1404,13 +1424,24 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
     // Получаем значения полей
     var nameInput = document.getElementById('editName').value.trim();
     var styleInput = document.getElementById('editStyle').value; // Используем новый идентификатор для стиля
+    var materialInput = document.getElementById('editMaterial').value; // Новый идентификатор для материала
     var yearInput = document.getElementById('editYear').value;
     var authorInput = document.getElementById('editAuthor').value.trim();
     var sellerInput = document.getElementById('editSeller').value.trim();
     var currentYear = new Date().getFullYear();
 
+    // Отладочные сообщения для проверки значений перед отправкой
+    console.log('Submitting form with values:', {
+        nameInput,
+        styleInput,
+        materialInput,
+        yearInput,
+        authorInput,
+        sellerInput
+    });
+
     // Проверка на наличие только пробелов
-    if (!nameInput || !styleInput || !authorInput || !sellerInput) {
+    if (!nameInput || !styleInput ||  !materialInput || !authorInput || !sellerInput) {
         alert('Пожалуйста, заполните все поля, не оставляя только пробелы.');
         return; // Останавливаем дальнейшее выполнение
     }
@@ -1432,6 +1463,7 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
         })
         .then(response => response.text())
         .then(data => {
+            console.log('Server response:', data); // Отладочное сообщение
             if (data.startsWith("Ошибка:")) {
                 alert(data); // Если возникла ошибка, показываем alert
             } else {
@@ -1445,22 +1477,6 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
     });
 });
 
-function trimLeadingSpaces(event) {
-    this.value = this.value.replace(/^\s+/, ''); // Удаляем пробелы в начале строки
-}
-
-// Применяем к всем текстовым полям
-const textInputs = [
-    'editName',
-    
-    'editYear',
-    'editAuthor',
-    'editSeller'
-];
-
-textInputs.forEach(id => {
-    document.getElementById(id).addEventListener('input', trimLeadingSpaces);
-});
 </script>
 
 <script>

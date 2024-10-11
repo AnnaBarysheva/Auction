@@ -3,7 +3,7 @@ body {
     margin: 0;
     font-family: Arial, sans-serif;
     user-select: none; /* Отключение выделения текста */
-    background-size: cover; /* Фон будет покрывать весь экран */
+    /*background-size: cover;  Фон будет покрывать весь экран */
     background-position: center; /* Фон будет центрироваться */
     background-repeat: no-repeat; /* Отключаем повторение изображения */
 }

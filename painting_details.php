@@ -44,7 +44,7 @@ if ($link == false) {
 
 // SQL-запрос для получения полной информации о картине
 $sql = "
-    SELECT Paintings.paint_name, Paintings.size, 
+ SELECT Paintings.paint_name, Paintings.size, 
            Styles.style_name, Materials.material_name, 
            Paintings.creation_year, Paintings.author, Paintings.image_path, 
            Sellers.full_name AS seller_name, Sellers.phone AS seller_phone, Sellers.email AS seller_email,
@@ -54,8 +54,8 @@ $sql = "
     JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
     LEFT JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
     LEFT JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
-    JOIN Styles ON Paintings.id_style = Styles.id_style
-    JOIN Materials ON Paintings.id_material = Materials.id_material
+    LEFT JOIN Styles ON Paintings.id_style = Styles.id_style
+    LEFT JOIN Materials ON Paintings.id_material = Materials.id_material
     WHERE Paintings.id_painting = $id_painting
 ";
 
@@ -83,7 +83,7 @@ mysqli_close($link);
     <p style="color: #00CED1; font-style: italic;">Лот № <?= htmlspecialchars($painting['lot_number']) ?></p>  
     <p><strong>Размер:</strong> <?= htmlspecialchars($painting['size']) ?></p> 
     <p><strong>Материалы:</strong> <?= htmlspecialchars($painting['material_name']) ?></p>
-    <p><strong>Стиль:</strong> <?= htmlspecialchars($painting['style_name']) ?></p>
+    <p><strong>Стиль:</strong> <span style="color: red;"><?= htmlspecialchars($painting['style_name'] ?? 'Стиль недоступен') ?></span></p>
     <p><strong>Год создания:</strong> <?= htmlspecialchars($painting['creation_year']) ?></p>
     <p><strong>Автор:</strong> <?= htmlspecialchars($painting['author']) ?></p> 
     <div class="price-info">
