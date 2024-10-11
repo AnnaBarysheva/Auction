@@ -612,21 +612,33 @@ document.getElementById('materialForm').addEventListener('submit', function(even
 </div>
 
 <script>
-// Открытие модального окна для редактирования стиля
+/// Открытие модального окна для редактирования стиля
 document.querySelectorAll('.editStyleButton').forEach(button => {
     button.addEventListener('click', function() {
         var styleId = this.getAttribute('data-id'); // Получаем ID стиля
+        var row = this.closest('tr'); // Находим соответствующую строку таблицы
+        var styleName = row.getElementsByTagName('td')[0].textContent; // Получаем текущее название стиля из первой ячейки
+
         document.getElementById('editStyleId').value = styleId; // Устанавливаем ID в скрытое поле формы
+        document.getElementById('editStyleName').value = styleName; // Устанавливаем текущее название стиля в поле ввода
 
         // Открываем модальное окно
         document.getElementById('editStyleModal').style.display = 'block';
     });
 });
 
+
 // Закрываем модальное окно
 document.getElementById('closeEditStyleModal').addEventListener('click', function() {
     document.getElementById('editStyleModal').style.display = 'none';
 });
+// Закрытие при клике вне модального окна
+window.onclick = function(event) {
+    var modal = document.getElementById('editStyleModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+};
 
 // Обработчик отправки формы для редактирования стиля
 document.getElementById('editStyleForm').addEventListener('submit', function(event) {
@@ -674,17 +686,32 @@ document.getElementById('editStyleForm').addEventListener('submit', function(eve
 document.querySelectorAll('.editMaterialButton').forEach(button => {
     button.addEventListener('click', function() {
         var materialId = this.getAttribute('data-id'); // Получаем ID материала
+        var row = this.closest('tr'); // Находим соответствующую строку таблицы
+        var materialName = row.getElementsByTagName('td')[0].textContent; // Получаем текущее название материала из первой ячейки
+
         document.getElementById('editMaterialId').value = materialId; // Устанавливаем ID в скрытое поле формы
+        document.getElementById('editMaterialName').value = materialName; // Устанавливаем текущее название материала в поле ввода
 
         // Открываем модальное окно
         document.getElementById('editMaterialModal').style.display = 'block';
     });
 });
 
+
 // Закрываем модальное окно
 document.getElementById('closeEditMaterialModal').addEventListener('click', function() {
     document.getElementById('editMaterialModal').style.display = 'none';
 });
+
+// Закрытие модального окна при клике вне его
+window.addEventListener('click', function(event) {
+    var editMaterialModal = document.getElementById('editMaterialModal');
+    if (event.target === editMaterialModal) {
+        editMaterialModal.style.display = 'none'; // Закрываем модальное окно
+    }
+});
+
+
 
 // Обработчик отправки формы для редактирования материала
 document.getElementById('editMaterialForm').addEventListener('submit', function(event) {
