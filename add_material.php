@@ -9,31 +9,44 @@ if ($connection === false) {
 
 // Проверка метода запроса
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Получение названия стиля из формы и удаление лишних пробелов
+    // Получение названия материала из формы и удаление лишних пробелов
     $material_name = trim($_POST['material_name']);
 
     // Проверка, что поле не пустое
     if (!empty($material_name)) {
-        // Подготовка SQL-запроса
-        $stmt = $connection->prepare("INSERT INTO Materials (material_name) VALUES (?)");
+        // Подготовка SQL-запроса для проверки существования материала
+        $stmt_check = $connection->prepare("SELECT COUNT(*) FROM Materials WHERE material_name = ?");
+        $stmt_check->bind_param("s", $material_name);
         
-        // Привязываем параметр (строка)
-        $stmt->bind_param("s", $material_name);
-
         // Выполнение запроса
-        if ($stmt->execute()) {
-            // Успешное добавление стиля — делаем перенаправление на index.php
-            header('Location: index.php'); 
-            exit(); // Останавливаем выполнение после перенаправления
-        } else {
-            // Сообщение об ошибке
-            echo "Ошибка при добавлении стиля: " . $stmt->error;
-        }
+        $stmt_check->execute();
+        $stmt_check->bind_result($count);
+        $stmt_check->fetch();
+        $stmt_check->close();
 
-        // Закрытие подготовленного запроса
-        $stmt->close();
+        // Проверка, существует ли материал
+        if ($count > 0) {
+            echo "Ошибка: Материал с таким названием уже существует.";
+        } else {
+            // Подготовка SQL-запроса для вставки нового материала
+            $stmt_insert = $connection->prepare("INSERT INTO Materials (material_name) VALUES (?)");
+            $stmt_insert->bind_param("s", $material_name);
+
+            // Выполнение запроса
+            if ($stmt_insert->execute()) {
+                // Успешное добавление материала — делаем перенаправление на index.php
+                header('Location: index.php'); 
+                exit(); // Останавливаем выполнение после перенаправления
+            } else {
+                // Сообщение об ошибке
+                echo "Ошибка при добавлении материала: " . $stmt_insert->error;
+            }
+
+            // Закрытие подготовленного запроса
+            $stmt_insert->close();
+        }
     } else {
-        echo "Ошибка: Название стиля не может быть пустым.";
+        echo "Ошибка: Название материала не может быть пустым.";
     }
 }
 

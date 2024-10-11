@@ -461,7 +461,7 @@ if ($isAdmin) {
     echo "</div>"; // Закрываем общий div main-tables-wrapper
 
     // Кнопки для добавления стиля и материала
-    echo "<div class='button-container'>";
+    echo "<div class='add-button-container'>";
     echo "<button id='addStyleButton' class='addButton'>Добавить стиль</button>";
     echo "<button id='addMaterialButton' class='addButton'>Добавить материал</button>";
     echo "</div>";
@@ -559,10 +559,17 @@ document.getElementById('styleForm').addEventListener('submit', function(event) 
     var styleName = document.getElementById('styleName').value.trim();
 
     // Проверяем на пустое значение или наличие только пробелов
-    if (!styleName) {
+    if (styleName.length === 0) { // Условие изменено для более строгой проверки
         alert('Пожалуйста, введите название стиля.');
         return;
     }
+
+    // Проверка на максимальную длину
+    if (styleName.length > 50) { // Здесь длина изменена на 50 символов
+        alert('Ошибка: название стиля не может превышать 50 символов.');
+        return;
+    }
+
 
     // Оборачиваем отправку в handleWithConnection (если требуется)
     handleWithConnection(() => {
@@ -615,10 +622,17 @@ document.getElementById('materialForm').addEventListener('submit', function(even
     var materialName = document.getElementById('materialName').value.trim();
 
     // Проверяем на пустое значение или наличие только пробелов
-    if (!materialName) {
-        alert('Пожалуйста, введите название материала.');
+    if (materialName.length === 0) { // Условие изменено для более строгой проверки
+    alert('Пожалуйста, введите название стиля.');
+    return;
+    }
+
+    // Проверка на максимальную длину
+    if (materialName.length > 50) { // Здесь длина изменена на 50 символов
+        alert('Ошибка: название стиля не может превышать 50 символов.');
         return;
     }
+
 
     // AJAX запрос для отправки данных
     var formData = new FormData(this);
@@ -674,6 +688,20 @@ window.onclick = function(event) {
 document.getElementById('editStyleForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Предотвращаем стандартную отправку формы
 
+    var styleName = document.getElementById('editStyleName').value.trim(); // Получаем текущее название стиля
+
+    // Проверяем на пустое значение
+    if (styleName.length === 0) { // Условие изменено для более строгой проверки
+        alert('Пожалуйста, введите название стиля.');
+        return;
+    }
+
+    // Проверка на максимальную длину
+    if (styleName.length > 50) { // Здесь длина изменена на 50 символов
+        alert('Ошибка: название стиля не может превышать 50 символов.');
+        return;
+    }
+
     var formData = new FormData(this); // Получаем данные формы
 
     fetch('update_style.php', {
@@ -728,6 +756,20 @@ window.addEventListener('click', function(event) {
 document.getElementById('editMaterialForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Предотвращаем стандартную отправку формы
 
+    var materialName = document.getElementById('editMaterialName').value.trim(); // Получаем текущее название стиля
+
+    // Проверяем на пустое значение
+    if (materialName.length === 0) { // Условие изменено для более строгой проверки
+        alert('Пожалуйста, введите название материала.');
+        return;
+    }
+
+    // Проверка на максимальную длину
+    if (materialName.length > 50) { // Здесь длина изменена на 50 символов
+        alert('Ошибка: название материала не может превышать 50 символов.');
+        return;
+    }
+
     var formData = new FormData(this); // Получаем данные формы
 
     fetch('update_material.php', {
@@ -759,7 +801,7 @@ for (var button of document.getElementsByClassName('deleteStyleButton')) {
 
             console.log("Запрос на удаление стиля с ID:", id); // Отладочное сообщение
 
-            if (confirm('Вы уверены, что хотите удалить этот материал?')) {
+            if (confirm('Вы уверены, что хотите удалить этот стиль?')) {
                 fetch('delete_style.php', {  // URL для удаления материала
                     method: 'POST',
                     headers: {

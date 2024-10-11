@@ -437,6 +437,14 @@ h1 {
    
 }
 
+.add-button-container {
+    display: flex; /* Используем Flexbox */
+    justify-content: center; /* Центрируем содержимое по горизонтали */
+    margin-top: 20px; /* Отступ сверху */
+    width: 100%; /* Ширина на 100% */
+    gap: 500px;
+}
+
 /* Стили для контейнера с полями ввода */
 .input-container {
     display: flex; /* Используем flexbox */
