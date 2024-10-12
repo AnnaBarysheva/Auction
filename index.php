@@ -85,6 +85,7 @@ if (isset($_SESSION['user_id'])) {
         <div class="input-group">
             <input type="text" id="nameInput" placeholder="Название картины">
             <input type="text" id="styleInput" placeholder="Стиль">
+            <input type="text" id="materialInput" placeholder="Материал">
             <input type="text" id="yearInput" placeholder="Год создания">
         </div>
         <div class="input-group">
@@ -1196,6 +1197,7 @@ for (var i = 1; i < rows.length; i++) {
 
             var nameFilter = nameInput.value.toLowerCase();
             var styleFilter = styleInput.value.toLowerCase();
+            var materialFilter = materialInput.value.toLowerCase();
             var yearFilter = yearInput.value.toLowerCase();
             var authorFilter = authorInput.value.toLowerCase();
             var sellerFilter = sellerInput.value.toLowerCase();
@@ -1210,13 +1212,16 @@ for (var i = 1; i < rows.length; i++) {
                 if (styleFilter && !cells[1].textContent.toLowerCase().includes(styleFilter)) {
                     matches = false;
                 }
-                if (yearFilter && !cells[2].textContent.toLowerCase().includes(yearFilter)) {
+                if (materialFilter && !cells[2].textContent.toLowerCase().includes(materialFilter)) {
                     matches = false;
                 }
-                if (authorFilter && !cells[3].textContent.toLowerCase().includes(authorFilter)) {
+                if (yearFilter && !cells[3].textContent.toLowerCase().includes(yearFilter)) {
                     matches = false;
                 }
-                if (sellerFilter && !cells[4].textContent.toLowerCase().includes(sellerFilter)) {
+                if (authorFilter && !cells[4].textContent.toLowerCase().includes(authorFilter)) {
+                    matches = false;
+                }
+                if (sellerFilter && !cells[5].textContent.toLowerCase().includes(sellerFilter)) {
                     matches = false;
                 }
 
