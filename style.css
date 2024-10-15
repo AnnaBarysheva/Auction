@@ -129,36 +129,40 @@ h1 {
 
 
 /* Стили для таблицы с картинами */
-#paintingsTable {
+#paintingsTable, #requestsTable {
     width: 1300px; /* Фиксированная ширина таблицы */
     margin: 20px auto; /* Центрирование таблицы */
     border-collapse: collapse; /* Убираем двойные границы */
     user-select: none; /* Отключение выделения текста */
 }
 
-#paintingsTable th, #paintingsTable td {
+#paintingsTable th, #paintingsTable td,
+#requestsTable th, #requestsTable td{
     padding: 15px; /* Отступы внутри ячеек */
     text-align: left; /* Выравнивание текста по левому краю */
     border: 1px solid #ddd; /* Светло-серая граница */
     user-select: none; /* Отключение выделения текста */
 }
 
-#paintingsTable th {
+#paintingsTable th, #requestsTable th {
     background-color: #00CED1; /* Цвет фона для заголовков */
     color: white; /* Цвет текста для заголовков */
     font-weight: bold; /* Жирный шрифт для заголовков */
 }
 
-#paintingsTable tr:nth-child(even) {
+#paintingsTable tr:nth-child(even),
+#requestsTable tr:nth-child(even) {
     background-color: rgba(0, 206, 209, 0.2); /* Полупрозрачный фон для четных строк */
 }
 
-#paintingsTable tr:hover {
+#paintingsTable tr:hover,
+#requestsTable tr:hover{
     background-color: rgba(221, 221, 221, 0.6); /* Полупрозрачный цвет при наведении на строку */
     cursor: pointer; /* Указатель курсора при наведении */
 }
 
-#paintingsTable td {
+#paintingsTable td,
+#requestsTable td {
     color: #333; /* Цвет текста для ячеек */
     font-size: 16px; /* Размер шрифта для ячеек */
 }

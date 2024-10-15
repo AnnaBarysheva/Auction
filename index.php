@@ -17,6 +17,7 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <script src="script.js"></script>
     <header>
         <div class="header-left">
             <img src="https://cdn-icons-png.flaticon.com/512/10613/10613919.png" alt="Art Gallery Logo" class="logo">
@@ -67,6 +68,7 @@ if ($link == false) {
 // Проверка роли пользователя
 $isAdmin = false;
 $isSeller = false;
+$isUser = false;
 if (isset($_SESSION['user_id'])) {
     $userId = $_SESSION['user_id'];
     $query = "SELECT role FROM Users WHERE id_user = $userId";
@@ -75,6 +77,7 @@ if (isset($_SESSION['user_id'])) {
         $user = mysqli_fetch_assoc($result);
         $isSeller = ($user['role'] === 'seller');
         $isAdmin = ($user['role'] === 'admin');
+        $isUser = ($user['role'] === 'user');
     }
 }
 
@@ -347,6 +350,11 @@ if (!$isAdmin) {
                 echo "<th>Действия</th>";
             }
 
+            // Если пользователь - обычный пользователь (user), добавляем столбец "Заявка"
+            if ($isUser) {
+                echo "<th>Заявка</th>";
+            }
+
             echo "</tr>";
 
             // Вывод каждой строки данных
@@ -379,11 +387,24 @@ if (!$isAdmin) {
                           </td>";
                 }
 
+                 // Если пользователь - обычный пользователь (user), добавляем чекбокс "Заявка"
+                 if ($isUser) {
+                    echo "<td>
+                    <input type='checkbox' class='requestCheckbox' data-id='" . $row['id_painting'] . "'>
+                        </td>";
+                }
+
                 echo "</tr>";
             }
             echo "</table>";
 
             echo "</div>";
+
+            if ($isUser) {
+                echo "<div class='button-container'>";
+                echo "<a href='my_requests.php' class='editButton'>Посмотреть заявки</a>";
+                echo "</div>";
+            }
 
             // Кнопка "Добавить картину", доступная только для продавцов
             if ($isSeller) {
@@ -1179,16 +1200,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     //}
 
 // Проходим по всем строкам таблицы
-for (var i = 1; i < rows.length; i++) {
-    rows[i].addEventListener('click', function() {
-        // Оборачиваем действие в handleWithConnection
-        handleWithConnection(() => {
-            var id_painting = this.getAttribute('data-id');
-            // Перенаправление на страницу с деталями
-            window.location.href = 'painting_details.php?id_painting=' + id_painting;
-        });
-    });
-}
+// for (var i = 1; i < rows.length; i++) {
+//     rows[i].addEventListener('click', function() {
+//         // Оборачиваем действие в handleWithConnection
+//         handleWithConnection(() => {
+//             var id_painting = this.getAttribute('data-id');
+//             // Перенаправление на страницу с деталями
+//             window.location.href = 'painting_details.php?id_painting=' + id_painting;
+//         });
+//     });
+// }
 
     // Поиск по таблице
     searchButton.addEventListener('click', function () {

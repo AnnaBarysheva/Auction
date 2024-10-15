@@ -1,0 +1,111 @@
+<?php
+session_start();
+$link = include 'db_connect.php';
+
+// Проверка подключения к базе данных
+if ($link === false) {
+    echo "Ошибка подключения к базе данных.";
+    exit();
+}
+
+// Проверка, авторизован ли пользователь
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php'); // Перенаправляем на страницу входа
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// SQL запрос для получения картин, выбранных пользователем
+$sql = "
+    SELECT p.id_painting, p.paint_name, p.creation_year, p.author, 
+           s.style_name, m.material_name
+    FROM Paintings p
+    JOIN PaintingUser pu ON p.id_painting = pu.id_painting
+    LEFT JOIN Styles s ON p.id_style = s.id_style
+    LEFT JOIN Materials m ON p.id_material = m.id_material
+    WHERE pu.id_user = ?
+";
+
+?>
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои заявки</title>
+    <link rel="stylesheet" href="style.css"> <!-- Подключение CSS стилей -->
+</head>
+<body>
+<header>
+        <div class="header-left">
+            <img src="https://cdn-icons-png.flaticon.com/512/10613/10613919.png" alt="Art Gallery Logo" class="logo">
+            <h1>HueHaven</h1>
+        </div>
+
+        <div class="header-right">
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <!-- Если пользователь вошел, показываем кнопку "Выход" -->
+                <button class="header-button" onclick="handleLogout()">Выход</button>
+            <?php else: ?>
+                <!-- Если пользователь не вошел, показываем кнопки "Войти" и "Зарегистрироваться" -->
+                <button class="header-button" onclick="handleLogin()">Войти</button>
+                <button class="header-button" onclick="handleRegister()">Зарегистрироваться</button>
+            <?php endif; ?>
+        </div>
+    </header>
+
+<?php 
+$stmt = mysqli_prepare($link, $sql);
+
+if ($stmt === false) {
+    echo "Ошибка подготовки запроса: " . mysqli_error($link);
+    exit();
+}
+
+mysqli_stmt_bind_param($stmt, 'i', $user_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+
+// Проверка на наличие результатов
+if ($result && mysqli_num_rows($result) > 0) {
+    echo "<h1>Ваши заявки на картины</h1>";
+    echo "<div class='table-wrapper'>";
+    echo "<table border='1' id='requestsTable'>"; 
+    echo "<thead>
+            <tr>
+                <th>ID картины</th>
+                <th>Название картины</th>
+                <th>Год создания</th>
+                <th>Автор</th>
+                <th>Стиль</th>
+                <th>Материал</th>
+            </tr>
+          </thead>
+          <tbody>";
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        echo "<tr>";
+        echo "<td>" . htmlspecialchars($row['id_painting']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['paint_name']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['creation_year']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['author']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['style_name'] ?? 'Нет') . "</td>";
+        echo "<td>" . htmlspecialchars($row['material_name'] ?? 'Нет') . "</td>";
+        echo "</tr>";
+    }
+    echo "</tbody></table>";
+    echo "</div>";
+} else {
+    echo "<h1>У вас нет заявок на картины.</h1>";
+}
+
+// Освобождение памяти и закрытие соединения
+mysqli_free_result($result);
+mysqli_stmt_close($stmt);
+mysqli_close($link);
+?>
+
+</body>
+</html>
