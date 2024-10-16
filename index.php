@@ -81,6 +81,23 @@ if (isset($_SESSION['user_id'])) {
     }
 }
 
+
+// Получение всех заявок пользователя, если он является обычным пользователем (user)
+$userRequests = [];
+if ($isUser) {
+    $sqlRequests = "SELECT id_painting FROM PaintingUser WHERE id_user = ?";
+    $stmtRequests = mysqli_prepare($link, $sqlRequests);
+    mysqli_stmt_bind_param($stmtRequests, 'i', $userId);
+    mysqli_stmt_execute($stmtRequests);
+    $resultRequests = mysqli_stmt_get_result($stmtRequests);
+
+    // Сохраняем ID всех заявок в массив
+    while ($row = mysqli_fetch_assoc($resultRequests)) {
+        $userRequests[] = $row['id_painting'];
+    }
+    mysqli_stmt_close($stmtRequests);
+}
+
  // Отображение полей для поиска только если пользователь не администратор
  if (!$isAdmin) {
     ?>
@@ -200,76 +217,7 @@ if (!$stylesResult || !$materialsResult) {
 }
 
 
-// // Если отправлена форма, сохраняем выбранный фильтр в сессии
-// if (isset($_POST['filter'])) {
-//     $_SESSION['filter'] = $_POST['filter'];
-// }
 
-// // Определяем состояние фильтра (по умолчанию — показываем текущие аукционы)
-// $filter = isset($_SESSION['filter']) ? $_SESSION['filter'] : 'current';
-
-// // Проверка роли пользователя
-// $isAdmin = false;
-// if (isset($_SESSION['user_id'])) {
-//     $userId = $_SESSION['user_id'];
-//     $query = "SELECT role FROM Users WHERE id_user = $userId";
-//     $result = mysqli_query($link, $query);
-//     if ($result && mysqli_num_rows($result) > 0) {
-//         $user = mysqli_fetch_assoc($result);
-//         $isAdmin = ($user['role'] === 'admin');
-//     }
-// }
-
-// // SQL-запрос в зависимости от роли пользователя
-// if ($isAdmin) {
-//     // Администратор видит все картины
-//     $sql = "
-//         SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
-//         FROM Paintings
-//         JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
-//         JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
-//         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
-//     ";
-// } else {
-//     // Пользователь может выбирать между текущими и будущими аукционами
-//     if ($filter == 'current') {
-//         // Показ картин с текущими аукционами
-//         $sql = "
-//             SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
-//             FROM Paintings
-//             JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
-//             JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
-//             JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
-//             WHERE Paintings.is_sold = FALSE
-//             AND Auctions.start_date <= CURDATE()
-//             AND Auctions.end_date >= CURDATE()
-//         ";
-//     } elseif ($filter == 'future') {
-//         // Показ картин с будущими аукционами
-//         $sql = "
-//             SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name
-//             FROM Paintings
-//             JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
-//             JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
-//             JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
-//             WHERE Paintings.is_sold = FALSE
-//             AND Auctions.start_date > CURDATE()
-//         ";
-//     }
-
-//     // Отображение радиокнопок только для пользователей (не администраторов)
-//     echo "
-//     <form method='POST'>
-//         <label>
-//             <input type='radio' name='filter' value='current' " . ($filter == 'current' ? 'checked' : '') . "> Текущие аукционы
-//         </label>
-//         <label>
-//             <input type='radio' name='filter' value='future' " . ($filter == 'future' ? 'checked' : '') . "> Будущие аукционы
-//         </label>
-//         <button type='submit'>Применить</button>
-//     </form>
-//     ";
-// } 
 
 
 // Функция для создания выпадающего списка
@@ -324,6 +272,7 @@ function createDropdownFromArray($dataArray, $dropdownId, $defaultOptionText, $c
     $dropdown .= "</select>";
     return $dropdown;
 }
+
 
 
 
@@ -389,9 +338,11 @@ if (!$isAdmin) {
 
                  // Если пользователь - обычный пользователь (user), добавляем чекбокс "Заявка"
                  if ($isUser) {
-                    echo "<td>
-                    <input type='checkbox' class='requestCheckbox' data-id='" . $row['id_painting'] . "'>
-                        </td>";
+                 // Проверяем, есть ли ID картины в списке заявок пользователя
+                 $checked = in_array($row['id_painting'], $userRequests) ? "checked" : "";
+                 echo "<td>
+                         <input type='checkbox' class='requestCheckbox' data-id='" . $row['id_painting'] . "' $checked>
+                       </td>";
                 }
 
                 echo "</tr>";
