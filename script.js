@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Script.js is loaded and working!");
-    console.log("Нет соединения с сервером.");
 
     var rows = document.querySelectorAll('#paintingsTable tr');
 

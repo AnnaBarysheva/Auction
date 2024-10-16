@@ -284,6 +284,13 @@ if (!$isAdmin) {
 
             $missingStyleOrMaterial = false;
 
+
+            if ($isSeller): // Кнопка будет видна только для продавцов ?>
+                <button type="button" class="addButton" id="seller-requests-button" onclick="location.href='seller_requests.php'">
+                    Заявки на мои картины
+                </button>
+            <?php endif; 
+
             echo "<div class='table-wrapper'>";
             echo "<table border='1' id='paintingsTable'>";
             echo "<tr>
