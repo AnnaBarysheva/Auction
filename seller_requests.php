@@ -118,7 +118,10 @@ if ($result && mysqli_num_rows($result) > 0) {
         
     echo "</tbody></table>";
     echo "</div>";
+} else {
+    echo "<h1 style='text-align: center; color: black;'>Заявок на ваши картины нет</h1>";
 }
+
 
 
 // Освобождение памяти и закрытие соединения

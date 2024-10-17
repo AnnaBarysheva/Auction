@@ -291,6 +291,13 @@ if (!$isAdmin) {
                 </button>
             <?php endif; 
 
+            if ($isUser): // Кнопка будет видна только для продавцов ?>
+                <button type="button" class="addButton" id="user-requests-button" onclick="location.href='my_requests.php'">
+                    Просмотреть мои заявки
+                </button>
+            <?php endif; 
+
+
             echo "<div class='table-wrapper'>";
             echo "<table border='1' id='paintingsTable'>";
             echo "<tr>
@@ -358,11 +365,13 @@ if (!$isAdmin) {
 
             echo "</div>";
 
-            if ($isUser) {
-                echo "<div class='button-container'>";
-                echo "<a href='my_requests.php' class='editButton'>Посмотреть заявки</a>";
-                echo "</div>";
-            }
+            // if ($isUser) {
+            //     echo "<div class='button-container'>";
+            //     echo "<a href='my_requests.php' class='editButton'>Посмотреть заявки</a>";
+            //     echo "</div>";
+            // }
+
+            
 
             // Кнопка "Добавить картину", доступная только для продавцов
             if ($isSeller) {

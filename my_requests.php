@@ -23,7 +23,7 @@ $sql = "
            st.style_name, m.material_name
     FROM Paintings p
     JOIN PaintingUser pu ON p.id_painting = pu.id_painting
-    LEFT JOIN Styles st ON p.id_style = st.id_style
+    JOIN Styles st ON p.id_style = st.id_style  -- Меняем LEFT JOIN на JOIN
     LEFT JOIN Materials m ON p.id_material = m.id_material
     LEFT JOIN Sellers s ON p.id_seller = s.id_seller  
     WHERE pu.id_user = ?
@@ -102,7 +102,7 @@ if ($result && mysqli_num_rows($result) > 0) {
     echo "</tbody></table>";
     echo "</div>";
 } else {
-    echo "<h1>У вас нет заявок на картины.</h1>";
+    echo "<h1 style='text-align: center; color: black;'>У вас нет заявок на картины</h1>";
 }
 
 // Освобождение памяти и закрытие соединения

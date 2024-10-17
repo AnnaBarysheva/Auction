@@ -417,7 +417,8 @@ h1 {
     background-color: #008B8B; /* Цвет при наведении */
 }
 
-#seller-requests-button {
+#seller-requests-button,
+#user-requests-button {
     display: block; /* Делаем кнопку блочным элементом, чтобы использовать margin */
     margin: 20px auto; /* Автоматические отступы слева и справа для центрирования */
     width: fit-content; /* Устанавливаем фиксированную ширину кнопки */
