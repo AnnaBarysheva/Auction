@@ -17,7 +17,7 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <script src="script.js"></script>
+<script src="script.js"></script>
     <header>
         <div class="header-left">
             <img src="https://cdn-icons-png.flaticon.com/512/10613/10613919.png" alt="Art Gallery Logo" class="logo">
@@ -306,10 +306,10 @@ if (!$isAdmin) {
                 echo "<th>Действия</th>";
             }
 
-            // Если пользователь - обычный пользователь (user), добавляем столбец "Заявка"
-            if ($isUser) {
-                echo "<th>Заявка</th>";
-            }
+                        // Если пользователь - обычный пользователь (user), добавляем столбец "Заявка"
+                        if ($isUser) {
+                            echo "<th>Заявка</th>";
+                        }
 
             echo "</tr>";
 
@@ -340,7 +340,7 @@ if (!$isAdmin) {
                     echo "<td>
                             <button class='editButton' data-id='" . $row['id_painting'] . "'>Редактировать</button>
                             <button class='deleteButton' data-id='" . $row['id_painting'] . "'>Удалить</button>
-                          </td>";
+                            </td>";
                 }
 
                  // Если пользователь - обычный пользователь (user), добавляем чекбокс "Заявка"
@@ -349,7 +349,7 @@ if (!$isAdmin) {
                  $checked = in_array($row['id_painting'], $userRequests) ? "checked" : "";
                  echo "<td>
                          <input type='checkbox' class='requestCheckbox' data-id='" . $row['id_painting'] . "' $checked>
-                       </td>";
+                          </td>";
                 }
 
                 echo "</tr>";
@@ -1169,7 +1169,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 //     });
 // }
 
-    // Поиск по таблице
+    // Проверка на существование кнопки
+if (searchButton) {
     searchButton.addEventListener('click', function () {
         handleWithConnection(() => {
             console.log("Search button clicked.");
@@ -1208,6 +1209,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         });
     });
+} else {
+    console.warn("Search button not found.");
+}
+
 
     // Обработчик для кнопки сброса
     resetButton.addEventListener('click', function () {

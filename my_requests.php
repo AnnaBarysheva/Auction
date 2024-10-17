@@ -90,7 +90,7 @@ if ($result && mysqli_num_rows($result) > 0) {
 
     while ($row = mysqli_fetch_assoc($result)) {
         echo "<tr>";
-       
+        echo "<tr data-id='" . $row['id_painting'] . "'>";
         echo "<td>" . htmlspecialchars($row['paint_name']) . "</td>";
         echo "<td>" . htmlspecialchars($row['creation_year']) . "</td>";
         echo "<td>" . htmlspecialchars($row['author']) . "</td>";
@@ -110,6 +110,24 @@ mysqli_free_result($result);
 mysqli_stmt_close($stmt);
 mysqli_close($link);
 ?>
+<script>
+    // Получаем таблицу и все строки таблицы
+var table = document.getElementById('requestsTable');
+var rows = table.getElementsByTagName('tr');
+
+// Проходим по всем строкам, начиная с первой после заголовка
+for (var i = 1; i < rows.length; i++) {
+    rows[i].addEventListener('click', function() {
+        // Оборачиваем действие в handleWithConnection
+        // handleWithConnection(() => {
+            var id_painting = this.getAttribute('data-id');
+            // Перенаправление на страницу с деталями
+            window.location.href = 'painting_details.php?id_painting=' + id_painting;
+        //});
+    });
+}
+
+</script>
 
 </body>
 </html>

@@ -6,6 +6,8 @@ body {
     /*background-size: cover;  Фон будет покрывать весь экран */
     background-position: center; /* Фон будет центрироваться */
     background-repeat: no-repeat; /* Отключаем повторение изображения */
+    background-size: 100% 100%; /* Фон растягивается по ширине, высота регулируется автоматически */
+    min-height: 100vh; /* Гарантируем, что минимальная высота body - 100% экрана */
 }
 
 .tables-container {
