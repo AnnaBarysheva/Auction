@@ -26,6 +26,9 @@
 
 
 <?php
+session_start();
+
+
 // Проверка, передан ли параметр id_painting
 if (isset($_GET['id_painting'])) {
     $id_painting = intval($_GET['id_painting']); // Преобразование в целое число для безопасности
@@ -45,7 +48,7 @@ if ($link == false) {
 // SQL-запрос для получения полной информации о картине
 $sql = "
  SELECT Paintings.paint_name, Paintings.size, 
-           Styles.style_name, Materials.material_name, 
+           Styles.style_name, Paintings.id_style, Materials.material_name, 
            Paintings.creation_year, Paintings.author, Paintings.image_path, 
            Sellers.full_name AS seller_name, Sellers.phone AS seller_phone, Sellers.email AS seller_email,
            Auctions.start_date, Auctions.end_date,  
@@ -63,6 +66,29 @@ $result = mysqli_query($link, $sql);
 
 if ($result && mysqli_num_rows($result) > 0) {
     $painting = mysqli_fetch_assoc($result); // Сохраняем данные картины в переменной
+
+
+    if (isset($_SESSION['user_id'])) {
+        $id_user = $_SESSION['user_id'];
+        $id_style = $painting['id_style'];
+    
+        // Проверка, есть ли уже запись
+        $check_sql = "SELECT count FROM UserActivity WHERE id_user = $id_user AND id_style = $id_style";
+        $result = mysqli_query($link, $check_sql);
+    
+        if (mysqli_num_rows($result) > 0) {
+            // Обновление счётчика
+            $update_sql = "UPDATE UserActivity SET count = count + 1 WHERE id_user = $id_user AND id_style = $id_style";
+            mysqli_query($link, $update_sql);
+        } else {
+            // Вставка новой записи
+            $insert_sql = "INSERT INTO UserActivity (id_user, id_style, count) VALUES ($id_user, $id_style, 1)";
+            mysqli_query($link, $insert_sql);
+        }
+    }
+
+    
+
 } else {
     die("Картина с таким id не найдена или ошибка запроса.");
 }

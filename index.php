@@ -96,7 +96,37 @@ if ($isUser) {
         $userRequests[] = $row['id_painting'];
     }
     mysqli_stmt_close($stmtRequests);
+
+    //  echo "<pre>";
+    //     print_r($userRequests);
+    //     echo "</pre>";
 }
+// Подсчет предпочтений пользователя
+$stylePreferences = [];
+if ($isUser) {
+    $sqlPreferences = "
+        SELECT id_style, count
+        FROM UserActivity
+        WHERE id_user = ?
+        ORDER BY count DESC
+    ";
+    $stmtPreferences = mysqli_prepare($link, $sqlPreferences);
+    mysqli_stmt_bind_param($stmtPreferences, 'i', $userId);
+    mysqli_stmt_execute($stmtPreferences);
+    $resultPreferences = mysqli_stmt_get_result($stmtPreferences);
+
+    // Получаем ID стилей и количество для каждого стиля
+    while ($row = mysqli_fetch_assoc($resultPreferences)) {
+        $stylePreferences[] = $row['id_style'];
+    }
+    mysqli_stmt_close($stmtPreferences);
+
+    // Отладочный вывод для проверки
+    // echo "<pre>";
+    // print_r($stylePreferences);
+    // echo "</pre>";
+}
+
 
  // Отображение полей для поиска только если пользователь не администратор
  if (!$isAdmin) {
@@ -175,32 +205,120 @@ if ($isSeller) {
         WHERE Paintings.id_user = {$_SESSION['user_id']}
     ";
 } elseif (!$isAdmin) {
-//     $sql = "
-//         SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
-//                Styles.style_name, Materials.material_name
-//         FROM Paintings
-//         JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
-//         JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
-//         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
-//         JOIN Styles ON Paintings.id_style = Styles.id_style
-//         JOIN Materials ON Paintings.id_material = Materials.id_material
-//     ";
-// } else {
-    $sql = "
-        SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
-               Styles.style_name, Materials.material_name
-        FROM Paintings
-        JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
-        JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
-        JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
-        JOIN Styles ON Paintings.id_style = Styles.id_style
-        JOIN Materials ON Paintings.id_material = Materials.id_material
-        WHERE Paintings.is_sold = FALSE
-        AND Auctions.start_date <= CURDATE()
-        AND Auctions.end_date >= CURDATE()
-        
-    ";
+    // Когда оба массива непустые
+    if (!empty($stylePreferences) && !empty($userRequests)) { 
+        $styleOrder = implode(',', $stylePreferences);
+        $userRequestsList = implode(',', $userRequests);
+
+        $sql = "
+            SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+                Styles.style_name, Materials.material_name,
+                (CASE WHEN Styles.id_style IN ($styleOrder) THEN 1 ELSE 0 END) as is_interesting,
+                (CASE WHEN Paintings.id_painting IN ($userRequestsList) THEN 1 ELSE 0 END) as has_request
+            FROM Paintings
+            JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+            JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+            JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+            JOIN Styles ON Paintings.id_style = Styles.id_style
+            JOIN Materials ON Paintings.id_material = Materials.id_material
+            WHERE Paintings.is_sold = FALSE
+            AND Auctions.start_date <= CURDATE()
+            AND Auctions.end_date >= CURDATE()
+            ORDER BY is_interesting DESC,
+                    FIELD(Styles.id_style, $styleOrder) ASC,  
+                    has_request ASC, 
+                    Paintings.creation_year DESC
+        ";
+
+    // Когда непустой только массив стилей
+    } elseif (!empty($stylePreferences)) {
+        $styleOrder = implode(',', $stylePreferences);
+
+        $sql = "
+            SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+                Styles.style_name, Materials.material_name,
+                (CASE WHEN Styles.id_style IN ($styleOrder) THEN 1 ELSE 0 END) as is_interesting
+            FROM Paintings
+            JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+            JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+            JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+            JOIN Styles ON Paintings.id_style = Styles.id_style
+            JOIN Materials ON Paintings.id_material = Materials.id_material
+            WHERE Paintings.is_sold = FALSE
+            AND Auctions.start_date <= CURDATE()
+            AND Auctions.end_date >= CURDATE()
+            ORDER BY is_interesting DESC,
+                    FIELD(Styles.id_style, $styleOrder) ASC,  
+                    Paintings.creation_year DESC
+        ";
+
+    // Когда непустой только массив заявок
+    } elseif (!empty($userRequests)) {
+        // Преобразуем $userRequests в строку, разделенную запятыми для SQL-запроса
+        $userRequestsList = implode(',', $userRequests);
+       
+
+        // Запрос для подсчета количества заявок по стилям
+        $styleCountQuery = "
+            SELECT Styles.id_style, COUNT(*) as style_count
+            FROM Paintings
+            JOIN Styles ON Paintings.id_style = Styles.id_style
+            WHERE Paintings.id_painting IN ($userRequestsList)
+            GROUP BY Styles.id_style
+            ORDER BY style_count ASC
+        ";
+
+        $styleCountResult = mysqli_query($link, $styleCountQuery);
+        $styleOrder = [];
+
+        // Собираем порядок стилей по количеству заявок
+        while ($row = mysqli_fetch_assoc($styleCountResult)) {
+            $styleOrder[] = $row['id_style'];
+        }
+        // echo "<pre>";
+        // print_r($styleOrder);
+        // echo "</pre>";
+
+        // Преобразуем $styleOrder в строку для использования в FIELD()
+        $styleOrderString = implode(',', $styleOrder);
+
+        // Основной запрос для вывода картин
+        $sql = "
+            SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+                Styles.style_name, Materials.material_name,
+                (CASE WHEN Paintings.id_painting IN ($userRequestsList) THEN 1 ELSE 0 END) as has_request
+            FROM Paintings
+            JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+            JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+            JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+            JOIN Styles ON Paintings.id_style = Styles.id_style
+            JOIN Materials ON Paintings.id_material = Materials.id_material
+            WHERE Paintings.is_sold = FALSE
+            AND Auctions.start_date <= CURDATE()
+            AND Auctions.end_date >= CURDATE()
+            ORDER BY FIELD(Styles.id_style, $styleOrderString) DESC, 
+                    has_request ASC, 
+                    Paintings.creation_year DESC
+        ";
+    
+    // Стандартный запрос, если у пользователя нет предпочтений
+    } else {
+        $sql = "
+            SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+                   Styles.style_name, Materials.material_name
+            FROM Paintings
+            JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+            JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+            JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+            JOIN Styles ON Paintings.id_style = Styles.id_style
+            JOIN Materials ON Paintings.id_material = Materials.id_material
+            WHERE Paintings.is_sold = FALSE
+            AND Auctions.start_date <= CURDATE()
+            AND Auctions.end_date >= CURDATE()
+        ";
+    }
 }
+
 
 
 // Запрос для получения стилей
@@ -364,14 +482,6 @@ if (!$isAdmin) {
             echo "</table>";
 
             echo "</div>";
-
-            // if ($isUser) {
-            //     echo "<div class='button-container'>";
-            //     echo "<a href='my_requests.php' class='editButton'>Посмотреть заявки</a>";
-            //     echo "</div>";
-            // }
-
-            
 
             // Кнопка "Добавить картину", доступная только для продавцов
             if ($isSeller) {

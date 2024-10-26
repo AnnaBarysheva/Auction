@@ -52,6 +52,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // document.querySelectorAll('.requestCheckbox').forEach(checkbox => {
+    //     checkbox.addEventListener('change', function() {
+    //         var paintingId = this.getAttribute('data-id');
+    //         var isChecked = this.checked;
+    
+    //         // AJAX запрос для сохранения заявки через fetch
+    //         var formData = new FormData();
+    //         formData.append('id_painting', paintingId);
+    //         formData.append('checked', isChecked); // true если выбран, false если снят
+    
+    //         fetch('handle_request.php', {
+    //             method: 'POST',
+    //             body: formData
+    //         })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.success) {
+    //                 if (isChecked) {
+    //                     console.log('Заявка на картину с ID: ' + paintingId + ' подана.');
+    //                 } else {
+    //                     console.log('Заявка на картину с ID: ' + paintingId + ' отменена.');
+    //                 }
+    //             } else {
+    //                 console.error('Ошибка при отправке заявки:', data.message);
+    //                 this.checked = !this.checked; // Отменяем действие если ошибка
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('Ошибка:', error);
+    //             this.checked = !this.checked; // Отменяем действие если ошибка
+    //         });
+    
+    //         //  запрос для отправки письма через fetch
+    //     let emailData = new URLSearchParams();
+    //     emailData.append('paintingId', paintingId);
+    //     emailData.append('isChecked', isChecked);
+
+    //     fetch('send_request_email.php', {
+    //         method: 'POST',
+    //         body: emailData
+    //     })
+    //     .then(response => response.text())
+    //     .then(responseText => {
+    //         console.log('Письмо отправлено на почту!', responseText);
+    //     })
+    //     .catch(error => {
+    //         console.error('Ошибка при отправке письма:', error);
+    //     });
+    //     });
+    // });
+    
+
+
 
 
     // Проверка на существование кнопки "Вернуться на главную"
@@ -117,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Соединение успешно, выполняем callback.");
         callback(); // Выполняем основное действие
     }
+    
     
 
     
