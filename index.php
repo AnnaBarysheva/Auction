@@ -127,6 +127,18 @@ if ($isUser) {
     // echo "</pre>";
 }
 
+$weights = [];
+if ($isUser) {
+    $weightsQuery = "SELECT characteristic_name, weight FROM SortingWeights";
+    $weightsResult = mysqli_query($link, $weightsQuery);
+
+    while ($row = mysqli_fetch_assoc($weightsResult)) {
+        $weights[$row['characteristic_name']] = $row['weight'];
+    }
+    // echo "<pre>";
+    // print_r($weights);
+    // echo "</pre>";
+}
 
  // Отображение полей для поиска только если пользователь не администратор
  if (!$isAdmin) {
@@ -205,10 +217,55 @@ if ($isSeller) {
         WHERE Paintings.id_user = {$_SESSION['user_id']}
     ";
 } elseif (!$isAdmin) {
+    // Проверяем наличие весов
+    $styleWeight = $weights['style'] ?? 1; // Значение по умолчанию 1
+    $requestWeight = $weights['has_request'] ?? 1; // Значение по умолчанию 1
+    $creationYearWeight = $weights['creation_year'] ?? 1; // Значение по умолчанию 1
+
+    // Сначала собираем веса
+    $weights = [
+        'style' => $styleWeight,
+        'has_request' => $requestWeight,
+        'creation_year' => $creationYearWeight,
+    ];
+
+    // Сортируем их по убыванию
+    arsort($weights);
+
+    
+
     // Когда оба массива непустые
     if (!empty($stylePreferences) && !empty($userRequests)) { 
         $styleOrder = implode(',', $stylePreferences);
         $userRequestsList = implode(',', $userRequests);
+
+        
+        // Создаем порядок сортировки в SQL
+        $orderBy = [];
+        foreach ($weights as $criterion => $weight) {
+            switch ($criterion) {
+                case 'style':
+                    $orderBy[] = "is_interesting DESC";
+                    $orderBy[] = "FIELD(Styles.id_style, $styleOrder) ASC";
+                    break;
+                case 'has_request':
+                    $orderBy[] = "has_request ASC";
+                    break;    
+                case 'creation_year':
+                    $orderBy[] = "Paintings.creation_year DESC";
+                    break;
+                
+            }
+        }
+
+        // echo "<pre>";
+        // print_r($orderBy);
+        // echo "</pre>";
+        // Соединяем порядок сортировки
+        $sqlOrder = implode(", ", $orderBy);
+        // echo "<pre>";
+        // print_r($sqlOrder);
+        // echo "</pre>";
 
         $sql = "
             SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
@@ -224,15 +281,35 @@ if ($isSeller) {
             WHERE Paintings.is_sold = FALSE
             AND Auctions.start_date <= CURDATE()
             AND Auctions.end_date >= CURDATE()
-            ORDER BY is_interesting DESC,
-                    FIELD(Styles.id_style, $styleOrder) ASC,  
-                    has_request ASC, 
-                    Paintings.creation_year DESC
+            ORDER BY $sqlOrder
         ";
 
     // Когда непустой только массив стилей
     } elseif (!empty($stylePreferences)) {
         $styleOrder = implode(',', $stylePreferences);
+
+         // Создаем порядок сортировки в SQL
+         $orderBy = [];
+         foreach ($weights as $criterion => $weight) {
+             switch ($criterion) {
+                 case 'style':
+                     $orderBy[] = "is_interesting DESC";
+                     $orderBy[] = "FIELD(Styles.id_style, $styleOrder) ASC";
+                     break;
+                 case 'creation_year':
+                     $orderBy[] = "Paintings.creation_year DESC";
+                     break;
+             }
+         }
+ 
+        //  echo "<pre>";
+        //  print_r($orderBy);
+        //  echo "</pre>";
+         // Соединяем порядок сортировки
+         $sqlOrder = implode(", ", $orderBy);
+        //  echo "<pre>";
+        //  print_r($sqlOrder);
+        //  echo "</pre>";
 
         $sql = "
             SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
@@ -247,9 +324,7 @@ if ($isSeller) {
             WHERE Paintings.is_sold = FALSE
             AND Auctions.start_date <= CURDATE()
             AND Auctions.end_date >= CURDATE()
-            ORDER BY is_interesting DESC,
-                    FIELD(Styles.id_style, $styleOrder) ASC,  
-                    Paintings.creation_year DESC
+            ORDER BY $sqlOrder
         ";
 
     // Когда непустой только массив заявок
@@ -282,6 +357,33 @@ if ($isSeller) {
         // Преобразуем $styleOrder в строку для использования в FIELD()
         $styleOrderString = implode(',', $styleOrder);
 
+         // Создаем порядок сортировки в SQL
+         $orderBy = [];
+         foreach ($weights as $criterion => $weight) {
+             switch ($criterion) {
+                 case 'style':
+                     $orderBy[] = "FIELD(Styles.id_style, $styleOrderString) DESC";
+                     break;
+                 case 'has_request':
+                     $orderBy[] = "has_request ASC";
+                     break;
+                case 'creation_year':
+                    $orderBy[] = "Paintings.creation_year DESC";
+                    break;     
+             }
+         }
+ 
+        //  echo "<pre>";
+        //  print_r($orderBy);
+        //  echo "</pre>";
+         // Соединяем порядок сортировки
+         $sqlOrder = implode(", ", $orderBy);
+        //  echo "<pre>";
+        //  print_r($sqlOrder);
+        //  echo "</pre>";
+
+        
+
         // Основной запрос для вывода картин
         $sql = "
             SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
@@ -296,9 +398,7 @@ if ($isSeller) {
             WHERE Paintings.is_sold = FALSE
             AND Auctions.start_date <= CURDATE()
             AND Auctions.end_date >= CURDATE()
-            ORDER BY FIELD(Styles.id_style, $styleOrderString) DESC, 
-                    has_request ASC, 
-                    Paintings.creation_year DESC
+            ORDER BY $sqlOrder
         ";
     
     // Стандартный запрос, если у пользователя нет предпочтений
@@ -318,6 +418,55 @@ if ($isSeller) {
         ";
     }
 }
+
+//Алина доп по 3 лабе
+    //  $sql = "
+
+    //         SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+    //             Styles.style_name, Materials.material_name, seller_painting_count
+    //         FROM Paintings
+    //         JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+    //         JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+    //         JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+    //         JOIN Styles ON Paintings.id_style = Styles.id_style
+    //         JOIN Materials ON Paintings.id_material = Materials.id_material
+    //         JOIN (
+    //             SELECT id_user, COUNT(*) AS seller_painting_count
+    //             FROM Paintings
+    //             GROUP BY id_user
+    //         ) AS SellerPaintingCounts ON Paintings.id_user = SellerPaintingCounts.id_user
+    //         WHERE Paintings.is_sold = FALSE
+    //         AND Auctions.start_date <= CURDATE()
+    //         AND Auctions.end_date >= CURDATE()
+    //         ORDER BY seller_painting_count DESC, Paintings.creation_year DESC;
+
+    //     ";
+
+        // Аня доп по 3 лабе
+
+        // $sql = "
+        //             SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+        //                 Styles.style_name, Materials.material_name
+        //             FROM Paintings
+        //             JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+        //             JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+        //             JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+        //             JOIN Styles ON Paintings.id_style = Styles.id_style
+        //             JOIN Materials ON Paintings.id_material = Materials.id_material
+        //             LEFT JOIN (
+        //                 SELECT Paintings.id_user, COUNT(PaintingUser.id_painting) AS seller_request_count
+        //                 FROM PaintingUser
+        //                 JOIN Paintings ON PaintingUser.id_painting = Paintings.id_painting
+        //                 GROUP BY Paintings.id_user
+        //             ) AS SellerRequestCounts ON Paintings.id_user = SellerRequestCounts.id_user
+        //             WHERE Paintings.is_sold = FALSE
+        //             AND Auctions.start_date <= CURDATE()
+        //             AND Auctions.end_date >= CURDATE()
+        //             ORDER BY SellerRequestCounts.seller_request_count DESC, 
+        //                     Paintings.creation_year DESC;
+        // ";
+
+//} 
 
 
 
@@ -581,6 +730,28 @@ if ($isAdmin) {
     echo "<button id='addStyleButton' class='addButton'>Добавить стиль</button>";
     echo "<button id='addMaterialButton' class='addButton'>Добавить материал</button>";
     echo "</div>";
+
+     // Запрос на получение данных из таблицы SortingWeights
+     $weightsQuery = "SELECT * FROM SortingWeights";
+     $weightsResult = mysqli_query($link, $weightsQuery);
+
+    if ($weightsResult) {
+        echo "<div class='sorting-weights-table-container'>";
+
+        // Таблица для весов сортировки
+        echo "<table border='1' id='weightsTable'>";
+        echo "<tr><th>Характеристика</th><th>Вес</th><th>Действия</th></tr>";
+        while ($row = mysqli_fetch_assoc($weightsResult)) {
+            echo "<tr data-id='" . $row['id'] . "'>";
+            echo "<td>" . $row['characteristic_name'] . "</td>";
+            echo "<td>" . $row['weight'] . "</td>";
+            echo "<td><button class='editWeightButton' data-id='" . $row['id'] . "'>Редактировать</button></td>";
+            echo "</tr>";
+        }
+    
+        echo "</table>";
+    }   
+    echo "</div>"; 
 }
 
 
@@ -646,6 +817,24 @@ mysqli_close($link);
         </form>
     </div>
 </div>
+
+<div id="editWeightModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="closeEditWeightModal">&times;</span>
+        <h2>Редактировать вес характеристики: <span id="characteristicNameDisplay"></span></h2>
+        <form id="editWeightForm" action="update_weight.php" method="POST">
+            <input type="hidden" id="editWeightId" name="id"> <!-- ID характеристики -->
+            
+            <label for="editWeightValue">Вес:</label>
+            <input type="number" class="modal-input" id="editWeightValue" name="weight" placeholder="Введите новый вес" required min="1" max="50">
+            
+            <button type="submit" class="saveButton">Сохранить изменения</button>
+        </form>
+    </div>
+</div>
+
+
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1013,6 +1202,68 @@ for (var button of document.getElementsByClassName('deleteMaterialButton')) {
     });
 }
 
+//////Обработчики редактирования веса характеристик для сортировки
+document.querySelectorAll('.editWeightButton').forEach(button => {
+    button.addEventListener('click', function() {
+        var weightId = this.getAttribute('data-id'); // Получаем ID характеристики
+        var row = this.closest('tr'); // Находим соответствующую строку таблицы
+        var characteristicName = row.getElementsByTagName('td')[0].textContent; // Получаем название характеристики
+        var weightValue = row.getElementsByTagName('td')[1].textContent; // Получаем текущее значение веса
+
+        document.getElementById('editWeightId').value = weightId; // Устанавливаем ID в скрытое поле формы
+        document.getElementById('characteristicNameDisplay').textContent = characteristicName; // Устанавливаем название характеристики для отображения
+        document.getElementById('editWeightValue').value = weightValue; // Устанавливаем текущее значение веса
+
+        // Открываем модальное окно
+        document.getElementById('editWeightModal').style.display = 'block';
+    });
+});
+
+// Закрываем модальное окно
+document.getElementById('closeEditWeightModal').addEventListener('click', function() {
+    document.getElementById('editWeightModal').style.display = 'none';
+});
+
+// Закрытие модального окна при клике вне его
+window.addEventListener('click', function(event) {
+    var editWeightModal = document.getElementById('editWeightModal');
+    if (event.target === editWeightModal) {
+        editWeightModal.style.display = 'none'; // Закрываем модальное окно
+    }
+});
+
+document.getElementById('editWeightForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    var weightValue = parseInt(document.getElementById('editWeightValue').value.trim(), 10); // Преобразуем значение в целое число
+
+    // Проверка на минимальное значение
+    if (isNaN(weightValue) || weightValue < 1 || weightValue > 50) { 
+        alert('Вес должен быть целым положительным числом от 1 до 50.');
+        return;
+    }
+
+    var formData = new FormData(this);
+
+    fetch('update_weight.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data.startsWith('Ошибка:')) {
+            alert(data);
+        } else {
+            document.getElementById('editWeightModal').style.display = 'none';
+            window.location.reload();
+        }
+    })
+    .catch(error => console.error('Ошибка:', error));
+});
+
+
+
+
 
 
 });
@@ -1332,7 +1583,7 @@ if (searchButton) {
     console.warn("Search button not found.");
 }
 
-
+if (resetButton){ 
     // Обработчик для кнопки сброса
     resetButton.addEventListener('click', function () {
         handleWithConnection(() => {
@@ -1351,6 +1602,7 @@ if (searchButton) {
             }
         });
     });
+}    
 
  // Обновите обработчик для кнопки редактирования
  for (var button of editButtons) {

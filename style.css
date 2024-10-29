@@ -207,6 +207,17 @@ h1 {
     justify-content: center; /* Центрируем таблицы внутри их контейнеров */
 }
 
+/* Полупрозрачная подложка для таблицы весов и характеристик */
+.sorting-weights-table-container {
+    background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный белый фон */
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 20px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень для глубины */
+    
+}
+
 /* Таблицы должны занимать больше ширины */
 #stylesTable, #materialsTable {
     width: 90%; /* Таблицы растягиваются до 90% ширины контейнера */
@@ -242,6 +253,44 @@ h1 {
     color: #333; /* Цвет текста для ячеек */
     font-size: 16px; /* Размер шрифта для ячеек */
 }
+
+/*Стиль для таблицы весов и характеристик*/
+#weightsTable {
+    width: 90%; /* Таблицы растягиваются до 90% ширины контейнера */
+    max-width: 600px; /* Максимальная ширина таблицы */
+    border-collapse: collapse; /* Убираем двойные границы */
+    user-select: none; /* Отключение выделения текста */
+    margin: 0 auto;
+}
+
+ #weightsTable th,
+ #weightsTable td {
+    padding: 15px; /* Отступы внутри ячеек */
+    text-align: left; /* Выравнивание текста по левому краю */
+    border: 1px solid #ddd; /* Светло-серая граница */
+    user-select: none; /* Отключение выделения текста */
+}
+
+ #weightsTable th {
+    background-color: #00CED1; /* Цвет фона для заголовков */
+    color: white; /* Цвет текста для заголовков */
+    font-weight: bold; /* Жирный шрифт для заголовков */
+}
+
+#weightsTable tr:nth-child(even) {
+    background-color: rgba(0, 206, 209, 0.2); /* Полупрозрачный фон для четных строк */
+}
+
+ #weightsTable tr:hover {
+    background-color: rgba(221, 221, 221, 0.6); /* Полупрозрачный цвет при наведении на строку */
+    cursor: pointer; /* Указатель курсора при наведении */
+}
+
+ #weightsTable td {
+    color: #333; /* Цвет текста для ячеек */
+    font-size: 16px; /* Размер шрифта для ячеек */
+}
+
 
 
 
@@ -348,6 +397,21 @@ h1 {
 }
 
 .editMaterialButton:hover {
+    background-color: #008B8B; /* Цвет при наведении */
+}
+
+.editWeightButton {
+    padding: 10px;
+    background-color: #00CED1; /* Цвет фона */
+    color: white; /* Цвет текста */
+    border: none; /* Без границы */
+    border-radius: 5px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Указатель курсора */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.editWeightButton:hover {
     background-color: #008B8B; /* Цвет при наведении */
 }
 
