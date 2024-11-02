@@ -221,100 +221,45 @@ if ($isSeller) {
     $styleWeight = $weights['style'] ?? 1; // Значение по умолчанию 1
     $requestWeight = $weights['has_request'] ?? 1; // Значение по умолчанию 1
     $creationYearWeight = $weights['creation_year'] ?? 1; // Значение по умолчанию 1
-
-    // Сначала собираем веса
-    $weights = [
-        'style' => $styleWeight,
-        'has_request' => $requestWeight,
-        'creation_year' => $creationYearWeight,
-    ];
-
-    // Сортируем их по убыванию
-    arsort($weights);
-
-    
-
+   
     // Когда оба массива непустые
     if (!empty($stylePreferences) && !empty($userRequests)) { 
         $styleOrder = implode(',', $stylePreferences);
         $userRequestsList = implode(',', $userRequests);
 
-        
-        // Создаем порядок сортировки в SQL
-        $orderBy = [];
-        foreach ($weights as $criterion => $weight) {
-            switch ($criterion) {
-                case 'style':
-                    $orderBy[] = "is_interesting DESC";
-                    $orderBy[] = "FIELD(Styles.id_style, $styleOrder) ASC";
-                    break;
-                case 'has_request':
-                    $orderBy[] = "has_request ASC";
-                    break;    
-                case 'creation_year':
-                    $orderBy[] = "Paintings.creation_year DESC";
-                    break;
-                
-            }
-        }
-
-        // echo "<pre>";
-        // print_r($orderBy);
-        // echo "</pre>";
-        // Соединяем порядок сортировки
-        $sqlOrder = implode(", ", $orderBy);
-        // echo "<pre>";
-        // print_r($sqlOrder);
-        // echo "</pre>";
-
         $sql = "
-            SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
-                Styles.style_name, Materials.material_name,
-                (CASE WHEN Styles.id_style IN ($styleOrder) THEN 1 ELSE 0 END) as is_interesting,
-                (CASE WHEN Paintings.id_painting IN ($userRequestsList) THEN 1 ELSE 0 END) as has_request
-            FROM Paintings
-            JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
-            JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
-            JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
-            JOIN Styles ON Paintings.id_style = Styles.id_style
-            JOIN Materials ON Paintings.id_material = Materials.id_material
-            WHERE Paintings.is_sold = FALSE
-            AND Auctions.start_date <= CURDATE()
-            AND Auctions.end_date >= CURDATE()
-            ORDER BY $sqlOrder
-        ";
+        SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
+            Styles.style_name, Materials.material_name,
+            
+            (
+                (CASE WHEN Styles.id_style IN ($styleOrder) THEN 1 ELSE 0 END) * {$styleWeight} +
+                (CASE WHEN Paintings.id_painting IN ($userRequestsList) THEN 1 ELSE 0 END) * {$requestWeight} +
+                (Paintings.creation_year * {$creationYearWeight})
+            ) as total_weight
+        FROM Paintings
+        JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+        JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+        JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+        JOIN Styles ON Paintings.id_style = Styles.id_style
+        JOIN Materials ON Paintings.id_material = Materials.id_material
+        WHERE Paintings.is_sold = FALSE
+        AND Auctions.start_date <= CURDATE()
+        AND Auctions.end_date >= CURDATE()
+        ORDER BY total_weight DESC
+    ";
 
     // Когда непустой только массив стилей
     } elseif (!empty($stylePreferences)) {
         $styleOrder = implode(',', $stylePreferences);
 
-         // Создаем порядок сортировки в SQL
-         $orderBy = [];
-         foreach ($weights as $criterion => $weight) {
-             switch ($criterion) {
-                 case 'style':
-                     $orderBy[] = "is_interesting DESC";
-                     $orderBy[] = "FIELD(Styles.id_style, $styleOrder) ASC";
-                     break;
-                 case 'creation_year':
-                     $orderBy[] = "Paintings.creation_year DESC";
-                     break;
-             }
-         }
- 
-        //  echo "<pre>";
-        //  print_r($orderBy);
-        //  echo "</pre>";
-         // Соединяем порядок сортировки
-         $sqlOrder = implode(", ", $orderBy);
-        //  echo "<pre>";
-        //  print_r($sqlOrder);
-        //  echo "</pre>";
-
+         
         $sql = "
             SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
                 Styles.style_name, Materials.material_name,
-                (CASE WHEN Styles.id_style IN ($styleOrder) THEN 1 ELSE 0 END) as is_interesting
+                (
+                (CASE WHEN Styles.id_style IN ($styleOrder) THEN 1 ELSE 0 END) * {$styleWeight} +
+                (Paintings.creation_year * {$creationYearWeight})
+                ) as total_weight
             FROM Paintings
             JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
             JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
@@ -324,7 +269,7 @@ if ($isSeller) {
             WHERE Paintings.is_sold = FALSE
             AND Auctions.start_date <= CURDATE()
             AND Auctions.end_date >= CURDATE()
-            ORDER BY $sqlOrder
+            ORDER BY total_weight DESC
         ";
 
     // Когда непустой только массив заявок
@@ -350,45 +295,21 @@ if ($isSeller) {
         while ($row = mysqli_fetch_assoc($styleCountResult)) {
             $styleOrder[] = $row['id_style'];
         }
-        // echo "<pre>";
-        // print_r($styleOrder);
-        // echo "</pre>";
-
+        
         // Преобразуем $styleOrder в строку для использования в FIELD()
         $styleOrderString = implode(',', $styleOrder);
 
-         // Создаем порядок сортировки в SQL
-         $orderBy = [];
-         foreach ($weights as $criterion => $weight) {
-             switch ($criterion) {
-                 case 'style':
-                     $orderBy[] = "FIELD(Styles.id_style, $styleOrderString) DESC";
-                     break;
-                 case 'has_request':
-                     $orderBy[] = "has_request ASC";
-                     break;
-                case 'creation_year':
-                    $orderBy[] = "Paintings.creation_year DESC";
-                    break;     
-             }
-         }
- 
-        //  echo "<pre>";
-        //  print_r($orderBy);
-        //  echo "</pre>";
-         // Соединяем порядок сортировки
-         $sqlOrder = implode(", ", $orderBy);
-        //  echo "<pre>";
-        //  print_r($sqlOrder);
-        //  echo "</pre>";
-
         
-
         // Основной запрос для вывода картин
         $sql = "
             SELECT Paintings.*, PaintingsOnAuction.starting_price, Sellers.full_name, 
                 Styles.style_name, Materials.material_name,
-                (CASE WHEN Paintings.id_painting IN ($userRequestsList) THEN 1 ELSE 0 END) as has_request
+                (
+                (CASE WHEN Styles.id_style IN ($styleOrderString) THEN 1 ELSE 0 END) * {$styleWeight} +
+                (CASE WHEN Paintings.id_painting IN ($userRequestsList) THEN 1 ELSE 0 END) * {$requestWeight} +
+                (Paintings.creation_year * {$creationYearWeight})
+            ) as total_weight
+                
             FROM Paintings
             JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
             JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
@@ -398,7 +319,7 @@ if ($isSeller) {
             WHERE Paintings.is_sold = FALSE
             AND Auctions.start_date <= CURDATE()
             AND Auctions.end_date >= CURDATE()
-            ORDER BY $sqlOrder
+            ORDER BY total_weight DESC
         ";
     
     // Стандартный запрос, если у пользователя нет предпочтений
@@ -826,7 +747,7 @@ mysqli_close($link);
             <input type="hidden" id="editWeightId" name="id"> <!-- ID характеристики -->
             
             <label for="editWeightValue">Вес:</label>
-            <input type="number" class="modal-input" id="editWeightValue" name="weight" placeholder="Введите новый вес" required min="1" max="50">
+            <input type="number" class="modal-input" id="editWeightValue" name="weight" placeholder="Введите новый вес" required min="0" max="100"step="0.01">
             
             <button type="submit" class="saveButton">Сохранить изменения</button>
         </form>
@@ -1235,13 +1156,9 @@ window.addEventListener('click', function(event) {
 document.getElementById('editWeightForm').addEventListener('submit', function(event) {
     event.preventDefault();
 
-    var weightValue = parseInt(document.getElementById('editWeightValue').value.trim(), 10); // Преобразуем значение в целое число
+    var weightValue = parseFloat(document.getElementById('editWeightValue').value.trim()); // Преобразуем значение в число с плавающей запятой
 
-    // Проверка на минимальное значение
-    if (isNaN(weightValue) || weightValue < 1 || weightValue > 50) { 
-        alert('Вес должен быть целым положительным числом от 1 до 50.');
-        return;
-    }
+    
 
     var formData = new FormData(this);
 
