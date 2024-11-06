@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $materialId = $_POST['materials'];  // Здесь будет ID выбранного материала
     $year = $_POST['creation_year'];
     $author = $_POST['author'];
-    $imagePath = $_POST['image_path'];
+    // $imagePath = $_POST['image_path'];
     $seller = $_POST['seller'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
@@ -29,6 +29,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($styleId) || empty($materialId)) {
         die("Ошибка: Выберите стиль и материал для картины.");
     }
+
+    // Проверка, был ли загружен файл
+    if (isset($_FILES['image_path']) && $_FILES['image_path']['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['image_path']['tmp_name'];
+        // Обработка загруженного файла
+      
+        
+        $fileName = $_FILES['image_path']['name'];
+        $fileSize = $_FILES['image_path']['size'];
+        $fileType = $_FILES['image_path']['type'];
+
+        // Определение расширения файла
+        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        // Проверка допустимых форматов файлов (например, jpg, png, gif)
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        // if (!in_array($fileExtension, $allowedExtensions)) {
+        //     die("Ошибка: Неверный формат файла. Пожалуйста, загрузите изображение в формате jpg, jpeg, png или gif.");
+        // }
+
+        // Создание уникального имени файла
+        $newFileName = uniqid('painting_', true) . '.' . $fileExtension;
+        $uploadFileDir = 'uploads/'; // Убедитесь, что эта папка существует и доступна для записи
+        $destPath = $uploadFileDir . $newFileName;
+
+        // Перемещение загруженного файла в целевую папку
+        if (!move_uploaded_file($fileTmpPath, $destPath)) {
+            die("Ошибка: Не удалось сохранить файл на сервере.");
+        }
+        $imagePath = $destPath;
 
     // Сначала вставляем продавца и получаем его ID
     $insertSeller = "INSERT INTO Sellers (full_name, phone, email) VALUES ('$seller', '$phone', '$email')";
@@ -64,7 +94,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         echo "Ошибка при вставке продавца: " . mysqli_error($link);
     }
+    } 
+    else {
+        echo("Ошибка: Файл не загружен или произошла ошибка загрузки.") .mysqli_error($link);
+    }
+
 
     mysqli_close($link);
 }
 ?>
+

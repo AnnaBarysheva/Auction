@@ -27,6 +27,7 @@ if (!isset($_SESSION['user_id'])) {
         <div class="header-right">
             <?php if (isset($_SESSION['user_id'])): ?>
                 <!-- Если пользователь вошел, показываем кнопку "Выход" -->
+                <button class="header-button" onclick="window.location.href='my_profile.php'">Мой профиль</button>
                 <button class="header-button" onclick="handleLogout()">Выход</button>
             <?php else: ?>
                 <!-- Если пользователь не вошел, показываем кнопки "Войти" и "Зарегистрироваться" -->
@@ -1638,8 +1639,9 @@ for (var button of document.getElementsByClassName('deleteButton')) {
             document.getElementById('addMaterials').value = '';
             document.getElementById('addStyle').value = '';
             document.getElementById('addYear').value = '';
-            document.getElementById('addAuthor').value = '';
-            document.getElementById('addImageUrl').value = '';
+            document.getElementById('addAuthor').value = ''; addImageFile
+            document.getElementById('addImageFile').value = '';
+            // document.getElementById('addImageUrl').value = '';
             document.getElementById('addSeller').value = '';
             document.getElementById('addEmail').value = '';
             document.getElementById('addPhone').value = '';
@@ -1661,7 +1663,8 @@ for (var button of document.getElementsByClassName('deleteButton')) {
                 document.getElementById('addStyle').value = '';
                 document.getElementById('addYear').value = '';
                 document.getElementById('addAuthor').value = '';
-                document.getElementById('addImageUrl').value = '';
+                // document.getElementById('addImageUrl').value = '';
+                document.getElementById('addImageFile').value = '';
                 document.getElementById('addSeller').value = '';
                 document.getElementById('addEmail').value = '';
                 document.getElementById('addPhone').value = '';
@@ -1678,6 +1681,20 @@ for (var button of document.getElementsByClassName('deleteButton')) {
 async function handleLogout() {
     await handleWithConnection(async () => {
         const response = await fetch('logout.php');
+        const result = await response.json();
+
+        if (result.success) {
+            // Перезагружаем страницу после выхода
+            location.reload();
+        } else {
+            alert('Ошибка выхода: ' + result.message);
+        }
+    });
+}
+
+async function handleProfile() {
+    await handleWithConnection(async () => {
+        const response = await fetch('my_profile.php');
         const result = await response.json();
 
         if (result.success) {
@@ -1751,7 +1768,7 @@ async function handleLogout() {
     <div class="modal-content">
         <span class="close-button" id="closeAddModal">&times;</span>
         <h2>Добавить картину</h2>
-        <form id="addForm" action="add_painting.php" method="POST">
+        <form id="addForm" action="add_painting.php" method="POST" enctype="multipart/form-data">
             <div class="input-container">
                 <div class="input-column">
                     <label for="addName">Название картины:</label>
@@ -1777,8 +1794,15 @@ async function handleLogout() {
                     <label for="addAuthor">Автор:</label>
                     <input type="text" id="addAuthor" name="author" class="modal-input" placeholder="Автор" required maxlength="255">
 
-                    <label for="addImageUrl">URL картины:</label>
-                    <input type="url" id="addImageUrl" name="image_path" class="modal-input" placeholder="URL картины" required maxlength="255" title="Введите корректный URL (например, https://example.com/image.jpg)">
+
+                    <label for="addImageFile" id="fileLabel">Загрузить картину</label>
+                    <input type="file" id="addImageFile" name="image_path" class="modal-input"  title="Загрузите файл изображения (например, .jpg, .png, .gif)" style="display: none;">
+                    <span id="fileName" style="margin-left: 10px; font-weight: bold;"></span>
+                    <!-- accept="image/*" -->
+
+
+                    <!-- <label for="addImageUrl">URL картины:</label>
+                    <input type="url" id="addImageUrl" name="image_path" class="modal-input" placeholder="URL картины" required maxlength="255" title="Введите корректный URL (например, https://example.com/image.jpg)"> -->
                 </div>
 
                 <div class="input-column">
@@ -1874,7 +1898,27 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
 </script>
 
 <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Устанавливаем дефолтные значения для полей формы
+    document.getElementById('addName').value = 'TEST';
+    document.getElementById('addSize').value = '50x70 см';      
+    document.getElementById('addYear').value = new Date().getFullYear(); 
+    document.getElementById('addAuthor').value = 'Автор';
+    document.getElementById('addSeller').value = 'Продавец';
+    document.getElementById('addEmail').value = 'example@example.com'; 
+    document.getElementById('addPhone').value = '+123456789012';
+    document.getElementById('addLotNumber').value = '001'; 
+    document.getElementById('addStartingPrice').value = '1000'; 
+    document.getElementById('addStartDate').value = '2024-01-01'; 
+    document.getElementById('addEndDate').value = '2024-12-01'; 
+
+
+    console.log('Дефолтные значения были установлены.');
+});
 document.getElementById('addForm').addEventListener('submit', function(event) {
+
+    console.log("addForm");
 
     // Проверка на наличие только пробелов
     const inputFields = [
@@ -1909,11 +1953,37 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
     var sizeInput = document.getElementById('addSize').value.trim();
     var materialsInput = document.getElementById('addMaterials').value.trim();
     var styleInput = document.getElementById('addStyle').value.trim();
-    var authorInput = document.getElementById('addAuthor').value.trim();
-    var imageUrlInput = document.getElementById('addImageUrl').value.trim();
+    var authorInput = document.getElementById('addAuthor').value.trim(); 
+    var imageFileInput = document.getElementById('addImageFile').files[0]; 
+    // console.log("ghjkl".imageFileInput );
     var sellerInput = document.getElementById('addSeller').value.trim();
     var emailInput = document.getElementById('addEmail').value.trim();
     var phoneInput = document.getElementById('addPhone').value.trim();
+    // console.log("ghjkl");
+      // Проверка на отсутствие выбранного файла
+    if (!imageFileInput.files.length) {
+        showErrorModal('Пожалуйста, выберите файл перед отправкой формы.');
+        event.preventDefault(); // Отменяем отправку формы
+        return;
+    }
+
+    // Проверка формата загружаемого файла
+    const file = imageFileInput.files[0];
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validImageTypes.includes(file.type)) {
+        showErrorModal('Пожалуйста, выберите файл с изображением (jpg, png, gif, webp).');
+        event.preventDefault();
+        return;
+    }
+
+    // Проверка размера файла (например, 5MB)
+    const maxSizeInBytes = 5 * 1024 * 1024;
+    if (file.size > maxSizeInBytes) {
+        showErrorModal('Размер файла превышает 5MB. Пожалуйста, выберите файл меньшего размера.');
+        event.preventDefault();
+        return;
+    }
+
 
     if (!nameInput || !sizeInput || !materialsInput || !styleInput || !authorInput || !imageUrlInput || !sellerInput || !emailInput || !phoneInput) {
         alert('Пожалуйста, заполните все поля, не оставляя только пробелы.');
@@ -1978,6 +2048,20 @@ if (startDate >= endDate) {
 
     // Отменяем стандартную отправку формы до завершения проверки
     event.preventDefault();
+});
+
+document.getElementById('addImageFile').addEventListener('change', function(event) {
+
+    const file = event.target.files[0]; // Получаем выбранный файл
+    const fileNameDisplay = document.getElementById('fileName'); // Элемент для отображения имени файла
+
+    if (file) {
+        // Отображаем имя файла
+        fileNameDisplay.textContent = file.name; // Устанавливаем текст в span
+    } else {
+        fileNameDisplay.textContent = ''; // Очищаем имя файла
+    }
+    
 });
 
 
@@ -2104,15 +2188,18 @@ document.getElementById('addStartingPrice').addEventListener('input', function()
     }
 });
     
-document.getElementById('addForm').addEventListener('submit', function(event) {
-    const urlInput = document.getElementById('addImageUrl');
-    const urlPattern = /^(ftp|http|https):\/\/[^ "]+$/;
+// document.getElementById('addForm').addEventListener('submit', function(event) {
+//     const urlInput = document.getElementById('addImageUrl');
+//     const urlPattern = /^(ftp|http|https):\/\/[^ "]+$/;
 
-    if (!urlPattern.test(urlInput.value)) {
-        alert('Введите корректный URL, начинающийся с http:// или https://');
-        event.preventDefault(); // Отменяем отправку формы
-    }
-}); 
+//     if (!urlPattern.test(urlInput.value)) {
+//         alert('Введите корректный URL, начинающийся с http:// или https://');
+//         event.preventDefault(); // Отменяем отправку формы
+//     }
+// }); 
+
+
+
 
 </script>
 
