@@ -172,7 +172,114 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     
-
     
- 
+    
+ //для показа названия файла
+    // const fileNameDisplay = document.getElementById('fileNameDisplay');
+    // const fileInput = document.getElementById('profile_picture');
+    // const customLabel = document.querySelector('.custom-file-upload');
+
+    // if (fileNameDisplay && fileInput && customLabel) {
+    //     // Обработчик для изменения текста при выборе файла
+    //     fileInput.addEventListener('change', function(event) {
+    //         const file = event.target.files[0];
+    //         fileNameDisplay.textContent = file ? file.name : 'Файл не выбран';
+    //     });
+
+    //     // Обработчик для клика по кастомному label
+    //     customLabel.addEventListener('click', function(event) {
+    //         // Проверяем, выбран ли файл, чтобы не повторять click на input
+    //         if (!fileInput.files.length) {
+    //             fileInput.click();
+    //         }
+    //     });
+    // } else {
+    //     console.error("Не удалось найти один или несколько элементов.");
+    // }
+
+    function showErrorModal(message) {
+        var modal = document.getElementById('errorModal');
+        var errorMessage = document.getElementById('errorMessage');
+        var closeModal = document.getElementById('closeErrorModal');
+    
+        // Устанавливаем текст ошибки
+        errorMessage.textContent = message;
+    
+        // Показываем модальное окно
+        modal.style.display = 'block';
+    
+        // Закрываем модальное окно при нажатии на "x"
+        closeModal.onclick = function() {
+            modal.style.display = 'none';
+        };
+    
+        // Закрываем модальное окно, если кликнули вне его
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
+    }
+    
+
+// // Функция для загрузки файла профиля
+// async function uploadProfilePicture(file) {
+//     await handleWithConnection(async () => {
+//         const formData = new FormData();
+//         formData.append('profile_picture', file);
+
+//         try {
+//             const response = await fetch('upload_profile_picture.php', {
+//                 method: 'POST',
+//                 body: formData
+//             });
+
+//             if (!response.ok) {
+//                 throw new Error('Ошибка загрузки файла на сервер.');
+//             }
+
+//             const result = await response.json();
+
+//             if (!result.success) {
+//                 throw new Error(result.message || 'Ошибка доступа к базе данных.');
+//             }
+
+//             console.log("Файл успешно загружен");
+//             location.reload(); // Перезагружаем страницу для обновления изображения
+//         } catch (error) {
+//             console.error("Ошибка при загрузке файла: ", error);
+//             showErrorModal("Ошибка при загрузке файла. Пожалуйста, попробуйте позже.");
+//         }
+//     });
+// }
+
+
+
+// // Пример вызова загрузки при выборе файла
+// document.getElementById('profile_picture').addEventListener('change', async function(event) {
+//     const file = event.target.files[0];
+//     if (file) {
+//         await uploadProfilePicture(file);
+//     }
+// });
+
+
+
+
 });
+
+
+///////
+async function handleLogout() {
+    await handleWithConnection(async () => {
+        const response = await fetch('logout.php');
+        const result = await response.json();
+
+        if (result.success) {
+            // Перезагружаем страницу после выхода
+            location.reload();
+        } else {
+            alert('Ошибка выхода: ' + result.message);
+        }
+    });
+}
