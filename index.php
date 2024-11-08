@@ -1917,18 +1917,15 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Дефолтные значения были установлены.');
 });
 document.getElementById('addForm').addEventListener('submit', function(event) {
-
+   
     console.log("addForm");
 
     // Проверка на наличие только пробелов
     const inputFields = [
         'addName',
         'addSize',
-        'addMaterials',
-        'addStyle',
         'addYear',
         'addAuthor',
-        'addImageUrl',
         'addSeller',
         'addEmail',
         'addPhone',
@@ -1951,8 +1948,6 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
     // Проверка на наличие только пробелов
     var nameInput = document.getElementById('addName').value.trim();
     var sizeInput = document.getElementById('addSize').value.trim();
-    var materialsInput = document.getElementById('addMaterials').value.trim();
-    var styleInput = document.getElementById('addStyle').value.trim();
     var authorInput = document.getElementById('addAuthor').value.trim(); 
     var imageFileInput = document.getElementById('addImageFile').files[0]; 
     // console.log("ghjkl".imageFileInput );
@@ -1964,23 +1959,6 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
     if (!imageFileInput.files.length) {
         showErrorModal('Пожалуйста, выберите файл перед отправкой формы.');
         event.preventDefault(); // Отменяем отправку формы
-        return;
-    }
-
-    // Проверка формата загружаемого файла
-    const file = imageFileInput.files[0];
-    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!validImageTypes.includes(file.type)) {
-        showErrorModal('Пожалуйста, выберите файл с изображением (jpg, png, gif, webp).');
-        event.preventDefault();
-        return;
-    }
-
-    // Проверка размера файла (например, 5MB)
-    const maxSizeInBytes = 5 * 1024 * 1024;
-    if (file.size > maxSizeInBytes) {
-        showErrorModal('Размер файла превышает 5MB. Пожалуйста, выберите файл меньшего размера.');
-        event.preventDefault();
         return;
     }
 
@@ -2050,18 +2028,39 @@ if (startDate >= endDate) {
     event.preventDefault();
 });
 
+
+
 document.getElementById('addImageFile').addEventListener('change', function(event) {
 
-    const file = event.target.files[0]; // Получаем выбранный файл
-    const fileNameDisplay = document.getElementById('fileName'); // Элемент для отображения имени файла
+const file = event.target.files[0]; // Получаем выбранный файл
+const fileNameDisplay = document.getElementById('fileName'); // Элемент для отображения имени файла
 
-    if (file) {
-        // Отображаем имя файла
-        fileNameDisplay.textContent = file.name; // Устанавливаем текст в span
-    } else {
-        fileNameDisplay.textContent = ''; // Очищаем имя файла
-    }
-    
+// Проверка, выбран ли файл
+if (!file) {
+    showErrorModal('Пожалуйста, выберите файл.');
+    fileNameDisplay.textContent = ''; // Очищаем отображение имени файла
+    event.preventDefault();
+    return;
+}
+
+// Отображаем имя файла
+fileNameDisplay.textContent = file.name;
+
+// Проверка допустимых типов файлов
+const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+if (!validImageTypes.includes(file.type)) {
+    showErrorModal('Пожалуйста, выберите файл с изображением (jpg, png, gif, webp).');
+    event.preventDefault();
+    return;
+}
+
+// Проверка размера файла (например, 5MB)
+const maxSizeInBytes = 5 * 1024 * 1024;
+if (file.size > maxSizeInBytes) {
+    showErrorModal('Размер файла превышает 5MB. Пожалуйста, выберите файл меньшего размера.');
+    event.preventDefault();
+    return;
+}
 });
 
 
