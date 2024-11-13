@@ -1921,16 +1921,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Проверка соединения при загрузке страницы (по желанию)
         // checkConnection();
 });
-document.getElementById('addForm').addEventListener('submit', async function(event) {
+document.getElementById('addForm').addEventListener('submit', function(event) {
    
-    // Оборачиваем в handleWithConnection
-    // await handleWithConnection(() => {
-    //     alert('!');
-    //     // Если проверка успешна, форма отправляется
-    //     document.getElementById('addForm').submit();
-    // });
-    
-    
+
     console.log("addForm");
 
     // Проверка на наличие только пробелов
@@ -2031,7 +2024,12 @@ document.getElementById('addForm').addEventListener('submit', async function(eve
         return;
     }
 
-
+    // Оборачиваем в handleWithConnection
+    // handleWithConnection(() => {
+    //     // Если проверка успешна, форма отправляется
+    //     this.submit();
+    // });
+    
     
 
     // Отменяем стандартную отправку формы до завершения проверки
@@ -2252,26 +2250,26 @@ document.getElementById('addStartingPrice').addEventListener('input', function()
 //     }
 // }); 
 
-// // Функция для обработки отправки формы с проверкой соединения
-// async function handleUpload(event) {
-//         event.preventDefault(); // Останавливаем отправку формы, чтобы сначала проверить соединение
+// Функция для обработки отправки формы с проверкой соединения
+async function handleUpload(event) {
+        event.preventDefault(); // Останавливаем отправку формы, чтобы сначала проверить соединение
 
-//         // Вызовем функцию проверки соединения
-//         const connectionOK = await handleWithConnection(() => {
+        // Вызовем функцию проверки соединения
+        const connectionOK = await handleWithConnection(() => {
             
-//             // Если соединение успешно, отправляем форму
-//             document.getElementById('addForm').submit();
-//             connectionOK = true;
-//         });
+            // Если соединение успешно, отправляем форму
+            document.getElementById('addForm').submit();
+            connectionOK = true;
+        });
 
-//         if (!connectionOK) {
-//             // Если нет соединения, покажем сообщение
-//             showErrorModal("Не удалось подключиться к серверу. Пожалуйста, попробуйте позже.");
-//         }
-//     }
+        if (!connectionOK) {
+            // Если нет соединения, покажем сообщение
+            showErrorModal("Не удалось подключиться к серверу. Пожалуйста, попробуйте позже.");
+        }
+    }
 
-//     // Привязываем обработчик к кнопке отправки
-//     document.getElementById('saveaddButton').addEventListener('click', handleUpload);
+    // Привязываем обработчик к кнопке отправки
+    document.getElementById('saveaddButton').addEventListener('click', handleUpload);
 
     
 
