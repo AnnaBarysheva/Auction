@@ -1830,7 +1830,7 @@ async function handleProfile() {
                 </div>
             </div>
 
-            <button type="submit" class="saveButton">Добавить</button>
+            <button type="submit" class="saveButton" id="saveaddButton">Добавить</button>
         </form>
     </div>
 </div>
@@ -1915,9 +1915,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     console.log('Дефолтные значения были установлены.');
+
+    document.getElementById('saveaddButton').addEventListener('click', handleSave);
+        
+        // Проверка соединения при загрузке страницы (по желанию)
+        // checkConnection();
 });
-document.getElementById('addForm').addEventListener('submit', function(event) {
+document.getElementById('addForm').addEventListener('submit', async function(event) {
    
+    // Оборачиваем в handleWithConnection
+    // await handleWithConnection(() => {
+    //     alert('!');
+    //     // Если проверка успешна, форма отправляется
+    //     document.getElementById('addForm').submit();
+    // });
+    
+    
     console.log("addForm");
 
     // Проверка на наличие только пробелов
@@ -1977,38 +1990,38 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
     }
 
     // Проверка на количество цифр в номере телефона
-var phoneInputValue = phoneInput.replace(/\D/g, ''); // Убираем все нецифровые символы
-if (phoneInputValue.length !== 12) {
-    alert('Номер телефона должен содержать ровно 12 цифр после знака +.');
-    event.preventDefault();
-    return;
-}
+    var phoneInputValue = phoneInput.replace(/\D/g, ''); // Убираем все нецифровые символы
+    if (phoneInputValue.length !== 12) {
+        alert('Номер телефона должен содержать ровно 12 цифр после знака +.');
+        event.preventDefault();
+        return;
+    }
 
     // Проверка на корректность дат начала и конца аукциона
-var startDate = new Date(document.getElementById('addStartDate').value);
-var endDate = new Date(document.getElementById('addEndDate').value);
+    var startDate = new Date(document.getElementById('addStartDate').value);
+    var endDate = new Date(document.getElementById('addEndDate').value);
 
-// Проверка на корректность года начала и конца аукциона
-var startYear = startDate.getFullYear();
-var endYear = endDate.getFullYear();
+    // Проверка на корректность года начала и конца аукциона
+    var startYear = startDate.getFullYear();
+    var endYear = endDate.getFullYear();
 
-if (startYear < 1901 || startYear > 2155) {
-    alert('Год начала аукциона должен быть от 1901 до 2155.');
-    event.preventDefault();
-    return;
-}
+    if (startYear < 1901 || startYear > 2155) {
+        alert('Год начала аукциона должен быть от 1901 до 2155.');
+        event.preventDefault();
+        return;
+    }
 
-if (endYear < 1901 || endYear > 2155) {
-    alert('Год конца аукциона должен быть от 1901 до 2155.');
-    event.preventDefault();
-    return;
-}
+    if (endYear < 1901 || endYear > 2155) {
+        alert('Год конца аукциона должен быть от 1901 до 2155.');
+        event.preventDefault();
+        return;
+    }
 
-if (startDate >= endDate) {
-    alert('Дата начала аукциона должна быть раньше даты конца аукциона.');
-    event.preventDefault();
-    return;
-}
+    if (startDate >= endDate) {
+        alert('Дата начала аукциона должна быть раньше даты конца аукциона.');
+        event.preventDefault();
+        return;
+    }
 
     // Проверка стартовой цены
     var startingPrice = parseFloat(document.getElementById('addStartingPrice').value);
@@ -2018,16 +2031,58 @@ if (startDate >= endDate) {
         return;
     }
 
-    // Оборачиваем в handleWithConnection
-    handleWithConnection(() => {
-        // Если проверка успешна, форма отправляется
-        this.submit();
-    });
+
+    
 
     // Отменяем стандартную отправку формы до завершения проверки
     event.preventDefault();
+   
+    
 });
 
+async function handleSave(event) {
+        event.preventDefault(); // Останавливаем отправку формы
+
+        // Проверяем соединение перед отправкой формы
+        const connectionOK = await checkConnection();
+        if (!connectionOK) {
+            showErrorModal("Не удалось подключиться к серверу. Пожалуйста, попробуйте позже.");
+            return;
+        }
+        
+        // Отправка формы, если соединение доступно
+        document.getElementById('addForm').submit();
+    }
+
+    // Функция проверки соединения с сервером
+    async function checkConnection() {
+        console.log("Проверка соединения с сервером...");
+
+        try {
+            // Запрос для проверки соединения
+            const response = await fetch('check_connection.php', {
+                method: 'GET',
+                headers: { 'Cache-Control': 'no-cache' },
+            });
+
+            if (!response.ok) {
+                throw new Error("Ошибка сети: не удалось подключиться.");
+            }
+
+            const data = await response.json();
+            console.log("Ответ сервера:", data);
+
+            if (!data.success) {
+                throw new Error(data.message || "Ошибка соединения с сервером.");
+            }
+
+            return true; // Соединение успешно
+        } catch (error) {
+            console.error("Ошибка при проверке соединения:", error.message);
+            showErrorModal("Ошибка подключения к серверу. Попробуйте позже.");
+            return false;
+        }
+    }
 
 
 document.getElementById('addImageFile').addEventListener('change', function(event) {
@@ -2197,10 +2252,34 @@ document.getElementById('addStartingPrice').addEventListener('input', function()
 //     }
 // }); 
 
+// // Функция для обработки отправки формы с проверкой соединения
+// async function handleUpload(event) {
+//         event.preventDefault(); // Останавливаем отправку формы, чтобы сначала проверить соединение
 
+//         // Вызовем функцию проверки соединения
+//         const connectionOK = await handleWithConnection(() => {
+            
+//             // Если соединение успешно, отправляем форму
+//             document.getElementById('addForm').submit();
+//             connectionOK = true;
+//         });
+
+//         if (!connectionOK) {
+//             // Если нет соединения, покажем сообщение
+//             showErrorModal("Не удалось подключиться к серверу. Пожалуйста, попробуйте позже.");
+//         }
+//     }
+
+//     // Привязываем обработчик к кнопке отправки
+//     document.getElementById('saveaddButton').addEventListener('click', handleUpload);
+
+    
+
+    
 
 
 </script>
+
 
 </body>
 </html>

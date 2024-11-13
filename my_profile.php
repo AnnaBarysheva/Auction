@@ -39,61 +39,61 @@
             : $defaultImagePath;
 
         // Обработка загрузки новой картинки
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['profile_picture'])) {
-            $file = $_FILES['profile_picture'];
-            $uploadOk = 1;
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['profile_picture'])) {
+        $file = $_FILES['profile_picture'];
+        $uploadOk = 1;
 
-            // Проверка на ошибки при загрузке
-            if ($file['error'] !== UPLOAD_ERR_OK) {
-                $error_messages[] = "Ошибка при загрузке файла.";
+        // Проверка на ошибки при загрузке
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $error_messages[] = "Ошибка при загрузке файла.";
+            $uploadOk = 0;
+        }
+
+        // Проверка типа файла (только изображения)
+        $fileType = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+        
+        if (!in_array($fileType, $allowedTypes)) {
+            $error_messages[] = "Недопустимый формат файла. Только JPG, JPEG, PNG и GIF файлы разрешены.";
+            $uploadOk = 0;
+        }
+
+        // Проверка размера файла
+        if ($uploadOk && $file['size'] > 2000000) { 
+            $error_messages[] = "Файл слишком большой. Максимальный размер: 2 MB.";
+            $uploadOk = 0;
+        }
+
+        // Проверка на битый файл
+        if ($uploadOk == 1) {
+            // Проверяем, является ли файл валидным изображением
+            if (@getimagesize($file['tmp_name']) === false) {
+                $error_messages[] = "Файл поврежден или не является изображением.";
                 $uploadOk = 0;
-            }
-
-            // Проверка типа файла (только изображения)
-            $fileType = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
-            
-            if (!in_array($fileType, $allowedTypes)) {
-                $error_messages[] = "Только JPG, JPEG, PNG и GIF файлы разрешены.";
-                $uploadOk = 0;
-            }
-
-            // Проверка размера файла 
-            if ($file['size'] > 2000000) { 
-                $error_messages[] = "Файл слишком большой.";
-                $uploadOk = 0;
-            }
-
-            // Проверка на битый файл
-            if ($uploadOk == 1) {
-                // Проверяем, является ли файл валидным изображением
-                if (@getimagesize($file['tmp_name']) === false) {
-                    $error_messages[] = "Файл поврежден или не является изображением.";
-                    $uploadOk = 0;
-                }
-            }
-            
-
-            // Если все проверки прошли успешно, обрабатываем файл
-            if ($uploadOk == 1) {
-                // Чтение содержимого файла
-                $fileData = file_get_contents($file['tmp_name']);
-
-                // Обновляем картинку профиля пользователя в базе данных
-                $updateQuery = $link->prepare("UPDATE users SET profile_image = ? WHERE id_user = ?");
-                $updateQuery->bind_param("bi", $fileData, $user_id);
-                $updateQuery->send_long_data(0, $fileData);
-                
-                if ($updateQuery->execute()) {
-                    // Перезагружаем страницу, чтобы обновить картинку
-                    header("Location: my_profile.php?upload_success=1");
-                    exit();
-                } else {
-                    $error_messages[] = "Ошибка при обновлении картинки: " . $link->error;
-                }
-                $updateQuery->close();
             }
         }
+
+        // Если все проверки прошли успешно, обрабатываем файл
+        if ($uploadOk == 1) {
+            // Чтение содержимого файла
+            $fileData = file_get_contents($file['tmp_name']);
+
+            // Обновляем картинку профиля пользователя в базе данных
+            $updateQuery = $link->prepare("UPDATE users SET profile_image = ? WHERE id_user = ?");
+            $updateQuery->bind_param("bi", $fileData, $user_id);
+            $updateQuery->send_long_data(0, $fileData);
+            
+            if ($updateQuery->execute()) {
+                // Перезагружаем страницу, чтобы обновить картинку
+                header("Location: my_profile.php?upload_success=1");
+                exit();
+            } else {
+                $error_messages[] = "Ошибка при обновлении картинки: " . $link->error;
+            }
+            $updateQuery->close();
+        }
+    }
+
     }
     ?>
 
@@ -161,67 +161,61 @@
     </html>
 
     <script>
-
-
-    // Функция для обработки отправки формы с проверкой соединения
-    async function handleUpload(event) {
-        event.preventDefault(); // Останавливаем отправку формы, чтобы сначала проверить соединение
-
-        // Вызовем функцию проверки соединения
-        const connectionOK = await handleWithConnection(() => {
-            // Если соединение успешно, отправляем форму
-            document.getElementById('uploadForm').submit();
-        });
-
-        if (!connectionOK) {
-            // Если нет соединения, покажем сообщение
-            showErrorModal("Не удалось подключиться к серверу. Пожалуйста, попробуйте позже.");
-        }
-    }
-
     // Привязываем обработчик к кнопке отправки
-    document.getElementById('uploadButton').addEventListener('click', handleUpload);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Подключаем обработчик только после загрузки DOM
+        document.getElementById('uploadButton').addEventListener('click', handleUpload);
+        
+        // Проверка соединения при загрузке страницы
+        checkConnection();
+    });
+
+    // Функция обработки отправки формы с проверкой соединения
+    async function handleUpload(event) {
+        event.preventDefault(); // Останавливаем отправку формы
+
+        // Проверяем соединение перед отправкой
+        const connectionOK = await checkConnection();
+        if (!connectionOK) {
+            showErrorModal("Не удалось подключиться к серверу. Пожалуйста, попробуйте позже.");
+            return;
+        }
+        
+        // Отправка формы, если соединение доступно
+        document.getElementById('uploadForm').submit();
+    }
 
     // Функция проверки соединения с сервером
     async function checkConnection() {
         console.log("Проверка соединения с сервером...");
 
         try {
-            const response = await fetch('check_connection.php'); // Убедитесь, что путь правильный
-            console.log("Ответ от сервера получен:", response);
+            // Запрос для проверки соединения
+            const response = await fetch('check_connection.php', {
+                method: 'GET',
+                headers: { 'Cache-Control': 'no-cache' },
+            });
 
-            // Проверяем, был ли успешен ответ с сервера
             if (!response.ok) {
-                throw new Error('Ошибка сети: не удалось подключиться.');
+                throw new Error("Ошибка сети: не удалось подключиться.");
             }
 
             const data = await response.json();
-            console.log("Получены данные от сервера:", data);
+            console.log("Ответ сервера:", data);
 
-            // Проверяем, есть ли ошибка в данных
             if (!data.success) {
-                throw new Error(data.message || "Неизвестная ошибка от сервера.");
+                throw new Error(data.message || "Ошибка соединения с сервером.");
             }
 
-            // Если соединение успешно, ничего не делаем
-            console.log("Соединение с базой данных успешно.");
-            return true;
+            return true; // Соединение успешно
         } catch (error) {
             console.error("Ошибка при проверке соединения:", error.message);
-
-            // Выводим alert с сообщением об ошибке
-            // alert("Ошибка подключения к серверу MySQL: " + error.message);
-            // return false;
-            // Показываем ошибку пользователю через модальное окно
             showErrorModal("Ошибка подключения к серверу. Попробуйте позже.");
-            return false; // Соединение не удалось
+            return false;
         }
     }
-    // Вызовите функцию проверки соединения при загрузке страницы
-    // window.onload = checkConnection;
 
-
-    // Функция для отображения ошибки в модальном окне
+    // Функция отображения ошибки в модальном окне
     function showErrorModal(message) {
         var modal = document.getElementById('errorModal');
         var errorMessage = document.getElementById('errorMessage');
@@ -238,7 +232,7 @@
             modal.style.display = 'none';
         };
 
-        // Закрываем модальное окно, если кликнули вне его
+        // Закрываем модальное окно при клике вне его
         window.onclick = function(event) {
             if (event.target == modal) {
                 modal.style.display = 'none';
@@ -246,18 +240,4 @@
         };
     }
 
-
-    // Универсальная функция, которая оборачивает действие в проверку соединения
-    async function handleWithConnection(callback) {
-        const connectionOK = await checkConnection();
-
-        if (!connectionOK) {
-            console.log("No connection to the server.");
-            return; // Прекращаем выполнение, если нет соединения
-        }
-        console.log("Выполнение действия...");
-        callback(); // Выполняем основное действие, если соединение успешно
-    }
-
-
-    </script>
+</script>

@@ -41,9 +41,9 @@ if (!$link) {
             $fileSize = $_FILES['image_path']['size'];
             $fileType = $_FILES['image_path']['type'];
 
-            $maxFileSize = 5 * 1024 * 1024;
+            $maxFileSize = 2 * 1024 * 1024;
             if ($fileSize > $maxFileSize) {
-                $error_messages[] = "Ошибка: Размер файла превышает 5 MB.";
+                $error_messages[] = "Ошибка: Размер файла превышает 2 MB.";
                 $uploadOk = 0;
             }
 
@@ -68,10 +68,14 @@ if (!$link) {
                 $newFileName = uniqid('painting_', true) . '.' . $fileExtension;
                 $uploadFileDir = 'uploads/';
                 $destPath = $uploadFileDir . $newFileName;
+                if (!is_writable($uploadFileDir)) {
+                    $error_messages[] = "Ошибка: Директория 'uploads/' недоступна для записи.";
+                }
 
                 if (!move_uploaded_file($fileTmpPath, $destPath)) {
-                    $error_messages[] = "Ошибка: Не удалось сохранить файл на сервере.";
+                    $error_messages[] = "Ошибка: Не удалось сохранить файл на сервере. Путь: " . $destPath;
                     $uploadOk = 0;
+                
                 } else {
                     $imagePath = $destPath;
                 }
