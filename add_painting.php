@@ -35,6 +35,13 @@ if (!$link) {
         }
         $uploadOk = 1;
 
+        $uploadFileDir = 'uploads/';
+        // Предварительная проверка прав доступа к директории
+        if (!is_writable($uploadFileDir)) {
+            $error_messages[] = "Ошибка: Директория 'uploads/'на сервере недоступна для записи. Пожалуйста, проверьте разрешения.";
+            $uploadOk = 0;
+        }
+
         if (isset($_FILES['image_path']) && $_FILES['image_path']['error'] === UPLOAD_ERR_OK) {
             $fileTmpPath = $_FILES['image_path']['tmp_name'];
             $fileName = $_FILES['image_path']['name'];
@@ -64,22 +71,19 @@ if (!$link) {
                 }
             }
 
-            if (empty($error_messages)) {
-                $newFileName = uniqid('painting_', true) . '.' . $fileExtension;
-                $uploadFileDir = 'uploads/';
-                $destPath = $uploadFileDir . $newFileName;
-                if (!is_writable($uploadFileDir)) {
-                    $error_messages[] = "Ошибка: Директория 'uploads/' недоступна для записи.";
-                }
+        
 
-                if (!move_uploaded_file($fileTmpPath, $destPath)) {
-                    $error_messages[] = "Ошибка: Не удалось сохранить файл на сервере. Путь: " . $destPath;
-                    $uploadOk = 0;
-                
-                } else {
-                    $imagePath = $destPath;
-                }
+        if ($uploadOk == 1) {
+            $newFileName = uniqid('painting_', true) . '.' . $fileExtension;
+            $destPath = $uploadFileDir . $newFileName;
+
+            if (!@move_uploaded_file($fileTmpPath, $destPath)) {
+                $error_messages[] = "Ошибка: Не удалось сохранить файл на сервере. Проверьте разрешения на папку.";
+                $uploadOk = 0;
+            } else {
+                $imagePath = $destPath;
             }
+        }
         } else {
             $error_messages[] = "Ошибка: Файл не загружен или произошла ошибка загрузки.";
             $uploadOk = 0;

@@ -66,6 +66,15 @@ if ($link == false) {
     die("Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error());
 }
 
+// Проверка доступности папки uploads
+$uploadDir = 'uploads/';
+$uploadCheckMessage = '';
+if (!is_writable($uploadDir)) {
+    $uploadCheckMessage = "Ошибка: Директория с изображениями картин недоступна на сервере. Изображения картин временно недоступны.";
+    echo "<script>alert(\"$uploadCheckMessage\");</script>";
+
+}
+
 // Проверка роли пользователя
 $isAdmin = false;
 $isSeller = false;
