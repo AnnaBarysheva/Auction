@@ -154,21 +154,33 @@ if ($isUser) {
  if (!$isAdmin) {
     ?>
     <div class="input-container">
-        <div class="input-group">
-            <input type="text" id="nameInput" placeholder="Название картины">
-            <input type="text" id="styleInput" placeholder="Стиль">
-            <input type="text" id="materialInput" placeholder="Материал">
-            <input type="text" id="yearInput" placeholder="Год создания">
-        </div>
-        <div class="input-group">
-            <input type="text" id="authorInput" placeholder="Автор">
-            <input type="text" id="sellerInput" placeholder="Продавец">
-            <div class="button-group">
-                <button id="searchButton">Найти</button>
-                <button id="resetButton">Сбросить фильтры</button>
-            </div>
+    <div class="input-group">
+        <input type="text" id="nameInput" placeholder="Название картины">
+        <div id="nameDropdown" class="dropdown-list"></div> <!-- Выпадающий список для Названия -->
+        
+        <input type="text" id="styleInput" placeholder="Стиль">
+        <div id="styleDropdown" class="dropdown-list"></div> <!-- Выпадающий список для Стиля -->
+
+        <input type="text" id="materialInput" placeholder="Материал">
+        <div id="materialDropdown" class="dropdown-list"></div> <!-- Выпадающий список для Материала -->
+        
+        <input type="text" id="yearInput" placeholder="Год создания">
+        <div id="yearDropdown" class="dropdown-list"></div> <!-- Выпадающий список для Года создания -->
+    </div>
+    <div class="input-group">
+        <input type="text" id="authorInput" placeholder="Автор">
+        <div id="authorDropdown" class="dropdown-list"></div> <!-- Выпадающий список для Автора -->
+
+        <input type="text" id="sellerInput" placeholder="Продавец">
+        <div id="sellerDropdown" class="dropdown-list"></div> <!-- Выпадающий список для Продавца -->
+
+        <div class="button-group">
+            <button id="searchButton">Найти</button>
+            <button id="resetButton">Сбросить фильтры</button>
         </div>
     </div>
+</div>
+
     <?php
     } 
 ?>
@@ -1467,11 +1479,233 @@ document.addEventListener('DOMContentLoaded', async function () {
 // }
 
     // Проверка на существование кнопки
+// if (searchButton) {
+//     searchButton.addEventListener('click', function () {
+//         handleWithConnection(() => {
+//             console.log("Search button clicked.");
+
+//             var nameFilter = nameInput.value.toLowerCase();
+//             var styleFilter = styleInput.value.toLowerCase();
+//             var materialFilter = materialInput.value.toLowerCase();
+//             var yearFilter = yearInput.value.toLowerCase();
+//             var authorFilter = authorInput.value.toLowerCase();
+//             var sellerFilter = sellerInput.value.toLowerCase();
+
+//             for (var i = 1; i < rows.length; i++) {
+//                 var cells = rows[i].getElementsByTagName('td');
+//                 var matches = true;
+
+//                 if (nameFilter && !cells[0].textContent.toLowerCase().includes(nameFilter)) {
+//                     matches = false;
+//                 }
+//                 if (styleFilter && !cells[1].textContent.toLowerCase().includes(styleFilter)) {
+//                     matches = false;
+//                 }
+//                 if (materialFilter && !cells[2].textContent.toLowerCase().includes(materialFilter)) {
+//                     matches = false;
+//                 }
+//                 if (yearFilter && !cells[3].textContent.toLowerCase().includes(yearFilter)) {
+//                     matches = false;
+//                 }
+//                 if (authorFilter && !cells[4].textContent.toLowerCase().includes(authorFilter)) {
+//                     matches = false;
+//                 }
+//                 if (sellerFilter && !cells[5].textContent.toLowerCase().includes(sellerFilter)) {
+//                     matches = false;
+//                 }
+
+//                 rows[i].style.display = matches ? '' : 'none';
+//             }
+//         });
+//     });
+// } else {
+//     console.warn("Search button not found.");
+// }
+
+// if (resetButton){ 
+//     // Обработчик для кнопки сброса
+//     resetButton.addEventListener('click', function () {
+//         handleWithConnection(() => {
+//             console.log("Reset button clicked.");
+
+//             // Очищаем поля ввода
+//             nameInput.value = '';
+//             styleInput.value = '';
+//             yearInput.value = '';
+//             authorInput.value = '';
+//             sellerInput.value = '';
+
+//             // Показываем все строки таблицы
+//             for (var i = 1; i < rows.length; i++) {
+//                 rows[i].style.display = '';
+//             }
+//         });
+//     });
+// }    
+
+// Получение уникального идентификатора пользователя из серверной стороны
+var userId = "<?php echo $_SESSION['user_id']; ?>";
+
+// Функция для получения куки
+function getCookie(name) {
+    let matches = document.cookie.match(new RegExp(
+        "(?:^|; )" + name.replace(/([$?*|{}\\[\]()^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : null;
+}
+
+// Функция для скрытия выпадающего списка
+function hideDropdown(inputElement) {
+    let dropdown = document.getElementById(`${inputElement.id}Dropdown`);
+    
+    // Проверяем, что элемент существует, перед изменением его стилей
+    if (dropdown) {
+        dropdown.style.display = 'none'; // Скрываем список
+    }
+}
+
+// Обновление опций для каждого поля при загрузке страницы
+function updateDropdownOptions(inputElement, cookieNameBase) {
+    let cookieName = `${cookieNameBase}_${userId}`;
+    let cookieValue = getCookie(cookieName);
+    let dropdownId = `${inputElement.id}Dropdown`;
+    let dropdown = document.getElementById(dropdownId);
+
+    // Проверяем, существует ли уже выпадающий список, если нет — создаем его
+    if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.id = dropdownId;
+        dropdown.classList.add('dropdown-list'); // Добавляем стиль для выпадающего списка
+        inputElement.parentNode.appendChild(dropdown); // Вставляем список в DOM
+    }
+
+    // Проверяем, что элемент существует перед манипуляцией с его стилями
+    if (dropdown) {
+        if (cookieValue) {
+            let values = cookieValue.split(',');
+            dropdown.innerHTML = ''; // Очистка предыдущего списка
+            values.forEach(value => {
+                let option = document.createElement('div');
+                option.classList.add('dropdown-item');
+                option.textContent = value;
+                option.onclick = function () {
+                    inputElement.value = value; // Заполняем поле при выборе
+                    hideDropdown(inputElement); // Скрываем список
+                };
+                dropdown.appendChild(option);
+            });
+            dropdown.style.display = 'block'; // Показываем список
+        } else {
+            dropdown.style.display = 'none'; // Если куки нет — скрываем список
+        }
+    }
+}
+
+// Функция для отображения выпадающего списка
+function showDropdown(inputElement, cookieNameBase) {
+    let cookieName = `${cookieNameBase}_${userId}`;
+    let cookieValue = getCookie(cookieName);
+    let dropdownId = `${inputElement.id}Dropdown`;
+    let dropdown = document.getElementById(dropdownId);
+
+    // Проверяем, существует ли уже выпадающий список, если нет — создаем его
+    if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.id = dropdownId;
+        dropdown.classList.add('dropdown-list'); // Добавляем стиль для выпадающего списка
+        inputElement.parentNode.appendChild(dropdown); // Вставляем список в DOM
+    }
+
+    // Проверяем, что элемент существует перед манипуляцией с его стилями
+    if (dropdown) {
+        if (cookieValue) {
+            let values = cookieValue.split(',');
+            dropdown.innerHTML = ''; // Очистка предыдущего списка
+            values.forEach(value => {
+                let option = document.createElement('div');
+                option.classList.add('dropdown-item');
+                option.textContent = value;
+                option.onclick = function () {
+                    inputElement.value = value; // Заполняем поле при выборе
+                    hideDropdown(inputElement); // Скрываем список
+                };
+                dropdown.appendChild(option);
+            });
+            dropdown.style.display = 'block'; // Показываем список
+        } else {
+            dropdown.style.display = 'none'; // Если куки нет — скрываем список
+        }
+    }
+}
+
+// Функция для сохранения значений в куки
+function saveInputValue(inputElement, cookieNameBase) {
+    let cookieName = `${cookieNameBase}_${userId}`;
+    let existingValues = getCookie(cookieName) ? getCookie(cookieName).split(',') : [];
+    let inputValue = inputElement.value.trim();
+
+    if (inputValue && !existingValues.includes(inputValue)) {
+        existingValues.push(inputValue);
+        setCookie(cookieName, existingValues.join(','));
+    }
+}
+
+// Функция для установки куки
+function setCookie(name, value, days = 365) {
+    let expires = "";
+    if (days) {
+        let date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
+}
+
+// Обработчик клика по каждому полю
+document.querySelectorAll('input[type="text"]').forEach(input => {
+    input.addEventListener('focus', function() {
+        showDropdown(input, input.id.replace('Input', 'FilterHistory')); // Показываем выпадающий список при фокусе
+    });
+
+    input.addEventListener('blur', function() {
+        setTimeout(() => hideDropdown(input), 200); // Задержка, чтобы клик по элементам списка не закрывал его сразу
+    });
+
+    // Скрытие списка, если пользователь кликает вне поля
+    document.addEventListener('click', function(event) {
+    // Проверяем, что выпадающий список существует перед использованием contains
+    let dropdown = document.getElementById(`${input.id}Dropdown`);
+    if (dropdown && !input.contains(event.target) && !dropdown.contains(event.target)) {
+        hideDropdown(input); // Если клик вне поля и списка, скрываем список
+    }
+});
+
+});
+
+// Обработчик для кнопки поиска
+var searchButton = document.getElementById('searchButton');
 if (searchButton) {
     searchButton.addEventListener('click', function () {
         handleWithConnection(() => {
             console.log("Search button clicked.");
 
+            // Очистка или скрытие всех выпадающих списков при нажатии на кнопку поиска
+            hideDropdown(nameInput);
+            hideDropdown(styleInput);
+            hideDropdown(materialInput);
+            hideDropdown(yearInput);
+            hideDropdown(authorInput);
+            hideDropdown(sellerInput);
+
+            // Здесь ваша логика для сохранения значений, фильтрации и т.д.
+            saveInputValue(nameInput, 'nameFilterHistory');
+            saveInputValue(styleInput, 'styleFilterHistory');
+            saveInputValue(materialInput, 'materialFilterHistory');
+            saveInputValue(yearInput, 'yearFilterHistory');
+            saveInputValue(authorInput, 'authorFilterHistory');
+            saveInputValue(sellerInput, 'sellerFilterHistory');
+
+            // Обработка фильтрации
             var nameFilter = nameInput.value.toLowerCase();
             var styleFilter = styleInput.value.toLowerCase();
             var materialFilter = materialInput.value.toLowerCase();
@@ -1510,26 +1744,41 @@ if (searchButton) {
     console.warn("Search button not found.");
 }
 
-if (resetButton){ 
-    // Обработчик для кнопки сброса
+// Обработчик для кнопки сброса фильтров
+var resetButton = document.getElementById('resetButton');
+if (resetButton) {
     resetButton.addEventListener('click', function () {
-        handleWithConnection(() => {
-            console.log("Reset button clicked.");
+        console.log("Reset button clicked.");
 
-            // Очищаем поля ввода
-            nameInput.value = '';
-            styleInput.value = '';
-            yearInput.value = '';
-            authorInput.value = '';
-            sellerInput.value = '';
+        // Очистка значений полей
+        nameInput.value = '';
+        styleInput.value = '';
+        materialInput.value = '';
+        yearInput.value = '';
+        authorInput.value = '';
+        sellerInput.value = '';
 
-            // Показываем все строки таблицы
-            for (var i = 1; i < rows.length; i++) {
-                rows[i].style.display = '';
-            }
-        });
+        // Сбрасываем отображение строк
+        for (var i = 1; i < rows.length; i++) {
+            rows[i].style.display = '';
+        }
+
+        // Обновляем выпадающие списки для всех полей
+        updateDropdownOptions(nameInput, 'nameFilterHistory');
+        updateDropdownOptions(styleInput, 'styleFilterHistory');
+        updateDropdownOptions(materialInput, 'materialFilterHistory');
+        updateDropdownOptions(yearInput, 'yearFilterHistory');
+        updateDropdownOptions(authorInput, 'authorFilterHistory');
+        updateDropdownOptions(sellerInput, 'sellerFilterHistory');
     });
-}    
+} else {
+    console.warn("Reset button not found.");
+}
+
+
+
+
+
 
  // Обновите обработчик для кнопки редактирования
  for (var button of editButtons) {
