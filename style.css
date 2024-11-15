@@ -295,24 +295,20 @@ h1 {
 
 
 
-/* Контейнер для ввода */
+/* Стили для полей ввода */
 .input-container {
     display: flex;
     flex-direction: row;
     justify-content: center;
     margin: 20px 0;
-    flex-wrap: wrap; /* Обеспечивает перенос элементов, если контейнер слишком мал */
 }
 
-/* Группа полей ввода */
 .input-group {
     display: flex;
     flex-direction: column;
-    margin: 0 20px; /* Отступ между колонками */
-    position: relative; /* Позиционируем контейнер относительно других элементов */
+    margin: 0 20px; /* Отступ между столбцами */
 }
 
-/* Поля ввода */
 .input-group input {
     padding: 10px;
     margin-bottom: 10px; /* Отступ между полями */
@@ -321,43 +317,10 @@ h1 {
     font-size: 16px; /* Размер шрифта */
 }
 
-/* Стили для полей при фокусе */
 .input-group input:focus {
     border-color: #00CED1; /* Цвет границы при фокусе */
     outline: none; /* Убираем стандартное выделение */
 }
-
-/* Стили для выпадающих списков */
-.dropdown-list {
-    position: absolute;
-    top: 100%; /* Позиционируем сразу под полем ввода */
-    left: 0;
-    right: 0;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    max-height: 200px;
-    overflow-y: auto;
-    display: none; /* Скрываем по умолчанию */
-    z-index: 10; /* Чтобы список был поверх других элементов */
-    border-radius: 5px; /* Закругленные углы для списка */
-    margin-top: 5px; /* Отступ от поля ввода */
-}
-
-/* Стили для элементов в выпадающем списке */
-.dropdown-item {
-    padding: 8px;
-    cursor: pointer;
-}
-
-.dropdown-item:hover {
-    background-color: #f1f1f1;
-}
-
-
-
-
-
 
 /* Кнопка "Найти" */
 #searchButton {
@@ -712,27 +675,6 @@ h1 {
     border-color: #00CED1; /* Цвет границы при фокусе */
     outline: none; /* Убираем стандартное выделение */
 }
-
-/* Стили для выпадающего списка */
-.dropdown-list {
-    position: absolute;
-    max-height: 200px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    background-color: white;
-    display: none; /* Скрыто по умолчанию */
-    z-index: 1000;
-}
-
-.dropdown-item {
-    padding: 8px;
-    cursor: pointer;
-}
-
-.dropdown-item:hover {
-    background-color: #f1f1f1;
-}
-
 
 
 

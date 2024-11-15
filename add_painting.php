@@ -58,9 +58,14 @@ if (!$link) {
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
 
             if (!in_array($fileExtension, $allowedExtensions)) {
-                $error_messages[] = "Ошибка: Неверный формат файла. Пожалуйста, загрузите изображение в формате jpg, jpeg, png или gif.";
+                $error_messages[] = "Ошибка: Неверный формат файла. Текущее расширение: $fileExtension. Пожалуйста, загрузите изображение в формате jpg, jpeg, png или gif.";
+                echo '<script>
+                alert("Ошибка: Неверный формат файла. Текущее расширение: ' . addslashes($fileExtension) . '. Пожалуйста, загрузите изображение в формате jpg, jpeg, png или gif.");
+                window.location.href = "index.php";
+              </script>';
                 $uploadOk = 0;
             }
+            
 
              // Проверка на битый файл
             if ($uploadOk == 1) {
