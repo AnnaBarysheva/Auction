@@ -33,10 +33,69 @@
         // Путь к дефолтной картинке
         $defaultImagePath = 'uploads/default_profile.jpg';
 
-        // Устанавливаем путь к картинке: из БД или дефолтный
-        $profile_picture = $user['profile_image']
-            ? 'data:image/jpeg;base64,' . base64_encode($user['profile_image'])
-            : $defaultImagePath;
+// // Проверяем, доступен ли путь к картинке профиля из базы
+// if ($user['profile_image']) {
+//     $profile_picture = 'data:image/jpeg;base64,' . base64_encode($user['profile_image']);
+// } else {
+//     // Если путь к картинке недоступен, проверяем дефолтное изображение
+//     if (!file_exists($defaultImagePath) || !is_readable($defaultImagePath)) {
+//         $error_messages[] = "Файл изображения профиля отсутствует или поврежден.";
+//         $profile_picture = '';
+//     } else {
+//         $profile_picture = $defaultImagePath;
+//     }
+// }
+
+function isValidImageBlob($data) {
+    if (!$data) {
+        return false; // Пустой BLOB
+    }
+
+    // Проверяем, можно ли создать изображение из данных
+    $image = @imagecreatefromstring($data);
+    if ($image === false) {
+        return false; // Некорректное изображение
+    }
+
+    // Очищаем ресурс изображения
+    imagedestroy($image);
+    return true;
+}
+
+
+if ($user['profile_image']) {
+    if (isValidImageBlob($user['profile_image'])) {
+        $profile_picture = 'data:image/jpeg;base64,' . base64_encode($user['profile_image']);
+    } else {
+        // Если BLOB поврежден или не является изображением
+        echo "<script>alert('Изображение профиля повреждено или не является допустимым изображением.Будет установлено изображение по умолчанию');</script>";
+        
+        // Проверяем дефолтное изображение
+        if (!file_exists($defaultImagePath) || !is_readable($defaultImagePath)) {
+            // Если дефолтное изображение также отсутствует или повреждено
+            echo "<script>alert('Файл изображения профиля отсутствует или поврежден.');</script>";
+            $profile_picture = ''; // Оставляем пустым
+        } else {
+            $profile_picture = $defaultImagePath; // Устанавливаем дефолтное изображение
+        }
+    }
+} else {
+    // Если в BLOB-е нет изображения, используем дефолтное
+    if (!file_exists($defaultImagePath) || !is_readable($defaultImagePath)) {
+        // Если дефолтное изображение также отсутствует или повреждено
+        echo "<script>alert('Файл изображения профиля отсутствует или поврежден.');</script>";
+        $profile_picture = ''; // Оставляем пустым
+    } else {
+        $profile_picture = $defaultImagePath; // Устанавливаем дефолтное изображение
+    }
+}
+
+
+
+        // // Устанавливаем путь к картинке: из БД или дефолтный
+        // $profile_picture = $user['profile_image']
+        //     ? 'data:image/jpeg;base64,' . base64_encode($user['profile_image'])
+        //     : $defaultImagePath;
 
         // Обработка загрузки новой картинки
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['profile_picture'])) {
@@ -161,6 +220,7 @@
     </html>
 
     <script>
+        
     // Привязываем обработчик к кнопке отправки
     document.addEventListener('DOMContentLoaded', function() {
         // Подключаем обработчик только после загрузки DOM

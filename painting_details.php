@@ -27,7 +27,8 @@
 
 <?php
 session_start();
-
+//todo
+//добавть алерт, если файл в uploads изменили (на битый файл)
 
 // Проверка, передан ли параметр id_painting
 if (isset($_GET['id_painting'])) {
@@ -101,8 +102,12 @@ mysqli_close($link);
 
 <div class="painting-info">
     <!-- Вывод изображения картины -->
-    <img src="<?= htmlspecialchars($painting['image_path']) ?>" alt="<?= htmlspecialchars($painting['paint_name']) ?>" class="painting-img">
-
+    <!-- <img src="<?= htmlspecialchars($painting['image_path']) ?>" alt="<?= htmlspecialchars($painting['paint_name']) ?>" class="painting-img"> -->
+    <img src="<?= htmlspecialchars($painting['image_path']) ?>" 
+         alt="<?= htmlspecialchars($painting['paint_name']) ?>" 
+         class="painting-img" 
+         onerror="handleImageError(this)" 
+         onload="handleImageLoad(this)">
     <!-- Вывод информации о картине -->
     <div class="painting-details">
     <h1><?= htmlspecialchars($painting['paint_name']) ?></h1>
@@ -183,6 +188,35 @@ mysqli_close($link);
 </html>
 
 <script>
+
+
+// Обработчик для ошибки изображения
+async function handleImageError(img) {
+    if (!img.hasAttribute('data-error-handled')) {
+        // Попробуем запросить файл напрямую через fetch
+        try {
+            const response = await fetch(img.src, { method: 'HEAD' }); // Только проверяем заголовки
+            if (!response.ok) {
+                alert("Ошибка: Доступ к изображению закрыт. Пожалуйста, обратитесь к администратору.");
+            } else {
+                alert("Ошибка: Изображение повреждено. Пожалуйста, обратитесь к администратору.");
+            }
+        } catch (error) {
+            // Ошибки сети (например, файл не найден)
+            alert("Ошибка: Не удалось загрузить изображение. Проверьте соединение или обратитесь к администратору.");
+        }
+
+        img.src = "path/to/placeholder-image.jpg"; // Путь к изображению-заглушке
+        img.alt = "Изображение недоступно";
+        img.setAttribute('data-error-handled', 'true');
+    }
+}
+
+
+function handleImageLoad(img) {
+    console.log("Изображение успешно загружено:", img.src);
+}
+
 // Получаем элементы модального окна и кнопки
 var modal = document.getElementById("priceProposalModal");
 var btn = document.querySelector(".bid-button");

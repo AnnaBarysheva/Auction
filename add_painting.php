@@ -48,7 +48,7 @@ if (!$link) {
             $fileSize = $_FILES['image_path']['size'];
             $fileType = $_FILES['image_path']['type'];
 
-            $maxFileSize = 2 * 1024 * 1024;
+            $maxFileSize = 10 * 1024 * 1024;
             if ($fileSize > $maxFileSize) {
                 $error_messages[] = "Ошибка: Размер файла превышает 2 MB.";
                 $uploadOk = 0;
