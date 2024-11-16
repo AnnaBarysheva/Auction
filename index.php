@@ -1971,7 +1971,7 @@ async function handleProfile() {
 
 
                     <label for="addImageFile" id="fileLabel">Загрузить картину</label>
-                    <input type="file" id="addImageFile" name="image_path" class="modal-input"  title="Загрузите файл изображения (например, .jpg, .png, .gif)" style="display: none;">
+                    <input type="file" id="addImageFile" name="image_path" class="modal-input"  title="Загрузите файл изображения (например, .jpg, .jpeg, .png, .gif)" style="display: none;">
                     <span id="fileName" style="margin-left: 10px; font-weight: bold;"></span>
                     <!-- accept="image/*" -->
 
@@ -2277,7 +2277,7 @@ fileNameDisplay.textContent = file.name;
 // Проверка допустимых типов файлов
 const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 if (!validImageTypes.includes(file.type)) {
-    showErrorModal('Пожалуйста, выберите файл с изображением (jpg, png, gif, webp).');
+    showErrorModal('Пожалуйста, выберите файл с изображением (jpg, jpeg, png, gif).');
     event.preventDefault();
     return;
 }
