@@ -176,6 +176,8 @@ if ($isUser) {
 <?php
 
 
+
+
 // // SQL-запрос для получения стилей из таблицы Styles
 // $stylesQuery = "SELECT * FROM Styles";
 // $stylesResult = mysqli_query($link, $stylesQuery);
@@ -226,6 +228,7 @@ if ($isSeller) {
         LEFT JOIN Materials ON Paintings.id_material = Materials.id_material -- Используем LEFT JOIN для материалов
         WHERE Paintings.id_user = {$_SESSION['user_id']}
     ";
+    
 } elseif (!$isAdmin) {
     // Проверяем наличие весов
     $styleWeight = $weights['style'] ?? 1; // Значение по умолчанию 1
@@ -257,6 +260,7 @@ if ($isSeller) {
         AND Auctions.end_date >= CURDATE()
         ORDER BY total_weight DESC
     ";
+    
 
     // Когда непустой только массив стилей
     } elseif (!empty($stylePreferences)) {
@@ -281,6 +285,7 @@ if ($isSeller) {
             AND Auctions.end_date >= CURDATE()
             ORDER BY total_weight DESC
         ";
+        
 
     // Когда непустой только массив заявок
     } elseif (!empty($userRequests)) {
@@ -331,6 +336,7 @@ if ($isSeller) {
             AND Auctions.end_date >= CURDATE()
             ORDER BY total_weight DESC
         ";
+       
     
     // Стандартный запрос, если у пользователя нет предпочтений
     } else {
@@ -347,6 +353,7 @@ if ($isSeller) {
             AND Auctions.start_date <= CURDATE()
             AND Auctions.end_date >= CURDATE()
         ";
+       
     }
 }
 
@@ -1534,6 +1541,25 @@ document.addEventListener('DOMContentLoaded', async function () {
 // Получение уникального идентификатора пользователя из серверной стороны (например, передача в шаблон или скрипт)
 var userId = "<?php echo $_SESSION['user_id']; ?>";
 
+async function encryptValue(value) {
+    let response = await fetch('encrypt_decrypt.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ action: 'encrypt', value })
+    });
+    return response.text();
+}
+
+async function decryptValue(value) {
+    let response = await fetch('encrypt_decrypt.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ action: 'decrypt', value })
+    });
+    return response.text();
+}
+
+
 // Функция для получения куки
 function getCookie(name) {
     let matches = document.cookie.match(new RegExp(
@@ -1553,10 +1579,11 @@ function setCookie(name, value, days = 365) {
     document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
 }
 
-function updateDropdownOptions(inputElement, cookieNameBase) {
+
+// Функция для обновления выпадающего списка
+async function updateDropdownOptions(inputElement, cookieNameBase) {
     let cookieName = `${cookieNameBase}_${userId}`;
     let cookieValue = getCookie(cookieName);
-    console.log(`Cookie value for ${cookieName}:`, cookieValue); // Отладка
 
     // Удаляем старый datalist, если он существует
     let existingDatalist = document.getElementById(`${inputElement.id}-datalist`);
@@ -1564,46 +1591,46 @@ function updateDropdownOptions(inputElement, cookieNameBase) {
         existingDatalist.remove();
     }
 
+    // Создаем новый datalist
     if (cookieValue) {
         let values = cookieValue.split(',');
+        let decryptedValues = await Promise.all(values.map(value => decryptValue(value))); // Расшифровка
+
         let datalist = document.createElement('datalist');
         datalist.id = `${inputElement.id}-datalist`;
 
-        values.forEach(value => {
+        // Добавляем только уникальные значения в datalist
+        let uniqueValues = Array.from(new Set(decryptedValues)); // Убираем дубликаты
+
+        uniqueValues.forEach(value => {
             let option = document.createElement('option');
             option.value = value;
             datalist.appendChild(option);
         });
 
-        // Проверьте, что родительский элемент input существует
-        if (inputElement.parentNode) {
-            inputElement.parentNode.appendChild(datalist);
-        } else {
-            console.error("Input's parentNode is null or undefined.");
-        }
-
-        // Убедитесь, что атрибут 'list' установлен на input
+        inputElement.parentNode.appendChild(datalist);
         inputElement.setAttribute('list', datalist.id);
-
-        // Делаем явную проверку, что атрибут 'list' присваивается
         console.log(`Input element list attribute set to: ${inputElement.getAttribute('list')}`);
     } else {
-        console.log(`No cookie found for ${cookieName}`); // Дополнительная проверка
+        console.log(`No cookie found for ${cookieName}`);
     }
 }
 
-
-
 // Функция для сохранения значений в куки
-function saveInputValue(inputElement, cookieNameBase) {
-    let cookieName = `${cookieNameBase}_${userId}`;
-    let existingValues = getCookie(cookieName) ? getCookie(cookieName).split(',') : [];
+async function saveInputValue(inputElement, cookieNameBase) {
     let inputValue = inputElement.value.trim();
 
-    if (inputValue && !existingValues.includes(inputValue)) {
-        existingValues.push(inputValue);
-        setCookie(cookieName, existingValues.join(','));
-        updateDropdownOptions(inputElement, cookieNameBase);
+    if (inputValue) {
+        let encryptedValue = await encryptValue(inputValue);
+        let cookieName = `${cookieNameBase}_${userId}`;
+        let existingValues = getCookie(cookieName) ? getCookie(cookieName).split(',') : [];
+
+        // Добавляем значение только если его нет в cookie
+        if (!existingValues.includes(encryptedValue)) {
+            existingValues.push(encryptedValue);
+            setCookie(cookieName, existingValues.join(',')); // Сохраняем зашифрованное значение в куки
+            updateDropdownOptions(inputElement, cookieNameBase); // Обновляем datalist
+        }
     }
 }
 

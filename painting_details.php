@@ -29,6 +29,25 @@
 session_start();
 //todo
 //добавть алерт, если файл в uploads изменили (на битый файл)
+// Функция для замера времени выполнения SQL-запроса
+function executeQueryAndMeasureTime($link, $sql) {
+    // Замеряем время начала выполнения запроса
+    $startTime = microtime(true);
+
+    // Выполняем запрос
+    $result = mysqli_query($link, $sql);
+
+    // Замеряем время окончания выполнения запроса
+    $endTime = microtime(true);
+
+    // Вычисляем время выполнения в миллисекундах
+    $executionTime = ($endTime - $startTime) * 1000;
+
+    // Выводим время выполнения запроса
+    echo "Время выполнения запроса: " . $executionTime . " мс<br>";
+
+    return $result;
+}
 
 // Проверка, передан ли параметр id_painting
 if (isset($_GET['id_painting'])) {
@@ -62,8 +81,50 @@ $sql = "
     LEFT JOIN Materials ON Paintings.id_material = Materials.id_material
     WHERE Paintings.id_painting = $id_painting
 ";
+// Измерение начального использования памяти
+// $startMemory = memory_get_usage();
+//  $sql = "
+//     SELECT 
+//         Paintings.paint_name, 
+//         Paintings.size, 
+//         Styles.style_name, 
+//         Paintings.id_style, 
+//         Materials.material_name, 
+//         Paintings.creation_year, 
+//         Paintings.author, 
+//         Paintings.image_path, 
+//         Sellers.full_name AS seller_name, 
+//         Sellers.phone AS seller_phone, 
+//         Sellers.email AS seller_email,
+//         Auctions.start_date, 
+//         Auctions.end_date,  
+//         PaintingsOnAuction.starting_price, 
+//         PaintingsOnAuction.purchase_price, 
+//         PaintingsOnAuction.lot_number 
+//     FROM 
+//         Paintings
+//     INNER JOIN Sellers ON Paintings.id_seller = Sellers.id_seller
+//     INNER JOIN PaintingsOnAuction ON Paintings.id_painting = PaintingsOnAuction.id_painting
+//     INNER JOIN Auctions ON PaintingsOnAuction.id_auction = Auctions.id_auction
+//     INNER JOIN Styles ON Paintings.id_style = Styles.id_style
+//     INNER JOIN Materials ON Paintings.id_material = Materials.id_material
+//     WHERE 
+//         Paintings.id_painting = $id_painting;
+
+// ";
+
+// executeQueryAndMeasureTime($link, $sql);
+
 
 $result = mysqli_query($link, $sql);
+// Измерение конечного использования памяти
+// $endMemory = memory_get_usage();
+// $peakMemory = memory_get_peak_usage();
+
+// // Вывод результатов
+// echo "Начальное использование памяти: " . ($startMemory / 1024) . " KB<br>";
+// echo "Конечное использование памяти: " . ($endMemory / 1024) . " KB<br>";
+// echo "Пиковое использование памяти: " . ($peakMemory / 1024) . " KB<br>";
 
 if ($result && mysqli_num_rows($result) > 0) {
     $painting = mysqli_fetch_assoc($result); // Сохраняем данные картины в переменной

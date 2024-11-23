@@ -62,33 +62,43 @@ function isValidImageBlob($data) {
     return true;
 }
 
-
 if ($user['profile_image']) {
     if (isValidImageBlob($user['profile_image'])) {
         $profile_picture = 'data:image/jpeg;base64,' . base64_encode($user['profile_image']);
     } else {
         // Если BLOB поврежден или не является изображением
-        echo "<script>alert('Изображение профиля повреждено или не является допустимым изображением.Будет установлено изображение по умолчанию');</script>";
+        echo "<script>alert('Изображение профиля повреждено или не является допустимым изображением. Будет установлено изображение по умолчанию.');</script>";
         
         // Проверяем дефолтное изображение
         if (!file_exists($defaultImagePath) || !is_readable($defaultImagePath)) {
-            // Если дефолтное изображение также отсутствует или повреждено
-            echo "<script>alert('Файл изображения профиля отсутствует или поврежден.');</script>";
+            echo "<script>alert('Доступ к файлу изображения профиля по умолчанию закрыт. Изображение профиля будет отсутствовать.');</script>";
             $profile_picture = ''; // Оставляем пустым
         } else {
-            $profile_picture = $defaultImagePath; // Устанавливаем дефолтное изображение
+            // Дополнительная проверка целостности файла
+            if (getimagesize($defaultImagePath) === false) {
+                echo "<script>alert('Файл  изображения профиля по умолчанию поврежден и не является допустимым изображением. Изображение профиля будет отсутствовать.');</script>";
+                $profile_picture = ''; // Оставляем пустым
+            } else {
+                $profile_picture = $defaultImagePath; // Устанавливаем дефолтное изображение
+            }
         }
     }
 } else {
     // Если в BLOB-е нет изображения, используем дефолтное
     if (!file_exists($defaultImagePath) || !is_readable($defaultImagePath)) {
-        // Если дефолтное изображение также отсутствует или повреждено
-        echo "<script>alert('Файл изображения профиля отсутствует или поврежден.');</script>";
+        echo "<script>alert('Доступ к файлу изображения профиля по умолчанию закрыт. Изображение профиля будет отсутствовать.');</script>";
         $profile_picture = ''; // Оставляем пустым
     } else {
-        $profile_picture = $defaultImagePath; // Устанавливаем дефолтное изображение
+        // Дополнительная проверка целостности файла
+        if (getimagesize($defaultImagePath) === false) {
+            echo "<script>alert('Файл  изображения профиля по умолчанию поврежден и не является допустимым изображением. Изображение профиля будет отсутствовать.');</script>";
+            $profile_picture = ''; // Оставляем пустым
+        } else {
+            $profile_picture = $defaultImagePath; // Устанавливаем дефолтное изображение
+        }
     }
 }
+
 
 
 
