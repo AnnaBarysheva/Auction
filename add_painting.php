@@ -29,6 +29,7 @@ if (!$link) {
         $startingPrice = $_POST['starting_price'];
         $startDate = $_POST['start_date'];
         $endDate = $_POST['end_date'];
+        
 
         if (empty($styleId) || empty($materialId)) {
             $error_messages[] = "Ошибка: Выберите стиль и материал для картины.";
@@ -79,8 +80,10 @@ if (!$link) {
         
 
         if ($uploadOk == 1) {
-            $newFileName = uniqid('painting_', true) . '.' . $fileExtension;
-            $destPath = $uploadFileDir . $newFileName;
+            do {
+                $newFileName = uniqid('painting_', true) . '.' . $fileExtension;
+                $destPath = $uploadFileDir . $newFileName;
+            } while (file_exists($destPath));
 
             if (!@move_uploaded_file($fileTmpPath, $destPath)) {
                 $error_messages[] = "Ошибка: Не удалось сохранить файл на сервере. Проверьте разрешения на папку.";
@@ -94,10 +97,15 @@ if (!$link) {
             $uploadOk = 0;
         }
         if ($uploadOk == 1) {
+            $_SESSION['seller_full_name'] = $seller;
+            $_SESSION['seller_phone'] = $phone;
+            $_SESSION['seller_email'] = $email; 
         // if (empty($error_messages)) {
             $insertSeller = "INSERT INTO Sellers (full_name, phone, email) VALUES ('$seller', '$phone', '$email')";
             if (mysqli_query($link, $insertSeller)) {
                 $sellerId = mysqli_insert_id($link);
+               
+                
 
                 $insertAuction = "INSERT INTO Auctions (start_date, end_date) VALUES ('$startDate', '$endDate')";
                 if (mysqli_query($link, $insertAuction)) {

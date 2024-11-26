@@ -6,6 +6,24 @@ if (!isset($_SESSION['user_id'])) {
     $_SESSION['user_id'] = null; // Устанавливаем в null, если не установлен
 }
 
+
+
+// Проверяем, установлены ли значения
+// if (isset($_SESSION['seller_full_name'], $_SESSION['seller_phone'], $_SESSION['seller_email'])) {
+//     $sellerName = $_SESSION['seller_full_name'];
+//     $sellerPhone = $_SESSION['seller_phone'];
+//     $sellerEmail = $_SESSION['seller_email'];
+
+//     echo "Имя продавца: $sellerName<br>";
+//     echo "Телефон продавца: $sellerPhone<br>";
+//     echo "Email продавца: $sellerEmail<br>";
+// } else {
+//     echo "Данные о продавце не найдены в сессии.";
+// }
+
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -1538,7 +1556,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 //     });
 // }    
 
-// Получение уникального идентификатора пользователя из серверной стороны (например, передача в шаблон или скрипт)
 var userId = "<?php echo $_SESSION['user_id']; ?>";
 
 async function encryptValue(value) {
@@ -1560,7 +1577,7 @@ async function decryptValue(value) {
 }
 
 
-// Функция для получения куки
+
 function getCookie(name) {
     let matches = document.cookie.match(new RegExp(
         "(?:^|; )" + name.replace(/([$?*|{}\\[\]()^])/g, '\\$1') + "=([^;]*)"
@@ -1568,7 +1585,7 @@ function getCookie(name) {
     return matches ? decodeURIComponent(matches[1]) : null;
 }
 
-// Функция для установки куки
+
 function setCookie(name, value, days = 365) {
     let expires = "";
     if (days) {
@@ -1580,27 +1597,27 @@ function setCookie(name, value, days = 365) {
 }
 
 
-// Функция для обновления выпадающего списка
+
 async function updateDropdownOptions(inputElement, cookieNameBase) {
     let cookieName = `${cookieNameBase}_${userId}`;
     let cookieValue = getCookie(cookieName);
 
-    // Удаляем старый datalist, если он существует
+    
     let existingDatalist = document.getElementById(`${inputElement.id}-datalist`);
     if (existingDatalist) {
         existingDatalist.remove();
     }
 
-    // Создаем новый datalist
+    
     if (cookieValue) {
         let values = cookieValue.split(',');
-        let decryptedValues = await Promise.all(values.map(value => decryptValue(value))); // Расшифровка
+        let decryptedValues = await Promise.all(values.map(value => decryptValue(value))); 
 
         let datalist = document.createElement('datalist');
         datalist.id = `${inputElement.id}-datalist`;
 
-        // Добавляем только уникальные значения в datalist
-        let uniqueValues = Array.from(new Set(decryptedValues)); // Убираем дубликаты
+        
+        let uniqueValues = Array.from(new Set(decryptedValues)); 
 
         uniqueValues.forEach(value => {
             let option = document.createElement('option');
@@ -1616,7 +1633,7 @@ async function updateDropdownOptions(inputElement, cookieNameBase) {
     }
 }
 
-// Функция для сохранения значений в куки
+
 async function saveInputValue(inputElement, cookieNameBase) {
     let inputValue = inputElement.value.trim();
 
@@ -1625,11 +1642,11 @@ async function saveInputValue(inputElement, cookieNameBase) {
         let cookieName = `${cookieNameBase}_${userId}`;
         let existingValues = getCookie(cookieName) ? getCookie(cookieName).split(',') : [];
 
-        // Добавляем значение только если его нет в cookie
+        
         if (!existingValues.includes(encryptedValue)) {
             existingValues.push(encryptedValue);
-            setCookie(cookieName, existingValues.join(',')); // Сохраняем зашифрованное значение в куки
-            updateDropdownOptions(inputElement, cookieNameBase); // Обновляем datalist
+            setCookie(cookieName, existingValues.join(',')); 
+            updateDropdownOptions(inputElement, cookieNameBase); 
         }
     }
 }
@@ -1646,7 +1663,7 @@ if (searchButton) {
             saveInputValue(authorInput, 'authorFilterHistory');
             saveInputValue(sellerInput, 'sellerFilterHistory');
 
-            // Обработка фильтрации
+           
             var nameFilter = nameInput.value.toLowerCase();
             var styleFilter = styleInput.value.toLowerCase();
             var materialFilter = materialInput.value.toLowerCase();
@@ -1702,7 +1719,7 @@ if (resetButton) {
             }
 
            
-             // Обновляем выпадающие списки для всех полей
+             
              updateDropdownOptions(nameInput, 'nameFilterHistory');
             updateDropdownOptions(styleInput, 'styleFilterHistory');
             updateDropdownOptions(materialInput, 'materialFilterHistory');
@@ -1713,7 +1730,7 @@ if (resetButton) {
     });
 }
 
-// Обновление опций для каждого поля при загрузке страницы
+
 updateDropdownOptions(nameInput, 'nameFilterHistory');
 updateDropdownOptions(styleInput, 'styleFilterHistory');
 updateDropdownOptions(materialInput, 'materialFilterHistory');
@@ -1724,7 +1741,7 @@ updateDropdownOptions(sellerInput, 'sellerFilterHistory');
 
 
 
- // Обновите обработчик для кнопки редактирования
+ //  обработчик для кнопки редактирования
  for (var button of editButtons) {
     button.addEventListener('click', function(event) {
         event.stopPropagation(); // Предотвращаем всплытие события
@@ -2007,7 +2024,7 @@ async function handleProfile() {
                     <input type="url" id="addImageUrl" name="image_path" class="modal-input" placeholder="URL картины" required maxlength="255" title="Введите корректный URL (например, https://example.com/image.jpg)"> -->
                 </div>
 
-                <div class="input-column">
+                <!-- <div class="input-column">
                     <label for="addSeller">Имя продавца:</label>
                     <input type="text" id="addSeller" name="seller" class="modal-input" placeholder="Имя продавца" required maxlength="255">
 
@@ -2015,8 +2032,21 @@ async function handleProfile() {
                     <input type="email" id="addEmail" name="email" class="modal-input" placeholder="Email продавца" required>
 
                     <label for="addPhone">Телефон продавца:</label>
-                    <input type="text" id="addPhone" name="phone" class="modal-input" placeholder="Телефон продавца" required maxlength="15" pattern="^\+\d{0,14}$" title="Введите номер телефона, начиная с + и далее только цифры.">                </div>
+                    <input type="text" id="addPhone" name="phone" class="modal-input" placeholder="Телефон продавца" required maxlength="15" pattern="^\+\d{0,14}$" title="Введите номер телефона, начиная с + и далее только цифры.">                </div> -->
 
+                    <div class="input-column">
+                    <label for="addSeller">Имя продавца:</label>
+                    <input type="text" id="addSeller" name="seller" class="modal-input" placeholder="Имя продавца" required maxlength="255"
+                        value="<?= isset($_SESSION['seller_full_name']) ? htmlspecialchars($_SESSION['seller_full_name'], ENT_QUOTES) : '' ?>">
+
+                    <label for="addEmail">Email продавца:</label>
+                    <input type="email" id="addEmail" name="email" class="modal-input" placeholder="Email продавца" required
+                        value="<?= isset($_SESSION['seller_email']) ? htmlspecialchars($_SESSION['seller_email'], ENT_QUOTES) : '' ?>">
+
+                    <label for="addPhone">Телефон продавца:</label>
+                    <input type="text" id="addPhone" name="phone" class="modal-input" placeholder="Телефон продавца" required maxlength="15" pattern="^\+\d{0,14}$" title="Введите номер телефона, начиная с + и далее только цифры."
+                        value="<?= isset($_SESSION['seller_phone']) ? htmlspecialchars($_SESSION['seller_phone'], ENT_QUOTES) : '' ?>">
+                </div>
                 <div class="input-column">
                     <label for="addLotNumber">Номер лота:</label>
                     <input type="number" id="addLotNumber" name="lot_number" class="modal-input" required min="0" max="9999" maxlength="4>
@@ -2036,6 +2066,7 @@ async function handleProfile() {
         </form>
     </div>
 </div>
+
 
 <script>
 document.getElementById('editForm').addEventListener('submit', function(event) {
@@ -2101,28 +2132,28 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
 
 <script>
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Устанавливаем дефолтные значения для полей формы
-    document.getElementById('addName').value = 'TEST';
-    document.getElementById('addSize').value = '50x70 см';      
-    document.getElementById('addYear').value = new Date().getFullYear(); 
-    document.getElementById('addAuthor').value = 'Автор';
-    document.getElementById('addSeller').value = 'Продавец';
-    document.getElementById('addEmail').value = 'example@example.com'; 
-    document.getElementById('addPhone').value = '+123456789012';
-    document.getElementById('addLotNumber').value = '001'; 
-    document.getElementById('addStartingPrice').value = '1000'; 
-    document.getElementById('addStartDate').value = '2024-01-01'; 
-    document.getElementById('addEndDate').value = '2024-12-01'; 
+// document.addEventListener('DOMContentLoaded', function() {
+//     // Устанавливаем дефолтные значения для полей формы
+//     document.getElementById('addName').value = 'TEST';
+//     document.getElementById('addSize').value = '50x70 см';      
+//     document.getElementById('addYear').value = new Date().getFullYear(); 
+//     document.getElementById('addAuthor').value = 'Автор';
+//     document.getElementById('addSeller').value = 'Продавец';
+//     document.getElementById('addEmail').value = 'example@example.com'; 
+//     document.getElementById('addPhone').value = '+123456789012';
+//     document.getElementById('addLotNumber').value = '001'; 
+//     document.getElementById('addStartingPrice').value = '1000'; 
+   // document.getElementById('addStartDate').value = '2024-01-01'; 
+    //document.getElementById('addEndDate').value = '2024-12-01'; 
 
 
-    console.log('Дефолтные значения были установлены.');
+    //console.log('Дефолтные значения были установлены.');
 
-    document.getElementById('saveaddButton').addEventListener('click', handleSave);
+//    document.getElementById('saveaddButton').addEventListener('click', handleSave);
         
         // Проверка соединения при загрузке страницы (по желанию)
         // checkConnection();
-});
+//});
 document.getElementById('addForm').addEventListener('submit', function(event) {
    
 

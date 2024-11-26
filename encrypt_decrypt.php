@@ -13,10 +13,10 @@ function decryptData($data, $key) {
     return openssl_decrypt($encrypted_data, $cipher, $key, 0, $iv);
 }
 
-// Пример ключа шифрования
+
 define('ENCRYPTION_KEY', 'LZFVlsJUeaDe/Dfsfw2QKiGjbNubEkVxNhLn28ZW65k=');
 
-// Обработка запросов
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
     $value = $_POST['value'];
