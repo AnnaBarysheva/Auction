@@ -2132,7 +2132,7 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
 
 <script>
 
-// document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
 //     // Устанавливаем дефолтные значения для полей формы
 //     document.getElementById('addName').value = 'TEST';
 //     document.getElementById('addSize').value = '50x70 см';      
@@ -2143,8 +2143,8 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
 //     document.getElementById('addPhone').value = '+123456789012';
 //     document.getElementById('addLotNumber').value = '001'; 
 //     document.getElementById('addStartingPrice').value = '1000'; 
-   // document.getElementById('addStartDate').value = '2024-01-01'; 
-    //document.getElementById('addEndDate').value = '2024-12-01'; 
+//    document.getElementById('addStartDate').value = '2024-01-01'; 
+//     document.getElementById('addEndDate').value = '2024-12-01'; 
 
 
     //console.log('Дефолтные значения были установлены.');
@@ -2152,12 +2152,10 @@ document.getElementById('editForm').addEventListener('submit', function(event) {
 //    document.getElementById('saveaddButton').addEventListener('click', handleSave);
         
         // Проверка соединения при загрузке страницы (по желанию)
-        // checkConnection();
-//});
+        checkConnection();
+});
 document.getElementById('addForm').addEventListener('submit', function(event) {
-   
-
-    console.log("addForm");
+    event.preventDefault();
 
     // Проверка на наличие только пробелов
     const inputFields = [
@@ -2195,14 +2193,14 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
     var phoneInput = document.getElementById('addPhone').value.trim();
     // console.log("ghjkl");
       // Проверка на отсутствие выбранного файла
-    if (!imageFileInput.files.length) {
-        showErrorModal('Пожалуйста, выберите файл перед отправкой формы.');
-        event.preventDefault(); // Отменяем отправку формы
-        return;
-    }
+      if (!imageFileInput) {
+    showErrorModal('Пожалуйста, выберите файл перед отправкой формы.');
+    event.preventDefault();
+    return;
+}
 
 
-    if (!nameInput || !sizeInput || !materialsInput || !styleInput || !authorInput || !imageUrlInput || !sellerInput || !emailInput || !phoneInput) {
+    if (!nameInput || !sizeInput || !styleInput || !authorInput || !sellerInput || !emailInput || !phoneInput) {
         alert('Пожалуйста, заполните все поля, не оставляя только пробелы.');
         event.preventDefault(); // Отменяем отправку формы
         return; // Останавливаем дальнейшее выполнение
@@ -2258,22 +2256,22 @@ document.getElementById('addForm').addEventListener('submit', function(event) {
     }
 
     // Оборачиваем в handleWithConnection
-    // handleWithConnection(() => {
-    //     // Если проверка успешна, форма отправляется
-    //     this.submit();
-    // });
+    handleWithConnection(() => {
+        // Если проверка успешна, форма отправляется
+        document.getElementById('addForm').submit();
+    });
     
     
 
     // Отменяем стандартную отправку формы до завершения проверки
-    event.preventDefault();
+    // event.preventDefault();
    
     
 });
 
 async function handleSave(event) {
         event.preventDefault(); // Останавливаем отправку формы
-
+        alert("handleSave");
         // Проверяем соединение перед отправкой формы
         const connectionOK = await checkConnection();
         if (!connectionOK) {
@@ -2486,7 +2484,7 @@ document.getElementById('addStartingPrice').addEventListener('input', function()
 // Функция для обработки отправки формы с проверкой соединения
 async function handleUpload(event) {
         event.preventDefault(); // Останавливаем отправку формы, чтобы сначала проверить соединение
-
+        alert("handleUpload");
         // Вызовем функцию проверки соединения
         const connectionOK = await handleWithConnection(() => {
             
@@ -2502,7 +2500,7 @@ async function handleUpload(event) {
     }
 
     // Привязываем обработчик к кнопке отправки
-    document.getElementById('saveaddButton').addEventListener('click', handleUpload);
+    // document.getElementById('saveaddButton').addEventListener('click', handleUpload);
 
     
 
