@@ -47,7 +47,7 @@ class GetStyleDropdownTest extends TestCase
 
         $output = $this->styleDropdown->createDropdownFromArray($dataArray, $dropdownId, $defaultOptionText);
 
-        $this->assertEquals($expectedOutput, $output, "Dropdown for empty data array is incorrect");
+        $this->assertEquals($expectedOutput, $output);
     }
 
 }
